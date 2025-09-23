@@ -1,4 +1,6 @@
 strands-agent>=1.0.0
 strands-agents-tools>=0.2.0
 strands-agents-builder
+strands-agents-tools[browser]
+strands-agents[ollama]
 boto3
