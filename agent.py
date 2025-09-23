@@ -1,7 +1,17 @@
 from strands import Agent, tool
 from strands.models.ollama import OllamaModel
-from strands_tools import http_request, handoff_to_user, retrieve
+from strands_tools import http_request, mem0, handoff_to_user, retrieve
 from strands.agent.conversation_manager import SlidingWindowConversationManager
+import logging
+from dotenv import load_dotenv
+import os
+from mem0 import MemoryClient
+
+# Load environment variables at startup
+load_dotenv()
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 # Try to import browser tool safely
 try:
@@ -14,6 +24,12 @@ except (ImportError, AttributeError) as e:
     browser_tool = None
     print(f"Browser tool not available ({e}) - using http_request and retrieve only")
 
+# Add environment variable handling
+MEM_API_KEY = os.getenv('MEM_API_KEY')
+if not MEM_API_KEY:
+    raise ValueError("MEM_API_KEY environment variable is required")
+
+client = MemoryClient(api_key=MEM_API_KEY)
 # Create model
 ollama_model = OllamaModel(
     host="http://localhost:11434",
@@ -23,6 +39,7 @@ ollama_model = OllamaModel(
 @tool
 def planner_agent(goal: str, context: str = "") -> str:
     """Creates research brief and step-by-step outline with task board."""
+    logger.info(f"Planner Agent invoked with goal %s:  and context length: {len(context)}", goal)
     planner = Agent(
         model=ollama_model,
         conversation_manager=SlidingWindowConversationManager(window_size=25),
@@ -39,6 +56,7 @@ def planner_agent(goal: str, context: str = "") -> str:
 @tool
 def researcher_agent(task: str, constraints: str = "") -> str:
     """Executes multi-strategy searches with provenance tracking."""
+    logger.info(f"Researcher Agent invoked with task %s:  and constraints length: {len(constraints)}", task)
     # Build tools list based on availability
     tools = [http_request, retrieve]
     if browser_tool:
@@ -67,6 +85,7 @@ def researcher_agent(task: str, constraints: str = "") -> str:
 @tool
 def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
     """Critical analysis with logic checking and risk assessment."""
+    logger.info(f"Analyst Agent invoked with goal %s:  and findings length: {len(findings)}", goal)
     analyst = Agent(
         model=ollama_model,
         conversation_manager=SlidingWindowConversationManager(window_size=20),
@@ -84,6 +103,7 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
 @tool
 def similarity_ranker(content: str, query: str) -> str:
     """Semantic similarity ranking and content filtering."""
+    logger.info(f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
     ranker = Agent(
         model=ollama_model,
         system_prompt="""You are a semantic similarity expert:
@@ -100,6 +120,7 @@ def similarity_ranker(content: str, query: str) -> str:
 @tool
 def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     """Synthesizes final report with confidence levels and citations."""
+    logger.info(f"Writer Agent invoked with goal %s:  and vetted_reasoning length: {len(vetted_reasoning)}", goal)
     writer = Agent(
         model=ollama_model,
         system_prompt="""You are the Writer/Synthesizer Agent:
@@ -113,49 +134,104 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     )
     return str(writer(f"Synthesize report for: {goal}\nVetted reasoning: {vetted_reasoning}\nSources: {sources}"))
 
-# Master reasoning agent with advanced workflow
-reasoning_agent = Agent(
-    model=ollama_model,
-    tools=[planner_agent, researcher_agent, analyst_agent, similarity_ranker, writer_agent, handoff_to_user],
-    conversation_manager=SlidingWindowConversationManager(window_size=40),
-    system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:
+def similarity_rank(content: str, query: str) -> str:
+    """
+    Semantic similarity ranking and content filtering.
 
-    MANDATORY WORKFLOW - EXECUTE ALL STEPS:
-    1. PLAN: Call planner_agent(goal=user_query, context="") - CREATE research brief
-    2. RESEARCH: Call researcher_agent(task=plan_output, constraints="") - GATHER evidence
-    3. ANALYZE: Call analyst_agent(findings=research_output, goal=user_query, assumptions="") - CRITIQUE findings
-    4. RANK: Call similarity_ranker(content=analysis_output, query=user_query) - FILTER content
-    5. SYNTHESIZE: Call writer_agent(vetted_reasoning=ranked_output, goal=user_query, sources="") - FINAL report
+    :param content: The content to be ranked and filtered.
+    :param query: The query used for ranking.
+    :return: The ranked and filtered content.
 
-    DO NOT STOP until all 5 tools have been called. Show your thinking between each step.
+    """
+    logger.info(f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
+    # define code for a similarity ranker
+    similarity_search = Agent(
+        model=ollama_model,
+        system_prompt="""You are a semantic similarity expert:
+        1. Rank information by relevance to original query (1-10 scale)
+        2. Group similar concepts and identify patterns
+        3. Filter low-relevance information (threshold: 6+)
+        4. Create attention-weighted summary (focus on high-relevance)
+        5. Identify key insights and supporting evidence
 
-    PARAMETER PASSING:
-    - Always pass the original user query as 'goal' parameter
-    - Pass previous agent outputs as content parameters
-    - Include context and constraints where relevant
+        Use sliding window attention for long content."""
+    )
+    return similarity_search(content=content, query=query)
 
-    SHARED MEMORY & TRACKING:
-    - Maintain task board (goals, subgoals, status)
-    - Track assumptions vs facts with sources
-    - Keep reasoning transcript for auditability
-    - Update outline as you learn
+def reasoning_result(user_query: str, context: str) -> str:
+    """
+    Execute the comprehensive reasoning research workflow.
 
-    QUALITY CONTROL:
-    - Force citation of sources for all assertions
-    - Separate assumptions from verified facts
-    - Generate checklists before finalizing
-    - Break loops when analyst confirms acceptance criteria met
-    - Use sliding window attention for long content
+    :param user_query: The user's research query.
+    :return: The final synthesized report.
+    """
+    # Master reasoning agent with advanced workflow
+    reasoning_agent = Agent(
+        model=ollama_model,
+        tools=[planner_agent, researcher_agent, analyst_agent, similarity_ranker, writer_agent, handoff_to_user],
+        conversation_manager=SlidingWindowConversationManager(window_size=40),
+        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:
 
-    ADVANCED FEATURES:
-    - Query decomposition and multi-strategy search
-    - Semantic similarity ranking and filtering
-    - Logic validation and bias detection
-    - Confidence scoring and uncertainty tracking
-    - Provenance tracking for all evidence
+        MANDATORY WORKFLOW - EXECUTE ALL STEPS:
+        1. PLAN: Call planner_agent(goal=user_query, context="") - CREATE research brief
+        2. RESEARCH: Call researcher_agent(task=plan_output, constraints="") - GATHER evidence
+        3. ANALYZE: Call analyst_agent(findings=research_output, goal=user_query, assumptions="") - CRITIQUE findings
+        4. RANK: Call similarity_ranker(content=analysis_output, query=user_query) - FILTER content
+        5. SYNTHESIZE: Call writer_agent(vetted_reasoning=ranked_output, goal=user_query, sources="") - FINAL report
 
-    You must complete the entire workflow. Think step-by-step and use each tool in sequence."""
-)
+        DO NOT STOP until all 5 tools have been called. Show your thinking between each step.
+
+        PARAMETER PASSING:
+        - Always pass the original user query as 'goal' parameter
+        - Pass previous agent outputs as content parameters
+        - Include context and constraints where relevant
+
+        SHARED MEMORY & TRACKING:
+        - Maintain task board (goals, subgoals, status)
+        - Track assumptions vs facts with sources
+        - Keep reasoning transcript for auditability
+        - Update outline as you learn
+
+        QUALITY CONTROL:
+        - Force citation of sources for all assertions
+        - Separate assumptions from verified facts
+        - Generate checklists before finalizing
+        - Break loops when analyst confirms acceptance criteria met
+        - Use sliding window attention for long content
+
+        ADVANCED FEATURES:
+        - Query decomposition and multi-strategy search
+        - Semantic similarity ranking and filtering
+        - Logic validation and bias detection
+        - Confidence scoring and uncertainty tracking
+        - Provenance tracking for all evidence
+
+        You must complete the entire workflow. Think step-by-step and use each tool in sequence.""",
+    )
+    return reasoning_agent(f"Execute comprehensive reasoning research workflow for: {user_query}")
+
+def knowledge_base_memory():
+    """
+    Load and return the knowledge base memory.
+
+    :return: The knowledge base memory content.
+    """
+    base_memory = "knowledge_base.txt"
+    try:
+        with open(base_memory, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
+
+    if base_memory not in globals():
+        with open(base_memory, "w", encoding="utf-8") as f:
+            f.write("Knowledge Base Initialized.\n")
+    # Init knowledge base file, but also need to add it to globals()
+    # Also, we need to append to the file with information from each module
+    # to use for context, so we should call it and write, not overwrite.
+    # Basically we call knowledge_base.append("new info") or however we add to the text file.
+    globals()['knowledge_base.txt'] = "knowledge_base.txt"
+    return globals()['knowledge_base.txt']
 
 if __name__ == "__main__":
     print("\n🧠 Advanced Reasoning Research Agent")
@@ -163,7 +239,12 @@ if __name__ == "__main__":
 
     # Store results for comparison
     research_history = []
-
+    reasoning_agent = Agent(
+        model=ollama_model,
+        tools=[planner_agent, researcher_agent, analyst_agent, similarity_ranker, writer_agent, handoff_to_user],
+        conversation_manager=SlidingWindowConversationManager(window_size=40),
+        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:"""
+    )
     while True:
         try:
             user_input = input("\nWhat would you like me to research? (type 'exit' to quit): ")

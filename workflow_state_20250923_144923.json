@@ -1,0 +1,68 @@
+{
+  "original_query": "ai agents",
+  "completed_steps": [],
+  "current_results": {},
+  "next_actions": [],
+  "start_time": "2025-09-23T14:49:23.266584",
+  "thinking_results": {
+    "goal_analysis": {
+      "toolUseId": "tooluse_think_721375798",
+      "status": "error",
+      "content": [
+        {
+          "text": "The tool result was too large!"
+        }
+      ]
+    },
+    "task_breakdown": {
+      "toolUseId": "tooluse_think_518543110",
+      "status": "error",
+      "content": [
+        {
+          "text": "The tool result was too large!"
+        }
+      ]
+    },
+    "risk_assessment": {
+      "toolUseId": "tooluse_think_588307627",
+      "status": "error",
+      "content": [
+        {
+          "text": "The tool result was too large!"
+        }
+      ]
+    },
+    "resource_planning": {
+      "toolUseId": "tooluse_think_557437568",
+      "status": "error",
+      "content": [
+        {
+          "text": "The tool result was too large!"
+        }
+      ]
+    },
+    "meta_thinking": {
+      "toolUseId": "tooluse_think_523295524",
+      "status": "error",
+      "content": [
+        {
+          "text": "The tool result was too large!"
+        }
+      ]
+    }
+  },
+  "errors": [
+    "Tool 'think' not found"
+  ],
+  "final_result": {
+    "toolUseId": "tooluse_think_495119232",
+    "status": "error",
+    "content": [
+      {
+        "text": "The tool result was too large!"
+      }
+    ]
+  },
+  "end_time": "2025-09-23T14:49:23.278023",
+  "total_steps": 1
+}

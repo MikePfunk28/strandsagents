@@ -4,3 +4,5 @@ strands-agents-builder
 strands-agents-tools[browser]
 strands-agents[ollama]
 boto3
+mem0-ai
+nest-asyncio
