@@ -1,16 +1,20 @@
 from strands import Agent, tool
 from strands.models.ollama import OllamaModel
-from strands_tools import http_request, mem0, handoff_to_user, retrieve
+from strands_tools import http_request, handoff_to_user, retrieve
 from strands.agent.conversation_manager import SlidingWindowConversationManager
 import logging
 from dotenv import load_dotenv
 import os
 from mem0 import MemoryClient
+from datetime import datetime
+import json
 
 # Load environment variables at startup
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 # Try to import browser tool safely
@@ -22,24 +26,22 @@ try:
     browser_tool = browser_instance.browser  # Use the .browser attribute
 except (ImportError, AttributeError) as e:
     browser_tool = None
-    print(f"Browser tool not available ({e}) - using http_request and retrieve only")
+    print(
+        f"Browser tool not available ({e}) - using http_request and retrieve only")
 
-# Add environment variable handling
-MEM_API_KEY = os.getenv('MEM_API_KEY')
-if not MEM_API_KEY:
-    raise ValueError("MEM_API_KEY environment variable is required")
 
-client = MemoryClient(api_key=MEM_API_KEY)
 # Create model
 ollama_model = OllamaModel(
     host="http://localhost:11434",
     model_id="llama3.2"
 )
 
+
 @tool
 def planner_agent(goal: str, context: str = "") -> str:
     """Creates research brief and step-by-step outline with task board."""
-    logger.info(f"Planner Agent invoked with goal %s:  and context length: {len(context)}", goal)
+    logger.info(
+        f"Planner Agent invoked with goal %s:  and context length: {len(context)}", goal)
     planner = Agent(
         model=ollama_model,
         conversation_manager=SlidingWindowConversationManager(window_size=25),
@@ -53,10 +55,12 @@ def planner_agent(goal: str, context: str = "") -> str:
     )
     return str(planner(f"Create research plan for: {goal}\nContext: {context}"))
 
+
 @tool
 def researcher_agent(task: str, constraints: str = "") -> str:
     """Executes multi-strategy searches with provenance tracking."""
-    logger.info(f"Researcher Agent invoked with task %s:  and constraints length: {len(constraints)}", task)
+    logger.info(
+        f"Researcher Agent invoked with task %s:  and constraints length: {len(constraints)}", task)
     # Build tools list based on availability
     tools = [http_request, retrieve]
     if browser_tool:
@@ -82,10 +86,12 @@ def researcher_agent(task: str, constraints: str = "") -> str:
     )
     return str(researcher(f"Research: {task}\nConstraints: {constraints}"))
 
+
 @tool
 def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
     """Critical analysis with logic checking and risk assessment."""
-    logger.info(f"Analyst Agent invoked with goal %s:  and findings length: {len(findings)}", goal)
+    logger.info(
+        f"Analyst Agent invoked with goal %s:  and findings length: {len(findings)}", goal)
     analyst = Agent(
         model=ollama_model,
         conversation_manager=SlidingWindowConversationManager(window_size=20),
@@ -100,10 +106,12 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
     )
     return str(analyst(f"Analyze for goal: {goal}\nFindings: {findings}\nAssumptions: {assumptions}"))
 
+
 @tool
 def similarity_ranker(content: str, query: str) -> str:
     """Semantic similarity ranking and content filtering."""
-    logger.info(f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
+    logger.info(
+        f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
     ranker = Agent(
         model=ollama_model,
         system_prompt="""You are a semantic similarity expert:
@@ -117,10 +125,12 @@ def similarity_ranker(content: str, query: str) -> str:
     )
     return str(ranker(f"Rank by similarity to '{query}':\n\n{content}"))
 
+
 @tool
 def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     """Synthesizes final report with confidence levels and citations."""
-    logger.info(f"Writer Agent invoked with goal %s:  and vetted_reasoning length: {len(vetted_reasoning)}", goal)
+    logger.info(
+        f"Writer Agent invoked with goal %s:  and vetted_reasoning length: {len(vetted_reasoning)}", goal)
     writer = Agent(
         model=ollama_model,
         system_prompt="""You are the Writer/Synthesizer Agent:
@@ -134,6 +144,7 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     )
     return str(writer(f"Synthesize report for: {goal}\nVetted reasoning: {vetted_reasoning}\nSources: {sources}"))
 
+
 def similarity_rank(content: str, query: str) -> str:
     """
     Semantic similarity ranking and content filtering.
@@ -143,7 +154,8 @@ def similarity_rank(content: str, query: str) -> str:
     :return: The ranked and filtered content.
 
     """
-    logger.info(f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
+    logger.info(
+        f"Similarity Ranker invoked with query %s:  and content length: {len(content)}", query)
     # define code for a similarity ranker
     similarity_search = Agent(
         model=ollama_model,
@@ -158,6 +170,7 @@ def similarity_rank(content: str, query: str) -> str:
     )
     return similarity_search(content=content, query=query)
 
+
 def reasoning_result(user_query: str, context: str) -> str:
     """
     Execute the comprehensive reasoning research workflow.
@@ -165,10 +178,13 @@ def reasoning_result(user_query: str, context: str) -> str:
     :param user_query: The user's research query.
     :return: The final synthesized report.
     """
+    context = knowledge_base_memory() + "\n\n" + context
     # Master reasoning agent with advanced workflow
-    reasoning_agent = Agent(
+    reason_agent = Agent(
         model=ollama_model,
-        tools=[planner_agent, researcher_agent, analyst_agent, similarity_ranker, writer_agent, handoff_to_user],
+
+        tools=[planner_agent, researcher_agent, analyst_agent,
+               similarity_ranker, writer_agent, handoff_to_user],
         conversation_manager=SlidingWindowConversationManager(window_size=40),
         system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:
 
@@ -208,30 +224,93 @@ def reasoning_result(user_query: str, context: str) -> str:
 
         You must complete the entire workflow. Think step-by-step and use each tool in sequence.""",
     )
-    return reasoning_agent(f"Execute comprehensive reasoning research workflow for: {user_query}")
+    return reason_agent(f"Execute comprehensive reasoning research workflow for: {user_query}")
+
 
 def knowledge_base_memory():
     """
     Load and return the knowledge base memory.
+    Creates knowledgebase.txt if it doesn't exist.
 
     :return: The knowledge base memory content.
     """
-    base_memory = "knowledge_base.txt"
+    base_memory = "knowledgebase.txt"
+
+    # Check if file exists first
+    if not os.path.exists(base_memory):
+        logger.info("Knowledge base file not found, creating new one")
+        try:
+            # Create the file with initial content
+            with open(base_memory, "w", encoding="utf-8") as f:
+                initial_content = "Knowledge Base Initialized.\n"
+                f.write(initial_content)
+            logger.info(f"✅ Created knowledgebase.txt with {len(initial_content)} characters")
+            return initial_content
+        except Exception as e:
+            logger.error(f"❌ Failed to create knowledgebase.txt: {e}")
+            return "Error: Could not create knowledge base file."
+
+    # File exists, try to read it
     try:
         with open(base_memory, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return ""
+            content = f.read()
+            logger.info(f"✅ Loaded knowledge base with {len(content)} characters")
+            return content
+    except Exception as e:
+        logger.error(f"❌ Failed to read knowledgebase.txt: {e}")
+        return "Error: Could not read knowledge base file."
 
-    if base_memory not in globals():
-        with open(base_memory, "w", encoding="utf-8") as f:
-            f.write("Knowledge Base Initialized.\n")
-    # Init knowledge base file, but also need to add it to globals()
-    # Also, we need to append to the file with information from each module
-    # to use for context, so we should call it and write, not overwrite.
-    # Basically we call knowledge_base.append("new info") or however we add to the text file.
-    globals()['knowledge_base.txt'] = "knowledge_base.txt"
-    return globals()['knowledge_base.txt']
+
+def append_to_knowledge_base(content: str, category: str = "general"):
+    """
+    Append important information to the knowledge base with categorization.
+
+    :param content: The content to store
+    :param category: The category/topic of the information
+    :return: Success status
+    """
+    try:
+        base_memory = "knowledgebase.txt"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Format the entry with metadata
+        entry = f"\n[{timestamp}] [{category.upper()}]\n{content}\n{'='*50}\n"
+
+        with open(base_memory, "a", encoding="utf-8") as f:
+            f.write(entry)
+
+        logger.info(
+            f"Added {len(content)} characters to knowledge base in category '{category}'")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to append to knowledge base: {str(e)}")
+        return False
+
+
+def save_research_output(query: str, result: str):
+    """
+    Save research results to a timestamped file for comparison.
+
+    :param query: The research query
+    :param result: The research result
+    """
+    try:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"research_output_{timestamp}.txt"
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(f"Query: {query}\n")
+            f.write(f"Timestamp: {datetime.now().isoformat()}\n")
+            f.write(f"Result Length: {len(result)} characters\n")
+            f.write("="*70 + "\n\n")
+            f.write(result)
+
+        logger.info(f"Saved research output to {filename}")
+        return filename
+    except Exception as e:
+        logger.error(f"Failed to save research output: {str(e)}")
+        return None
+
 
 if __name__ == "__main__":
     print("\n🧠 Advanced Reasoning Research Agent")
@@ -241,26 +320,31 @@ if __name__ == "__main__":
     research_history = []
     reasoning_agent = Agent(
         model=ollama_model,
-        tools=[planner_agent, researcher_agent, analyst_agent, similarity_ranker, writer_agent, handoff_to_user],
+        tools=[planner_agent, researcher_agent, analyst_agent,
+               similarity_ranker, writer_agent, handoff_to_user],
         conversation_manager=SlidingWindowConversationManager(window_size=40),
         system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:"""
     )
     while True:
         try:
-            user_input = input("\nWhat would you like me to research? (type 'exit' to quit): ")
+            user_input = input(
+                "\nWhat would you like me to research? (type 'exit' to quit): ")
             if user_input.lower() == "exit":
                 print("\nGoodbye!")
                 break
 
             # Check if this is a repeat query
-            is_repeat = any(entry['query'].lower() == user_input.lower() for entry in research_history)
+            is_repeat = any(entry['query'].lower() == user_input.lower()
+                            for entry in research_history)
 
-            print(f"\n🔍 Starting advanced reasoning workflow for: '{user_input}'")
+            print(
+                f"\n🔍 Starting advanced reasoning workflow for: '{user_input}'")
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
             print("📋 Workflow: Plan → Research → Analyze → Rank → Synthesize → Report")
 
-            result = reasoning_agent(f"Execute comprehensive reasoning research workflow for: {user_input}")
+            result = reasoning_agent(
+                f"Execute comprehensive reasoning research workflow for: {user_input}")
 
             print("\n" + "="*70)
             print("🧠 ADVANCED REASONING RESEARCH REPORT")
@@ -278,13 +362,17 @@ if __name__ == "__main__":
 
             # Compare with previous results if repeat
             if is_repeat:
-                previous_results = [entry for entry in research_history[:-1] if entry['query'].lower() == user_input.lower()]
+                previous_results = [entry for entry in research_history[:-1]
+                                    if entry['query'].lower() == user_input.lower()]
                 if previous_results:
                     print("\n🔄 COMPARISON WITH PREVIOUS RESULT(S):")
-                    print(f"Current result length: {len(str(result))} characters")
+                    print(
+                        f"Current result length: {len(str(result))} characters")
                     for prev in previous_results:
-                        print(f"Previous result #{prev['timestamp']} length: {len(prev['result'])} characters")
-                    print("Note: Results may vary due to different web sources and timing.")
+                        print(
+                            f"Previous result #{prev['timestamp']} length: {len(prev['result'])} characters")
+                    print(
+                        "Note: Results may vary due to different web sources and timing.")
 
         except KeyboardInterrupt:
             print("\n\nGoodbye!")

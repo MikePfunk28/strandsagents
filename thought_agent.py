@@ -6,7 +6,7 @@ thinking pipelines analyze tasks and intelligently orchestrate agent workflows.
 """
 
 from strands.agent.conversation_manager import SlidingWindowConversationManager
-from strands_tools import http_request, handoff_to_user, retrieve, think
+from strands_tools import http_request, handoff_to_user, retrieve, think, mem0_memory, use_llm
 from strands.models.ollama import OllamaModel
 from strands import Agent, tool
 import logging
@@ -15,7 +15,8 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 import os
-
+from mem0 import MemoryClient
+from mem0 import Memory
 # Load environment variables at startup
 load_dotenv()
 
@@ -23,7 +24,8 @@ load_dotenv()
 MEM_API_KEY = os.getenv('MEM_API_KEY')
 if not MEM_API_KEY:
     raise ValueError("MEM_API_KEY environment variable is required")
-
+else:
+    client = MemoryClient(api_key=MEM_API_KEY)
 # Core strands imports
 
 # Browser tool setup with proper error handling
@@ -34,7 +36,7 @@ try:
     browser_instance = LocalChromiumBrowser()
     browser_tool = browser_instance.browser
     print("✅ Browser tool initialized successfully")
-except (ImportError, AttributeError, Exception) as e:
+except (Exception) as e:
     browser_tool = None
     print(
         f"⚠️ Browser tool not available ({e}) - using http_request and retrieve only")
@@ -147,9 +149,64 @@ def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
     """Synthesize all workflow results into final output."""
     logger.info("Synthesizing workflow results")
 
-    final_result = "Workflow completed with results"
+    # Extract key information from workflow state
+    original_query = workflow_state.get("original_query", "Unknown query")
+    completed_steps = workflow_state.get("completed_steps", [])
+    thinking_results = workflow_state.get("thinking_results", {})
+    total_steps = workflow_state.get("total_steps", 0)
+    errors = workflow_state.get("errors", [])
 
-    logger.info("Synthesizing final results")
+    # Build comprehensive summary
+    summary_parts = []
+
+    # Add original query
+    summary_parts.append(f"## Original Query\n{original_query}\n")
+
+    # Add thinking results summary if available
+    if thinking_results:
+        summary_parts.append("## Thinking Analysis\n")
+        for key, value in thinking_results.items():
+            if isinstance(value, str) and len(value) > 100:
+                summary_parts.append(f"**{key}:** {value[:100]}...\n")
+            else:
+                summary_parts.append(f"**{key}:** {value}\n")
+        summary_parts.append("\n")
+
+    # Add completed steps summary
+    if completed_steps:
+        summary_parts.append(f"## Workflow Steps ({total_steps} total)\n")
+        for step in completed_steps:
+            agent = step.get("agent", "Unknown")
+            confidence = step.get("confidence", "Unknown")
+            reasoning = step.get("reasoning", "No reasoning provided")
+            summary_parts.append(f"- **{agent}** (confidence: {confidence})\n")
+            summary_parts.append(f"  - Reasoning: {reasoning}\n")
+        summary_parts.append("\n")
+
+    # Add errors if any occurred
+    if errors:
+        summary_parts.append("## Issues Encountered\n")
+        for error in errors:
+            summary_parts.append(f"- {error}\n")
+        summary_parts.append("\n")
+
+    # Add final status
+    summary_parts.append("## Final Status\n")
+    summary_parts.append("✅ Workflow completed successfully\n")
+
+    final_result = "".join(summary_parts)
+
+    logger.info("Synthesizing final results - %d characters", len(final_result))
+    # Initialize Memory
+    mem = Memory()
+    # Add final result to memory with metadata
+    mem.add(
+        final_result,
+        user_id="demo_user",
+        metadata={"source": "workflow_summary"}
+    )
+
+
     return final_result
 
 
@@ -166,6 +223,7 @@ def save_workflow_state(workflow_state: Dict[str, Any]):
     except Exception as e:
         logger.error("Failed to save workflow state: %s", str(e))
 
+    return workflow_state, filename
 
 @tool
 def intelligent_workflow_orchestrator(user_query: str, context: str = "", history: List = None) -> Dict[str, Any]:
@@ -280,7 +338,7 @@ def researcher_agent(task: str, constraints: str = "") -> str:
     tools = [http_request, retrieve]
     if browser_tool:
         tools.append(browser_tool)
-
+    logger.info("Researcher tools: %s", [t.__name__ for t in tools])
     researcher = Agent(
         model=ollama_model,
         tools=tools,
@@ -297,11 +355,12 @@ def researcher_agent(task: str, constraints: str = "") -> str:
         - retrieve: For web scraping and content extraction
         - browser: For interactive websites requiring JavaScript
 
+
         Return: {evidence: [], sources: [], gaps: [], confidence: score, provenance: []}"""
     )
 
     result = str(researcher(f"Research: {task}\nConstraints: {constraints}"))
-    logger.info("Researcher agent completed")
+    logger.info("Researcher agent completed %s", task)
     return result
 
 
@@ -324,7 +383,12 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
 
     result = str(analyst(
         f"Analyze for goal: {goal}\nFindings: {findings}\nAssumptions: {assumptions}"))
-    logger.info("Analyst agent completed")
+    logger.info("Analyst agent completed %s", goal)
+    logger.info("Analyst result length: %d characters", len(result))
+    logger.info("Findings %s", findings[:200] +
+                "..." if len(findings) > 200 else findings)
+    logger.info("Assumptions %s",
+                assumptions[:200] + "..." if len(assumptions) > 200 else assumptions)
     return result
 
 
@@ -332,6 +396,8 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
 def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     """Synthesizes final report with confidence levels and citations."""
     logger.info("Executing writer agent for goal: %s", goal)
+    logger.info("Sources %s", sources[:200] +
+                "..." if len(sources) > 200 else sources)
 
     writer = Agent(
         model=ollama_model,
@@ -347,8 +413,57 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
 
     result = str(writer(
         f"Synthesize report for: {goal}\nVetted reasoning: {vetted_reasoning}\nSources: {sources}"))
-    logger.info("Writer agent completed")
+    logger.info("Writer agent completed reasoning %s", vetted_reasoning)
     return result
+
+
+class MemoryAssistant:
+    MEMORY_SYSTEM_PROMPT = """You are a memory assistant that helps store and retrieve relevant information."""
+    ANSWER_SYSTEM_PROMPT = """You are an assistant that creates helpful responses based on retrieved memories.
+    Use the provided memories to create a natural, conversational response to the user's question..."""
+
+    def __init__(self, user_id: str = "demo_user"):
+        self.user_id = user_id
+        self.agent = Agent(
+            system_prompt=self.MEMORY_SYSTEM_PROMPT,  # ✅ Correct
+            tools=[mem0_memory, use_llm],
+        )
+
+    def store_memory(self, content: str) -> Dict[str, Any]:
+        """Store memory using mem0_memory tool through agent."""
+        try:
+            # Use the mem0_memory tool through the agent
+            result = self.agent.tool.mem0_memory(content=content, user_id=self.user_id)
+            logger.info("Memory stored successfully: %s", result)
+            return result
+        except Exception as e:
+            logger.error("Failed to store memory: %s", str(e))
+            return {"error": str(e)}
+
+    def retrieve_memories(self, query: str, min_score: float = 0.3, max_results: int = 5) -> List[Dict[str, Any]]:
+        """Retrieve memories using mem0_memory tool through agent."""
+        try:
+            # Use the mem0_memory tool through the agent
+            result = self.agent.tool.mem0_memory(
+                query=query,
+                user_id=self.user_id,
+                min_score=min_score,
+                max_results=max_results
+            )
+            logger.info("Retrieved %d memories for query: %s", len(result) if isinstance(result, list) else 0, query)
+            return result if isinstance(result, list) else []
+        except Exception as e:
+            logger.error("Failed to retrieve memories: %s", str(e))
+            return []
+
+    def list_all_memories(self) -> List[Dict[str, Any]]:
+        return (self.retrieve_memories(self.user_id))
+
+    def generate_answer_from_memories(self, query: str, memories: List[Dict[str, Any]]) -> str:
+        ...  # Implementation...
+
+    def process_input(self, user_input: str) -> str:
+        return self.store_memory(user_input)
 
 
 @tool
