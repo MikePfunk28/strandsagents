@@ -10,27 +10,33 @@ from strands_tools import http_request, handoff_to_user, retrieve, think, use_ll
 from strands.models.ollama import OllamaModel
 from strands import Agent, tool
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 import json
 from datetime import datetime
 from dotenv import load_dotenv
 import os
-
-
+from mem0 import MemoryClient
+from mem0 import Memory
 from file_assistant import FileAssistant
 from memory_assistant import MemoryAssistant
 from meta_tool_assistant import MetaToolAssistant
 # Load environment variables at startup
 load_dotenv()
 
-# Core strands imports
-
+# Verify MEM_API_KEY is loaded
+MEM_API_KEY = os.getenv('MEM_API_KEY')
+if not MEM_API_KEY:
+    raise ValueError("MEM_API_KEY environment variable is required")
+else:
+    client = MemoryClient(api_key=MEM_API_KEY)
 
 WORKFLOW_RUN_OUTPUT_DIR = "workflow_runs"
 KNOWLEDGE_CONTEXT_OUTPUT_DIR = "knowledge_context"
 KNOWLEDGE_LOG_FILE = "knowledge_base.txt"
-
+MEM0_ENABLED = False
 LAST_WORKFLOW_ARTIFACTS: Dict[str, str] = {}
+
+# Core strands imports
 
 # Browser tool setup with proper error handling
 try:
@@ -118,7 +124,7 @@ def structured_thinking_pipeline(goal: str, context: str = "") -> Dict[str, Any]
     # Step 5: Meta-Thinking (2 cycles for self-improvement)
     logger.info("Step 5: Meta-Thinking")
     thinking_results['meta_thinking'] = thinking_agent.tool.think(
-        thought="Evaluate my thinking quality so far. How thorough was the analysis? What could be improved? Are there any blind spots or biases?",
+        thought=f"Evaluate my thinking quality so far. How thorough was the analysis? What could be improved? Are there any blind spots or biases?",
         system_prompt="You are a meta-cognition expert. Evaluate thinking quality and identify improvements.",
         cycle_count=2
     )
@@ -144,93 +150,84 @@ def similarity_ranker(content: str, query: str) -> str:
         Use sliding window attention for long content."""
     )
 
-    result_similarity = str(
-        ranker(f"Rank by similarity to '{query}':\n\n{content}"))
+    result = str(ranker(f"Rank by similarity to '{query}':\n\n{content}"))
     logger.info("Similarity ranker completed")
-    return result_similarity
+    return result
+
 
 
 def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
-    """Synthesize all workflow results into final output.
-
-    This refactored version extracts formatting logic into small helpers to
-    reduce cognitive complexity while preserving the original output.
-    """
+    """Synthesize all workflow results into final output."""
     logger.info("Synthesizing workflow results")
 
+    # Extract key information from workflow state
     original_query = workflow_state.get("original_query", "Unknown query")
-    completed_steps = workflow_state.get("completed_steps", []) or []
-    thinking_results = workflow_state.get("thinking_results", {}) or {}
-    total_steps = workflow_state.get("total_steps", 0) or 0
-    errors = workflow_state.get("errors", []) or []
+    completed_steps = workflow_state.get("completed_steps", [])
+    thinking_results = workflow_state.get("thinking_results", {})
+    total_steps = workflow_state.get("total_steps", 0)
+    errors = workflow_state.get("errors", [])
 
-    parts: List[str] = []
-    parts.append(f"## Original Query\n{original_query}\n")
+    # Build comprehensive summary
+    summary_parts = []
 
-    # use existing helpers; guard against empty output
+    # Add original query
+    summary_parts.append(f"## Original Query\n{original_query}\n")
+
+    # Add thinking results summary if available
     if thinking_results:
-        block = _format_thinking_results(thinking_results)
-        if block and block.strip():
-            parts.append(block)
+        summary_parts.append("## Thinking Analysis\n")
+        for key, value in thinking_results.items():
+            if isinstance(value, str) and len(value) > 100:
+                summary_parts.append(f"**{key}:** {value[:100]}...\n")
+            else:
+                summary_parts.append(f"**{key}:** {value}\n")
+        summary_parts.append("\n")
 
+    # Add completed steps summary
     if completed_steps:
-        block = _format_completed_steps(completed_steps, total_steps)
-        if block and block.strip():
-            parts.append(block)
+        summary_parts.append(f"## Workflow Steps ({total_steps} total)\n")
+        for step in completed_steps:
+            agent = step.get("agent", "Unknown")
+            confidence = step.get("confidence", "Unknown")
+            reasoning = step.get("reasoning", "No reasoning provided")
+            summary_parts.append(f"- **{agent}** (confidence: {confidence})\n")
+            summary_parts.append(f"  - Reasoning: {reasoning}\n")
+        summary_parts.append("\n")
 
+    # Add errors if any occurred
     if errors:
-        block = _format_errors(errors)
-        if block and block.strip():
-            parts.append(block)
+        summary_parts.append("## Issues Encountered\n")
+        for error in errors:
+            summary_parts.append(f"- {error}\n")
+        summary_parts.append("\n")
 
-    parts.append("## Final Status\n")
-    parts.append("✅ Workflow completed successfully\n")
+    # Add final status
+    summary_parts.append("## Final Status\n")
+    summary_parts.append("✅ Workflow completed successfully\n")
 
-    final_result = "".join(parts)
+    final_result = "".join(summary_parts)
 
-    logger.info("Synthesizing final results - %d characters",
-                len(final_result))
+    logger.info("Synthesizing final results - %d characters", len(final_result))
+    if MEM0_ENABLED:
+        try:
+            mem = Memory()
+            mem.add(
+                final_result,
+                user_id="demo_user",
+                metadata={"source": "workflow_summary"}
+            )
+        except Exception as mem_error:
+            logger.warning("mem0 write skipped: %s", mem_error)
 
     return final_result
 
-def _format_thinking_results(thinking_results: Dict[str, Any]) -> str:
 
-    parts: List[str] = ["## Thinking Analysis\n"]
-    for key, value in thinking_results.items():
-        text = str(value)
-        if len(text) > 100:
-            parts.append(f"**{key}:** {text[:100]}...\n")
-        else:
-            parts.append(f"**{key}:** {text}\n")
-    parts.append("\n")
-    return "".join(parts)
-
-
-def _format_completed_steps(completed_steps: List[Dict[str, Any]], total_steps: int) -> str:
-    parts: List[str] = [f"## Workflow Steps ({total_steps} total)\n"]
-    for step in completed_steps:
-        agent = step.get("agent", "Unknown")
-        confidence = step.get("confidence", "Unknown")
-        reasoning = step.get("reasoning", "No reasoning provided")
-        parts.append(f"- **{agent}** (confidence: {confidence})\n")
-        parts.append(f"  - Reasoning: {reasoning}\n")
-    parts.append("\n")
-    return "".join(parts)
-
-
-def _format_errors(errors: List[Any]) -> str:
-    parts: List[str] = ["## Issues Encountered\n"]
-    for error in errors:
-        parts.append(f"- {error}\n")
-    parts.append("\n")
-    return "".join(parts)
 
 
 def save_workflow_state(workflow_state: Dict[str, Any]):
     """Save workflow state for analysis and learning."""
     try:
-        timestamp = workflow_state.get(
-            "run_id") or datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = workflow_state.get("run_id") or datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"workflow_state_{timestamp}.json"
 
         with open(filename, 'w', encoding='utf-8') as f:
@@ -244,46 +241,67 @@ def save_workflow_state(workflow_state: Dict[str, Any]):
 
 
 @tool
-
 def intelligent_workflow_orchestrator(user_query: str, context: str = "", history: List = None) -> Dict[str, Any]:
-    """Main orchestrator that thinks first, then decides which agent to call next."""
-    logger.info("Starting intelligent workflow orchestration for: %s", user_query)
+    """
+    Main orchestrator that thinks first, then decides which agent to call next.
 
-    thinking_results = structured_thinking_pipeline(user_query, context)
+    Args:
+        user_query: The user's original query
+        context: Additional context
+        history: Previous interaction history
 
-    logger.info("Step 2: Decision Analysis via MetaToolAssistant")
-    history_list = history if isinstance(history, list) else []
-    meta_decision = meta_tool_assistant.select_next_action(
-        user_query=user_query,
-        context=context,
-        history=history_list,
-        thinking_results=thinking_results,
-        current_results={},
-    )
-
-    normalized_decision = _normalize_meta_decision(
-        meta_decision,
-        user_query,
-        context,
-        thinking_results,
-        {},
-    )
-
-    orchestration_result = {
-        "thinking_results": thinking_results,
-        "meta_decision": meta_decision,
-        "decision": normalized_decision,
-        "user_query": user_query,
-        "timestamp": datetime.now().isoformat(),
-    }
-
+    Returns:
+        Dictionary containing orchestration decision and thinking results
+    """
     logger.info(
-        "Orchestration decision: %s (intent: %s) with confidence: %s",
-        normalized_decision.get("next_agent", "unknown"),
-        normalized_decision.get("intent", "use_tool"),
-        normalized_decision.get("confidence", "unknown"),
-    )
-    return orchestration_result
+        "Starting intelligent workflow orchestration for: %s", user_query)
+
+# Step 1: Execute structured thinking pipeline
+thinking_results = structured_thinking_pipeline(user_query, context)
+
+logger.info("Step 2: Decision Analysis via MetaToolAssistant")
+history_list = history if isinstance(history, list) else []
+meta_decision = meta_tool_assistant.select_next_action(
+    user_query=user_query,
+    context=context,
+    history=history_list,
+    thinking_results=thinking_results,
+    current_results={},
+)
+
+next_agent_name = meta_decision.get("next_agent", "planner_agent")
+parameters = _build_agent_parameters(
+    next_agent_name,
+    user_query,
+    context,
+    thinking_results,
+    {},
+)
+
+next_action = {
+    "next_agent": next_agent_name,
+    "parameters": parameters,
+    "reasoning": meta_decision.get("reasoning", "Decision based on meta-tool analysis"),
+    "confidence": meta_decision.get("confidence", "medium"),
+}
+if meta_decision.get("follow_up"):
+    next_action["follow_up"] = meta_decision["follow_up"]
+
+orchestration_result = {
+    "thinking_results": thinking_results,
+    "meta_decision": meta_decision,
+    "decision": next_action,
+    "user_query": user_query,
+    "timestamp": datetime.now().isoformat(),
+}
+
+logger.info(
+    "Orchestration decision: %s with confidence: %s",
+    next_action.get("next_agent", "unknown"),
+    next_action.get("confidence", "unknown"),
+)
+return orchestration_result
+
 
 def parse_decision_text(decision_text: str) -> Dict[str, Any]:
     """
@@ -342,10 +360,10 @@ def planner_agent(goal: str, context: str = "") -> str:
         Keep outline visible and update as you learn. Format structured for other agents."""
     )
 
-    result_planner = str(
+    result = str(
         planner(f"Create research plan for: {goal}\nContext: {context}"))
     logger.info("Planner agent completed")
-    return result_planner
+    return result
 
 
 @tool
@@ -378,10 +396,9 @@ def researcher_agent(task: str, constraints: str = "") -> str:
         Return: {evidence: [], sources: [], gaps: [], confidence: score, provenance: []}"""
     )
 
-    result_researcher = str(researcher(
-        f"Research: {task}\nConstraints: {constraints}"))
+    result = str(researcher(f"Research: {task}\nConstraints: {constraints}"))
     logger.info("Researcher agent completed %s", task)
-    return result_researcher
+    return result
 
 
 @tool
@@ -401,7 +418,7 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
         Ask: What could be wrong? What's unverified? What contradicts? What's missing?"""
     )
 
-    result_analyst = str(analyst(
+    result = str(analyst(
         f"Analyze for goal: {goal}\nFindings: {findings}\nAssumptions: {assumptions}"))
     logger.info("Analyst agent completed %s", goal)
     logger.info("Analyst result length: %d characters", len(result))
@@ -409,7 +426,7 @@ def analyst_agent(findings: str, goal: str, assumptions: str = "") -> str:
                 "..." if len(findings) > 200 else findings)
     logger.info("Assumptions %s",
                 assumptions[:200] + "..." if len(assumptions) > 200 else assumptions)
-    return result_analyst
+    return result
 
 
 @tool
@@ -431,278 +448,62 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
         Format: Executive summary + detailed analysis + sources + confidence assessment"""
     )
 
-    result_writer = str(writer(
+    result = str(writer(
         f"Synthesize report for: {goal}\nVetted reasoning: {vetted_reasoning}\nSources: {sources}"))
     logger.info("Writer agent completed reasoning %s", vetted_reasoning)
-    return result_writer
+    return result
 
 
+file_assistant = FileAssistant(
+    run_dir=WORKFLOW_RUN_OUTPUT_DIR,
+    context_dir=KNOWLEDGE_CONTEXT_OUTPUT_DIR,
+    knowledge_log=KNOWLEDGE_LOG_FILE,
+)
 
-AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
+memory_assistant = MemoryAssistant(user_id="thought_agent")
+
+meta_tool_assistant = MetaToolAssistant(
+    model=ollama_model,
+    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
+)
+
+knowledge_extraction_agent = Agent(
+    model=ollama_model,
+    tools=[use_llm],
+    conversation_manager=SlidingWindowConversationManager(window_size=10),
+    system_prompt="""You extract concise, durable memories from context. Output 0-5 bullet facts.
+Each fact must be standalone, <=20 words, and omit speculation.""",
+)
+
+knowledge_summary_agent = Agent(
+    model=ollama_model,
+    tools=[use_llm],
+    conversation_manager=SlidingWindowConversationManager(window_size=10),
+    system_prompt="""You maintain a rolling summary of the conversation context.
+Keep it under 120 words, preserve key facts, and avoid duplication.""",
+)
+
+
+AGENT_REGISTRY: Dict[str, Dict[str, str]] = {
     "planner_agent": {
         "description": "Creates structured plans, decomposes the goal, and identifies next steps.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "goal": {
-                    "type": "string",
-                    "description": "Primary goal or research question to plan against.",
-                },
-                "context": {
-                    "type": "string",
-                    "description": "Supplemental context, constraints, or prior findings.",
-                },
-            },
-            "required": ["goal"],
-        },
     },
     "researcher_agent": {
         "description": "Gathers external information using http_request, retrieve, and browser tools.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "task": {
-                    "type": "string",
-                    "description": "The research task or question to investigate.",
-                },
-                "constraints": {
-                    "type": "string",
-                    "description": "Constraints, focus areas, or sources to prioritise.",
-                },
-            },
-            "required": ["task"],
-        },
     },
     "analyst_agent": {
         "description": "Critiques findings, surfaces risks, and checks logic gaps.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "findings": {
-                    "type": "string",
-                    "description": "Findings or reasoning to critique and stress-test.",
-                },
-                "goal": {
-                    "type": "string",
-                    "description": "The goal or claim those findings support.",
-                },
-                "assumptions": {
-                    "type": "string",
-                    "description": "Known assumptions or outstanding questions to audit.",
-                },
-            },
-            "required": ["findings", "goal"],
-        },
     },
     "writer_agent": {
         "description": "Synthesizes final reports with evidence, confidence, and open issues.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "vetted_reasoning": {
-                    "type": "string",
-                    "description": "The reviewed reasoning or outline to transform into a report.",
-                },
-                "goal": {
-                    "type": "string",
-                    "description": "Original goal or question that the report must answer.",
-                },
-                "sources": {
-                    "type": "string",
-                    "description": "Supporting evidence or citations to weave into the draft.",
-                },
-            },
-            "required": ["vetted_reasoning", "goal"],
-        },
     },
     "similarity_ranker": {
         "description": "Ranks content by semantic similarity to the query for relevance filtering.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Items to rank by similarity.",
-                },
-                "query": {
-                    "type": "string",
-                    "description": "Reference query for similarity ranking.",
-                },
-            },
-            "required": ["items", "query"],
-        },
     },
 }
 
-def _build_meta_tool_catalog() -> Dict[str, Dict[str, Any]]:
-    """Expose tool metadata for the meta-tool in a consistent schema."""
-    catalog: Dict[str, Dict[str, Any]] = {}
-    for name, meta in AGENT_REGISTRY.items():
-        catalog[name] = {
-            "description": meta.get("description", ""),
-            "input_schema": meta.get("input_schema"),
-        }
-    return catalog
 
-
-def _normalize_meta_decision(
-    meta_decision: Dict[str, Any],
-    user_query: str,
-    context: str,
-    thinking_results: Dict[str, Any],
-    current_results: Dict[str, Any],
-) -> Dict[str, Any]:
-    """Ensure meta-tool guidance is executable inside this workflow."""
-    decision = dict(meta_decision or {})
-
-    intent = decision.get("intent", "use_tool")
-    if not isinstance(intent, str):
-        intent = "use_tool"
-    intent = intent.lower().strip()
-    if intent not in {"use_tool", "create_tool"}:
-        intent = "use_tool"
-
-    raw_agent = decision.get("next_agent", "planner_agent")
-    next_agent = raw_agent.strip() if isinstance(raw_agent, str) else "planner_agent"
-    if intent == "use_tool" and next_agent not in AGENT_REGISTRY:
-        logger.warning("Unknown agent '%s' requested by meta tool; defaulting to planner_agent", next_agent)
-        next_agent = "planner_agent"
-
-    proposed_tool = None
-    if intent == "create_tool":
-        proposed_tool = next_agent or decision.get("proposed_tool")
-        next_agent = "planner_agent"
-
-    base_parameters = _build_agent_parameters(
-        next_agent,
-        user_query,
-        context,
-        thinking_results,
-        current_results,
-    )
-
-    provided_parameters = decision.get("parameters") if isinstance(decision.get("parameters"), dict) else {}
-    parameters = {**base_parameters, **provided_parameters}
-
-    reasoning = decision.get("reasoning", "Decision based on meta-tool analysis.")
-    if not isinstance(reasoning, str) or not reasoning.strip():
-        reasoning = "Decision based on meta-tool analysis."
-
-    confidence = decision.get("confidence", "medium")
-    if not isinstance(confidence, str) or not confidence.strip():
-        confidence = "medium"
-
-    normalized: Dict[str, Any] = {
-        "next_agent": next_agent,
-        "parameters": parameters,
-        "intent": intent,
-        "reasoning": reasoning.strip(),
-        "confidence": confidence.strip(),
-    }
-
-    follow_up = decision.get("follow_up")
-    if isinstance(follow_up, str) and follow_up.strip():
-        normalized["follow_up"] = follow_up.strip()
-
-    tool_spec = decision.get("tool_spec")
-    if tool_spec is not None:
-        normalized["tool_spec"] = tool_spec
-
-    if proposed_tool:
-        normalized["proposed_tool"] = proposed_tool
-
-    return normalized
-
-
-def _initialize_workflow_state(user_query: str) -> Dict[str, Any]:
-    run_started_at = datetime.now()
-    return {
-        "original_query": user_query,
-        "completed_steps": [],
-        "current_results": {},
-        "next_actions": [],
-        "start_time": run_started_at.isoformat(),
-        "run_id": run_started_at.strftime("%Y%m%d_%H%M%S"),
-    }
-
-
-def _invoke_agent(agent_name: str, parameters: Dict[str, Any]) -> Any:
-    if agent_name == "planner_agent":
-        return planner_agent(**parameters)
-    if agent_name == "researcher_agent":
-        return researcher_agent(**parameters)
-    if agent_name == "analyst_agent":
-        return analyst_agent(**parameters)
-    if agent_name == "similarity_ranker":
-        return "Similarity ranker not implemented"
-    if agent_name == "writer_agent":
-        return writer_agent(**parameters)
-    raise ValueError(f"Unknown agent: {agent_name}")
-
-
-def _execute_decision_step(
-    decision: Dict[str, Any],
-    workflow_state: Dict[str, Any],
-) -> int:
-    if not decision:
-        return 0
-
-    step_index = len(workflow_state.get("completed_steps", [])) + 1
-    agent_name = decision.get("next_agent", "planner_agent")
-    if agent_name not in AGENT_REGISTRY:
-        logger.warning("Unknown agent '%s' during execution; defaulting to planner_agent", agent_name)
-        agent_name = "planner_agent"
-
-    parameters = decision.get("parameters") if isinstance(decision.get("parameters"), dict) else {}
-    intent = decision.get("intent", "use_tool")
-
-    if intent == "create_tool" and decision.get("tool_spec"):
-        workflow_state.setdefault("pending_tool_specs", []).append(decision["tool_spec"])
-    if intent == "create_tool" and decision.get("proposed_tool"):
-        workflow_state.setdefault("pending_tool_names", []).append(decision["proposed_tool"])
-
-    try:
-        result = _invoke_agent(agent_name, parameters)
-    except Exception as exc:  # noqa: BLE001 - log and persist workflow error
-        logger.error("Error in workflow step %d: %s", step_index, exc)
-        workflow_state.setdefault("errors", []).append(str(exc))
-        return 0
-
-    result_text = str(result)
-    if intent == "create_tool":
-        result_text = "[Tool creation requested]\n" + result_text
-
-    workflow_state.setdefault("completed_steps", []).append({
-        "step": step_index,
-        "agent": agent_name,
-        "result": result_text,
-        "reasoning": decision.get("reasoning"),
-        "confidence": decision.get("confidence", "unknown"),
-        "intent": intent,
-        "timestamp": datetime.now().isoformat(),
-    })
-    workflow_state.setdefault("current_results", {})[agent_name] = result_text
-    workflow_state["last_decision"] = decision
-    return 1
-
-
-def _finalize_workflow_run(workflow_state: Dict[str, Any]) -> Tuple[str, Dict[str, Optional[str]]]:
-    final_result = synthesize_workflow_results(workflow_state)
-    workflow_state["final_result"] = final_result
-
-    workflow_state, workflow_state_path = save_workflow_state(workflow_state)
-    artifact_paths = _run_knowledge_pipeline(workflow_state, final_result)
-    artifact_paths["workflow_state"] = workflow_state_path
-    workflow_state["artifact_paths"] = artifact_paths
-    return final_result, artifact_paths
-
-
-
-def _summarize_thinking_results(
-    thinking_results: Dict[str, Any],
-    max_length: int = 400,
-) -> str:
+def _summarize_thinking_results(thinking_results: Dict[str, Any], max_length: int = 400) -> str:
     if not thinking_results:
         return ""
     parts: List[str] = []
@@ -726,18 +527,23 @@ def _build_agent_parameters(
 ) -> Dict[str, Any]:
     thinking_summary = _summarize_thinking_results(thinking_results)
 
-    # Small helper builders for each agent type
-    def _planner_params() -> Dict[str, Any]:
-        return {"goal": user_query, "context": context or thinking_summary}
+    if agent_name == "planner_agent":
+        return {
+            "goal": user_query,
+            "context": context or thinking_summary,
+        }
 
-    def _researcher_params() -> Dict[str, Any]:
-        constraints = (context or "").strip()
+    if agent_name == "researcher_agent":
+        constraints = context.strip()
         if thinking_summary:
             supplemental = f"Planning insights:\n{thinking_summary}"
             constraints = f"{constraints}\n\n{supplemental}" if constraints else supplemental
-        return {"task": user_query, "constraints": constraints or "None"}
+        return {
+            "task": user_query,
+            "constraints": constraints or "None",
+        }
 
-    def _analyst_params() -> Dict[str, Any]:
+    if agent_name == "analyst_agent":
         findings = (
             current_results.get("researcher_agent")
             or current_results.get("planner_agent")
@@ -745,35 +551,36 @@ def _build_agent_parameters(
             or user_query
         )
         assumptions = context or thinking_summary or "None"
-        return {"findings": findings, "goal": user_query, "assumptions": assumptions}
+        return {
+            "findings": findings,
+            "goal": user_query,
+            "assumptions": assumptions,
+        }
 
-    def _writer_params() -> Dict[str, Any]:
+    if agent_name == "writer_agent":
         vetted_reasoning = (
-            current_results.get(
-                "analyst_agent") or thinking_summary or user_query
+            current_results.get("analyst_agent")
+            or thinking_summary
+            or user_query
         )
         sources = current_results.get("researcher_agent", "")
-        return {"vetted_reasoning": vetted_reasoning, "goal": user_query, "sources": sources}
+        return {
+            "vetted_reasoning": vetted_reasoning,
+            "goal": user_query,
+            "sources": sources,
+        }
 
-    def _similarity_params() -> Dict[str, Any]:
-        content = current_results.get(
-            "researcher_agent") or thinking_summary or user_query
-        return {"content": content, "query": user_query}
+    if agent_name == "similarity_ranker":
+        content = current_results.get("researcher_agent") or thinking_summary or user_query
+        return {
+            "content": content,
+            "query": user_query,
+        }
 
-    dispatch = {
-        "planner_agent": _planner_params,
-        "researcher_agent": _researcher_params,
-        "analyst_agent": _analyst_params,
-        "writer_agent": _writer_params,
-        "similarity_ranker": _similarity_params,
+    return {
+        "goal": user_query,
+        "context": context or thinking_summary,
     }
-
-    builder = dispatch.get(agent_name)
-    if builder:
-        return builder()
-
-    # default
-    return {"goal": user_query, "context": context or thinking_summary}
 
 
 file_assistant = FileAssistant(
@@ -786,7 +593,138 @@ memory_assistant = MemoryAssistant(user_id="thought_agent")
 
 meta_tool_assistant = MetaToolAssistant(
     model=ollama_model,
-    available_tools=_build_meta_tool_catalog(),
+    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
+)
+
+
+knowledge_extraction_agent = Agent(
+    model=ollama_model,
+    tools=[use_llm],
+    conversation_manager=SlidingWindowConversationManager(window_size=10),
+    system_prompt="""You extract concise, durable memories from context. Output 0-5 bullet facts.
+Each fact must be standalone, <=20 words, and omit speculation.""",
+)
+
+knowledge_summary_agent = Agent(
+    model=ollama_model,
+    tools=[use_llm],
+    conversation_manager=SlidingWindowConversationManager(window_size=10),
+    system_prompt="""You maintain a rolling summary of the conversation context.
+Keep it under 120 words, preserve key facts, and avoid duplication.""",
+)
+
+
+
+AGENT_REGISTRY: Dict[str, Dict[str, str]] = {
+    "planner_agent": {
+        "description": "Creates structured plans, decomposes the goal, and identifies next steps.",
+    },
+    "researcher_agent": {
+        "description": "Gathers external information using http_request, retrieve, and browser tools.",
+    },
+    "analyst_agent": {
+        "description": "Critiques findings, surfaces risks, and checks logic gaps.",
+    },
+    "writer_agent": {
+        "description": "Synthesizes final reports with evidence, confidence, and open issues.",
+    },
+    "similarity_ranker": {
+        "description": "Ranks content by semantic similarity to the query for relevance filtering.",
+    },
+}
+
+
+def _summarize_thinking_results(thinking_results: Dict[str, Any], max_length: int = 400) -> str:
+    if not thinking_results:
+        return ""
+    parts: List[str] = []
+    for key, value in thinking_results.items():
+        snippet = str(value)
+        if len(snippet) > 160:
+            snippet = snippet[:157] + "..."
+        parts.append(f"{key}: {snippet}")
+    summary = "\n".join(parts)
+    if len(summary) > max_length:
+        summary = summary[: max_length - 3] + "..."
+    return summary
+
+
+def _build_agent_parameters(
+    agent_name: str,
+    user_query: str,
+    context: str,
+    thinking_results: Dict[str, Any],
+    current_results: Dict[str, Any],
+) -> Dict[str, Any]:
+    thinking_summary = _summarize_thinking_results(thinking_results)
+
+    if agent_name == "planner_agent":
+        return {
+            "goal": user_query,
+            "context": context or thinking_summary,
+        }
+
+    if agent_name == "researcher_agent":
+        constraints = context.strip()
+        if thinking_summary:
+            supplemental = f"Planning insights:\n{thinking_summary}"
+            constraints = f"{constraints}\n\n{supplemental}" if constraints else supplemental
+        return {
+            "task": user_query,
+            "constraints": constraints or "None",
+        }
+
+    if agent_name == "analyst_agent":
+        findings = (
+            current_results.get("researcher_agent")
+            or current_results.get("planner_agent")
+            or thinking_summary
+            or user_query
+        )
+        assumptions = context or thinking_summary or "None"
+        return {
+            "findings": findings,
+            "goal": user_query,
+            "assumptions": assumptions,
+        }
+
+    if agent_name == "writer_agent":
+        vetted_reasoning = (
+            current_results.get("analyst_agent")
+            or thinking_summary
+            or user_query
+        )
+        sources = current_results.get("researcher_agent", "")
+        return {
+            "vetted_reasoning": vetted_reasoning,
+            "goal": user_query,
+            "sources": sources,
+        }
+
+    if agent_name == "similarity_ranker":
+        content = current_results.get("researcher_agent") or thinking_summary or user_query
+        return {
+            "content": content,
+            "query": user_query,
+        }
+
+    return {
+        "goal": user_query,
+        "context": context or thinking_summary,
+    }
+
+
+file_assistant = FileAssistant(
+    run_dir=WORKFLOW_RUN_OUTPUT_DIR,
+    context_dir=KNOWLEDGE_CONTEXT_OUTPUT_DIR,
+    knowledge_log=KNOWLEDGE_LOG_FILE,
+)
+
+memory_assistant = MemoryAssistant(user_id="thought_agent")
+
+meta_tool_assistant = MetaToolAssistant(
+    model=ollama_model,
+    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
 )
 
 knowledge_extraction_agent = Agent(
@@ -801,8 +739,104 @@ knowledge_summary_agent = Agent(
     model=ollama_model,
     tools=[use_llm],
     conversation_manager=SlidingWindowConversationManager(window_size=10),
-    system_prompt="""You maintain a rolling summary for this workflow. Keep it under 120 words and avoid duplication.""",
+    system_prompt="""You maintain a rolling summary of the conversation context.
+Keep it under 120 words, preserve key facts, and avoid duplication.""",
 )
+
+
+
+AGENT_REGISTRY: Dict[str, Dict[str, str]] = {
+    "planner_agent": {
+        "description": "Creates structured plans, decomposes the goal, and identifies next steps.",
+    },
+    "researcher_agent": {
+        "description": "Gathers external information using http_request, retrieve, and browser tools.",
+    },
+    "analyst_agent": {
+        "description": "Critiques findings, surfaces risks, and checks logic gaps.",
+    },
+    "writer_agent": {
+        "description": "Synthesizes final reports with evidence, confidence, and open issues.",
+    },
+    "similarity_ranker": {
+        "description": "Ranks content by semantic similarity to the query for relevance filtering.",
+    },
+}
+
+
+def _summarize_thinking_results(thinking_results: Dict[str, Any], max_length: int = 400) -> str:
+    if not thinking_results:
+        return ""
+    parts: List[str] = []
+    for key, value in thinking_results.items():
+        snippet = str(value)
+        if len(snippet) > 160:
+            snippet = snippet[:157] + "..."
+        parts.append(f"{key}: {snippet}")
+    summary = "
+".join(parts)
+    if len(summary) > max_length:
+        summary = summary[: max_length - 3] + "..."
+    return summary
+
+
+def _build_agent_parameters(
+    agent_name: str,
+    user_query: str,
+    context: str,
+    thinking_results: Dict[str, Any],
+    current_results: Dict[str, Any],
+) -> Dict[str, Any]:
+    thinking_summary = _summarize_thinking_results(thinking_results)
+
+    if agent_name == "planner_agent":
+        return {
+            "goal": user_query,
+            "context": context or thinking_summary,
+        }
+
+    if agent_name == "researcher_agent":
+        constraints = context.strip()
+        if thinking_summary:
+            supplemental = f"Planning insights:\n{thinking_summary}"
+            constraints = f"{constraints}
+
+{sup supplemental}" if constraints else supplemental
+        return {
+            "task": user_query,
+            "constraints": constraints or "None",
+        }
+
+    if agent_name == "analyst_agent":
+        findings = current_results.get("researcher_agent") or current_results.get("planner_agent") or thinking_summary or user_query
+        assumptions = context or thinking_summary or "None"
+        return {
+            "findings": findings,
+            "goal": user_query,
+            "assumptions": assumptions,
+        }
+
+    if agent_name == "writer_agent":
+        vetted_reasoning = current_results.get("analyst_agent") or thinking_summary or user_query
+        sources = current_results.get("researcher_agent", "")
+        return {
+            "vetted_reasoning": vetted_reasoning,
+            "goal": user_query,
+            "sources": sources,
+        }
+
+    if agent_name == "similarity_ranker":
+        content = current_results.get("researcher_agent") or thinking_summary or user_query
+        return {
+            "content": content,
+            "query": user_query,
+        }
+
+    return {
+        "goal": user_query,
+        "context": context or thinking_summary,
+    }
+
 
 
 def _build_context_sources(
@@ -829,6 +863,7 @@ def _build_context_sources(
 
 def _parse_memory_bullets(raw_output: str) -> List[str]:
     memories: List[str] = []
+    bullet_prefix_chars = "-*0123456789.) " + chr(8226)
     for line in raw_output.splitlines():
         cleaned = line.strip()
         if not cleaned:
@@ -836,17 +871,18 @@ def _parse_memory_bullets(raw_output: str) -> List[str]:
         lowered = cleaned.lower()
         if lowered in {"none", "no facts", "n/a"}:
             return []
-        while cleaned and cleaned[0] in "-*0123456789.) ":
+        while cleaned and cleaned[0] in bullet_prefix_chars:
             cleaned = cleaned[1:].lstrip()
         cleaned = cleaned.strip()
         if cleaned:
             memories.append(cleaned)
-    return memories[:5]
+    return memories
 
 
 def _extract_candidate_memories(context_sources: Dict[str, str]) -> List[str]:
-    prompt = """You are a knowledge extraction analyst. Use the context sources to propose at most five durable memory facts.
-    Return each fact on its own line prefixed with "- ". If nothing is worth storing, respond with "NONE"."""
+    prompt = """You are a knowledge extraction analyst.
+Use the context sources to propose at most five durable memory facts.
+Return each fact on its own line prefixed with "- ". If nothing is worth storing, respond with "NONE"."""
     prompt += "\n\nContext Sources:\n"
     prompt += f"1. Latest exchange:\n{context_sources.get('latest_exchange') or 'None'}\n\n"
     prompt += f"2. Rolling summary:\n{context_sources.get('rolling_summary') or 'None'}\n\n"
@@ -856,7 +892,8 @@ def _extract_candidate_memories(context_sources: Dict[str, str]) -> List[str]:
     except Exception as exc:
         logger.error("Knowledge extraction failed: %s", exc)
         return []
-    return _parse_memory_bullets(str(raw))
+    memories = _parse_memory_bullets(str(raw))
+    return memories[:5]
 
 
 def _refresh_rolling_summary(existing_summary: str, candidate_memories: List[str]) -> str:
@@ -864,7 +901,8 @@ def _refresh_rolling_summary(existing_summary: str, candidate_memories: List[str
     if not candidate_memories:
         return existing_summary
     bullet_block = "\n".join(f"- {fact}" for fact in candidate_memories)
-    prompt = """Update the rolling summary with the new facts. Keep it under 120 words and avoid repeating information."""
+    prompt = """Update the rolling summary with the new facts.
+Keep it under 120 words and avoid repeating information."""
     prompt += "\n\nCurrent summary:\n" + (existing_summary or "None")
     prompt += "\n\nNew facts:\n" + bullet_block
     try:
@@ -874,55 +912,12 @@ def _refresh_rolling_summary(existing_summary: str, candidate_memories: List[str
         return existing_summary
     return str(updated).strip()
 
-def _persist_memories_to_store(
-    final_result: str,
-    candidate_memories: List[str],
-    workflow_state: Dict[str, Any],
-) -> None:
-    run_id = workflow_state.get("run_id", "unknown")
-    query = workflow_state.get("original_query", "")
-
-    stored_ids: List[str] = []
-    for fact in candidate_memories:
-        response = memory_assistant.store_memory(
-            fact,
-            metadata={
-                "type": "knowledge_fact",
-                "run_id": run_id,
-                "query": query,
-            },
-        )
-        entry = response.get("entry") if isinstance(response, dict) else None
-        if isinstance(entry, dict) and entry.get("id"):
-            stored_ids.append(entry["id"])
-
-    summary_response = memory_assistant.store_memory(
-        final_result,
-        metadata={
-            "type": "workflow_summary",
-            "run_id": run_id,
-            "query": query,
-        },
-    )
-
-    workflow_state.setdefault("memory_store", {})
-    workflow_state["memory_store"].update(
-        {
-            "stored_fact_ids": stored_ids,
-            "summary_status": summary_response.get("status")
-            if isinstance(summary_response, dict)
-            else "unknown",
-        }
-    )
-
 
 def _run_knowledge_pipeline(workflow_state: Dict[str, Any], final_result: str) -> Dict[str, Optional[str]]:
     rolling_summary = file_assistant.load_rolling_summary()
-    context_sources = _build_context_sources(
-        workflow_state, final_result, rolling_summary)
+    context_sources = _build_context_sources(workflow_state, final_result, rolling_summary)
     candidate_memories = _extract_candidate_memories(context_sources)
-    updated_summary = _refresh_rolling_summary(
-        rolling_summary, candidate_memories)
+    updated_summary = _refresh_rolling_summary(rolling_summary, candidate_memories)
 
     workflow_state["candidate_memories"] = candidate_memories
     if updated_summary:
@@ -939,41 +934,115 @@ def _run_knowledge_pipeline(workflow_state: Dict[str, Any], final_result: str) -
         store_summary=summary_changed and bool(snapshot_summary.strip()),
     )
 
-    _persist_memories_to_store(final_result, candidate_memories, workflow_state)
-
-    logger.info("Knowledge pipeline stored %d candidate memories",
-                len(candidate_memories))
+    logger.info("Knowledge pipeline stored %d candidate memories", len(candidate_memories))
     return artifacts
 
-
-@tool
 def execute_thinking_driven_workflow(user_query: str, context: str = "", history: List = None) -> str:
     """Execute workflow where thinking determines which agents to call and in what order."""
     logger.info("Starting thinking-driven workflow for: %s", user_query)
 
-    workflow_state = _initialize_workflow_state(user_query)
-    workflow_state["context"] = context
+    run_started_at = datetime.now()
+    run_id = run_started_at.strftime("%Y%m%d_%H%M%S")
 
-    orchestration_result = intelligent_workflow_orchestrator(user_query, context, history)
-    workflow_state["thinking_results"] = orchestration_result.get("thinking_results", {})
-    workflow_state["meta_decision"] = orchestration_result.get("meta_decision")
+    # Track workflow state
+    workflow_state = {
+        "original_query": user_query,
+        "completed_steps": [],
+        "current_results": {},
+        "next_actions": [],
+        "start_time": run_started_at.isoformat(),
+        "run_id": run_id
+    }
 
-    current_decision = orchestration_result.get("decision")
-    steps_executed = _execute_decision_step(current_decision, workflow_state) if current_decision else 0
+    # Initial thinking and planning
+    orchestration_result = intelligent_workflow_orchestrator(
+        user_query, context, history)
+    workflow_state["thinking_results"] = orchestration_result["thinking_results"]
 
-    workflow_state["total_steps"] = steps_executed
+    # Execute first agent based on thinking decision
+    current_decision = orchestration_result["decision"]
+    max_steps = 5  # Prevent infinite loops
+    step_count = 0
+
+    while current_decision and step_count < max_steps:
+        step_count += 1
+        logger.info("Executing step %d: %s", step_count,
+                    current_decision['next_agent'])
+
+        try:
+            # Execute the chosen agent
+            agent_name = current_decision["next_agent"]
+            parameters = current_decision["parameters"]
+
+            if agent_name not in AGENT_REGISTRY:
+                logger.warning("Unknown agent '%s' selected; defaulting to planner_agent", agent_name)
+                agent_name = "planner_agent"
+                parameters = _build_agent_parameters(
+                    agent_name,
+                    user_query,
+                    context,
+                    workflow_state.get("thinking_results", {}),
+                    workflow_state.get("current_results", {}),
+                )
+                current_decision["next_agent"] = agent_name
+                current_decision["parameters"] = parameters
+
+            # Call the appropriate agent
+            if agent_name == "planner_agent":
+                result = planner_agent(**parameters)
+            elif agent_name == "researcher_agent":
+                result = researcher_agent(**parameters)
+            elif agent_name == "analyst_agent":
+                result = analyst_agent(**parameters)
+            elif agent_name == "similarity_ranker":
+                result = "Similarity ranker not implemented"
+            elif agent_name == "writer_agent":
+                result = writer_agent(**parameters)
+            else:
+                result = f"Unknown agent: {agent_name}"
+
+            result_text = str(result)
+
+            # Store results
+            workflow_state["completed_steps"].append({
+                "step": step_count,
+                "agent": agent_name,
+                "result": result_text,
+                "reasoning": current_decision["reasoning"],
+                "confidence": current_decision.get("confidence", "unknown"),
+                "timestamp": datetime.now().isoformat()
+            })
+
+            workflow_state["current_results"][agent_name] = result_text
+            workflow_state["last_decision"] = current_decision
+
+            # For now, just break after first step to avoid complexity
+            break
+
+        except Exception as e:
+            logger.error("Error in workflow step %d: %s", step_count, str(e))
+            workflow_state["errors"] = workflow_state.get(
+                "errors", []) + [str(e)]
+            break
+
+    workflow_state["total_steps"] = step_count
     workflow_state["end_time"] = datetime.now().isoformat()
 
-    final_result, artifact_paths = _finalize_workflow_run(workflow_state)
+    final_result = synthesize_workflow_results(workflow_state)
+    workflow_state["final_result"] = final_result
+
+    workflow_state, workflow_state_path = save_workflow_state(workflow_state)
+    artifact_paths = _run_knowledge_pipeline(workflow_state, final_result)
+    artifact_paths["workflow_state"] = workflow_state_path
+    workflow_state["artifact_paths"] = artifact_paths
 
     logger.info("Workflow artifacts saved: %s", artifact_paths)
-    logger.info("Thinking-driven workflow completed in %d steps", steps_executed)
+    logger.info("Thinking-driven workflow completed in %d steps", step_count)
 
     global LAST_WORKFLOW_ARTIFACTS
     LAST_WORKFLOW_ARTIFACTS = artifact_paths
 
     return final_result
-
 
 
 if __name__ == "__main__":
@@ -1018,28 +1087,26 @@ if __name__ == "__main__":
             print("\n" + "="*70)
 
             # Store result for comparison
-            artifacts = dict(LAST_WORKFLOW_ARTIFACTS)
             research_entry = {
                 'query': user_input,
                 'result': str(result),
                 'timestamp': datetime.now().isoformat(),
                 'result_length': len(str(result)),
-                'artifacts': artifacts,
+                'artifacts': dict(LAST_WORKFLOW_ARTIFACTS)
             }
             research_history.append(research_entry)
 
+            artifacts = research_entry['artifacts']
             if artifacts:
-                full_run_path = artifacts.get('full_run')
-                context_path = artifacts.get('context')
-                knowledge_log_path = artifacts.get('knowledge_log')
-                workflow_state_path = artifacts.get('workflow_state')
+                full_run_path = artifacts.get("full_run")
+                context_path = artifacts.get("context")
+                knowledge_log_path = artifacts.get("knowledge_log")
+                workflow_state_path = artifacts.get("workflow_state")
 
                 if full_run_path:
-                    print(
-                        f"Saved full workflow transcript to: {full_run_path}")
+                    print(f"Saved full workflow transcript to: {full_run_path}")
                 if context_path:
-                    print(
-                        f"Saved distilled knowledge context to: {context_path}")
+                    print(f"Saved distilled knowledge context to: {context_path}")
                 if workflow_state_path:
                     print(f"Workflow state JSON: {workflow_state_path}")
                 if knowledge_log_path:
