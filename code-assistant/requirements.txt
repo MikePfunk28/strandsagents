@@ -1,0 +1,10 @@
+# Core dependencies
+strands>=0.1.0
+requests>=2.28.0
+
+# Optional dependencies for enhanced functionality
+langchain-text-splitters>=0.2.0
+
+# Development dependencies (optional)
+black>=23.0.0
+pytest>=7.0.0
