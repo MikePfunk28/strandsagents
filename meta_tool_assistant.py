@@ -267,5 +267,3 @@ def meta_tool_orchestrator(tool_use: ToolUseDict, **kwargs: Any) -> ToolResultDi
         "status": "success",
         "content": [{"json": decision}],
     }
-
-

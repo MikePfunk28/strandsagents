@@ -24,7 +24,7 @@ from meta_tool_assistant import MetaToolAssistant
 load_dotenv()
 
 # Core strands imports
-
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 WORKFLOW_RUN_OUTPUT_DIR = "workflow_runs"
 KNOWLEDGE_CONTEXT_OUTPUT_DIR = "knowledge_context"
@@ -49,7 +49,8 @@ except (Exception) as e:
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt='%Y-%m-%d %H:%M:%S',
+    filename=f'thought_agent_{timestamp}.log'
 )
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def structured_thinking_pipeline(goal: str, context: str = "") -> Dict[str, Any]
         system_prompt="You are an expert analyst. Provide detailed, structured analysis.",
         cycle_count=3
     )
-
+    logger.info("Goal analysis results: %s", thinking_results['goal_analysis'])
     # Step 2: Task Decomposition (4 cycles for thoroughness)
     logger.info("Step 2: Task Decomposition")
     thinking_results['task_breakdown'] = thinking_agent.tool.think(

@@ -9,7 +9,7 @@ agent = Agent(tools=[browser.browser])
 result = agent.tool.browser({
     "action": {
         "type": "navigate",
-        "url": "https://example.com"
+        "url": "https://google.com"
     }
 })
 

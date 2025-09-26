@@ -4,8 +4,8 @@ Code Interpreter Tool implementation using Strands @tool decorator.
 This module contains the base tool class that provides lifecycle management
 and can be extended by specific platform implementations.
 """
-
 import logging
+from logging_config import init_logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
@@ -23,13 +23,14 @@ from .models import (
     RemoveFilesAction,
     WriteFilesAction,
 )
-
+init_logging()
 logger = logging.getLogger(__name__)
 
 
 class CodeInterpreter(ABC):
     def __init__(self):
         self._started = False
+        logger.debug("Code Interpreter Tool initialized")
         # Dynamically override the ToolSpec description using the implementation-defined supported languages
         self.code_interpreter.tool_spec["description"] = """
         Code Interpreter tool for executing code in isolated sandbox environments.
@@ -241,6 +242,7 @@ class CodeInterpreter(ABC):
         elif isinstance(action, WriteFilesAction):
             return self.write_files(action)
         else:
+            logger.error(f"Unknown action type: {type(action)}")
             return {"status": "error", "content": [{"text": f"Unknown action type: {type(action)}"}]}
 
     def _start(self) -> None:
@@ -273,54 +275,54 @@ class CodeInterpreter(ABC):
     @abstractmethod
     def start_platform(self) -> None:
         """Initialize the platform connection and resources."""
-        ...
 
     @abstractmethod
     def cleanup_platform(self) -> None:
         """Clean up platform resources and connections."""
-        ...
+
 
     @abstractmethod
     def init_session(self, action: InitSessionAction) -> Dict[str, Any]:
         """Initialize a new sandbox session."""
-        ...
+
 
     @abstractmethod
     def execute_code(self, action: ExecuteCodeAction) -> Dict[str, Any]:
         """Execute code in a sandbox session."""
-        ...
+
 
     @abstractmethod
     def execute_command(self, action: ExecuteCommandAction) -> Dict[str, Any]:
         """Execute a shell command in a sandbox session."""
-        ...
+
 
     @abstractmethod
     def read_files(self, action: ReadFilesAction) -> Dict[str, Any]:
         """Read files from a sandbox session."""
-        ...
+
 
     @abstractmethod
     def list_files(self, action: ListFilesAction) -> Dict[str, Any]:
         """List files in a session directory."""
-        ...
+
 
     @abstractmethod
     def remove_files(self, action: RemoveFilesAction) -> Dict[str, Any]:
         """Remove files from a sandbox session."""
-        ...
+
 
     @abstractmethod
     def write_files(self, action: WriteFilesAction) -> Dict[str, Any]:
         """Write files to a sandbox session."""
-        ...
+
 
     @abstractmethod
     def list_local_sessions(self) -> Dict[str, Any]:
         """List all sessions created by this platform instance."""
-        ...
+
 
     @abstractmethod
     def get_supported_languages(self) -> List[LanguageType]:
         """list supported languages"""
-        ...
+
+
