@@ -1,11 +1,11 @@
 from strands import Agent, tool
 from strands.models.ollama import OllamaModel
-from strands_tools import http_request, handoff_to_user, retrieve
+from strands_tools import http_request, handoff_to_user, retrieve, file_read, file_write, editor
 from strands.agent.conversation_manager import SlidingWindowConversationManager
 import logging
 from dotenv import load_dotenv
 import os
-from mem0 import MemoryClient
+#from mem0 import MemoryClient
 from datetime import datetime
 import json
 
@@ -35,6 +35,18 @@ ollama_model = OllamaModel(
     host="http://localhost:11434",
     model_id="llama3.2"
 )
+
+# Creating Orchestrator Agent
+# Define the orchestrator system prompt with clear tool selection guidance
+MAIN_SYSTEM_PROMPT = """
+You are an assistant that routes queries to specialized agents:
+- For research questions and factual information → Use the research_assistant tool
+- For product recommendations and shopping advice → Use the product_recommendation_assistant tool
+- For travel planning and itineraries → Use the trip_planning_assistant tool
+- For simple questions not requiring specialized knowledge → Answer directly
+
+Always select the most appropriate tool based on the user's query.
+"""
 
 
 @tool
@@ -180,7 +192,7 @@ def reasoning_result(user_query: str, context: str) -> str:
     """
     context = knowledge_base_memory() + "\n\n" + context
     # Master reasoning agent with advanced workflow
-    reason_agent = Agent(
+    orchestrator = Agent(
         model=ollama_model,
 
         tools=[planner_agent, researcher_agent, analyst_agent,
@@ -224,9 +236,10 @@ def reasoning_result(user_query: str, context: str) -> str:
 
         You must complete the entire workflow. Think step-by-step and use each tool in sequence.""",
     )
-    return reason_agent(f"Execute comprehensive reasoning research workflow for: {user_query}")
+    return orchestrator(f"Execute comprehensive reasoning research workflow for: {user_query}")
 
-
+# Knowledge Base Memory- Need to make sure to only get what
+# is relevant to the current query
 def knowledge_base_memory():
     """
     Load and return the knowledge base memory.
@@ -244,10 +257,10 @@ def knowledge_base_memory():
             with open(base_memory, "w", encoding="utf-8") as f:
                 initial_content = "Knowledge Base Initialized.\n"
                 f.write(initial_content)
-            logger.info(f"✅ Created knowledgebase.txt with {len(initial_content)} characters")
+            logger.info(f"✅ Created knowledgebase.txt with %s characters", (len(initial_content),))
             return initial_content
         except Exception as e:
-            logger.error(f"❌ Failed to create knowledgebase.txt: {e}")
+            logger.error("❌ Failed to create knowledgebase.txt: %s", e)
             return "Error: Could not create knowledge base file."
 
     # File exists, try to read it
@@ -287,23 +300,29 @@ def append_to_knowledge_base(content: str, category: str = "general"):
         return False
 
 
-def save_research_output(query: str, result: str):
+def save_research_output(query: str, result):
     """
     Save research results to a timestamped file for comparison.
 
     :param query: The research query
-    :param result: The research result
+    :param result: The research result (can be AgentResult or string)
     """
     try:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"research_output_{timestamp}.txt"
 
+        # Convert result to string if it's an AgentResult object
+        if hasattr(result, '__str__'):
+            result_str = str(result)
+        else:
+            result_str = str(result)
+
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"Query: {query}\n")
             f.write(f"Timestamp: {datetime.now().isoformat()}\n")
-            f.write(f"Result Length: {len(result)} characters\n")
+            f.write(f"Result Length: {len(result_str)} characters\n")
             f.write("="*70 + "\n\n")
-            f.write(result)
+            f.write(result_str)
 
         logger.info(f"Saved research output to {filename}")
         return filename
@@ -351,6 +370,15 @@ if __name__ == "__main__":
             print("="*70)
             print(result)
             print("\n" + "="*70)
+
+            # Store research result in knowledge base
+            append_to_knowledge_base(f"Research Query: {user_input}", "research")
+            append_to_knowledge_base(f"Research Result: {result}", "findings")
+
+            # Save research output to file for comparison
+            output_file = save_research_output(user_input, result)
+            if output_file:
+                print(f"📄 Research output saved to: {output_file}")
 
             # Store result for comparison
             research_entry = {

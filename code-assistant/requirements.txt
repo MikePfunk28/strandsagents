@@ -1,0 +1,20 @@
+# StrandsAgents core packages (FIXED - was using wrong package name)
+strands-agents>=0.1.0
+strands-agents-tools>=0.1.0
+
+# MCP integration for external coordination
+mcp>=0.1.0
+
+# Required by StrandsAgents
+boto3>=1.28.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Development dependencies
+black>=23.0.0
+pytest>=7.0.0
+
+# Optional data processing (uncomment if needed)
+# pandas>=2.0.0
+# pillow>=10.0.0
+# pypdf>=3.15.0

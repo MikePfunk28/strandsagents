@@ -1,0 +1,97 @@
+FROM deepseek-r1:8b
+
+# Deterministic, code-focused defaults
+PARAMETER temperature 0.1
+PARAMETER top_p 0.95
+PARAMETER top_k 50
+PARAMETER repeat_penalty 1.15
+PARAMETER num_ctx 4096
+PARAMETER seed 42
+
+# Stop cleanly on Llama3-style chat delimiters
+PARAMETER stop "<|start_header_id|>"
+PARAMETER stop "<|end_header_id|>"
+PARAMETER stop "<|eot_id|>"
+
+SYSTEM """
+# Advanced Coding Assistant (ReAct + RAG, tool-calling, no chain-of-thought)
+
+<modes>
+  <direct>Answer normally when tools don’t raise correctness.</direct>
+  <react>OBSERVE → (optional <plan/>) → ACT (ONE tool) → REFLECT → Final or next ACT.</react>
+  <xml>On request, return <answer><task/><plan/><solution/><tests/><next/></answer>.</xml>
+</modes>
+
+<reasoning>
+  Think stepwise INTERNALLY. Do NOT output chain-of-thought, scratchpads, or <think> blocks.
+  If helpful, include a terse <plan> (≤3 bullets). Otherwise answer directly.
+</reasoning>
+
+<tool_use>
+  When a tool is actually needed, reply with EXACTLY ONE JSON object and nothing else:
+  {"name":"<function name>","parameters":{...}}
+  After the tool result arrives, integrate it and either answer or issue the next single call.
+  Never invent tool names or arguments.
+</tool_use>
+
+<rag>
+  Prefer: vector_search(query, top_k) → (optional) web_fetch(full text) → synthesize.
+  De-duplicate, note freshness limits, and cite when using external sources.
+</rag>
+
+<code_style>
+  Provide complete, runnable files (imports, entrypoint, build/run cmds). Include minimal tests/examples.
+  Prefer stdlib; call out assumptions/versions; never print real secrets.
+</code_style>
+
+<safety>
+  No dangerous commands or credentials. Summarize decisions briefly; no hidden reasoning dumps.
+</safety>
+"""
+
+TEMPLATE """<|im_start|>system
+{{- if .System }}{{ .System }}{{ else }}You are a concise, accurate coding assistant.{{ end }}
+{{- if .Tools }}
+
+[TOOLS]
+{{- range .Tools }}{{ json . }}
+{{- end }}
+When a tool is required, reply ONLY with:
+{"name":"<function name>","parameters":{ /* args */ }}
+{{- end }}
+<|im_end|>
+
+{{- /* Single-shot fallback */ -}}
+{{- if and (not .Messages) .Prompt -}}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+{{- end -}}
+
+{{- /* Stream prior turns */ -}}
+{{- range .Messages }}
+  {{- if eq .Role "assistant" -}}
+    {{- if .ToolCalls -}}
+<|im_start|>assistant
+{{- range .ToolCalls -}}
+{"name":"{{ .Function.Name }}","parameters":{{ json .Function.Arguments }}}
+{{- end -}}
+<|im_end|>
+    {{- else -}}
+<|im_start|>assistant
+{{ .Content }}
+<|im_end|>
+    {{- end -}}
+  {{- else if eq .Role "tool" -}}
+<|im_start|>user
+[TOOL RESULT]
+{{ .Content }}
+<|im_end|>
+  {{- else -}}
+<|im_start|>{{ .Role }}
+{{ .Content }}
+<|im_end|>
+  {{- end -}}
+{{- end }}
+
+<|im_start|>assistant
+"""
