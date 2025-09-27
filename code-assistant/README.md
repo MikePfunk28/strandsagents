@@ -1,74 +1,125 @@
-# Coding Assistant with Ollama Integration
+# Adversarial Coding System
 
-A powerful coding assistant built with StrandsAgents that uses local Ollama models for AI processing and provides hierarchical memory management with semantic understanding.
+A GAN-style coding assistant that uses multiple AI agents to iteratively improve code quality through adversarial feedback.
 
-## Features
+## 🎯 What We Built
 
-- **Local AI Models**: Uses Ollama with llama3.2 model (no cloud dependencies)
-- **Hierarchical Memory**: Document, paragraph, sentence, and word-level embeddings
-- **Semantic Understanding**: Automatic content classification and context retrieval
-- **Workflow Orchestration**: StrandsAgents workflow system for complex tasks
-- **Comprehensive Tools**: Python REPL, file operations, code analysis, testing, git integration
-- **Long/Short Term Memory**: Intelligent memory consolidation and retrieval
-- **SQLite Databases**: Local storage for cache, knowledge, and memory
+**Your Vision Realized**: A "Claude Code + WARP" equivalent that goes beyond Python-only coding with:
 
-## Prerequisites
+- **Multi-language support**: Python, JavaScript, TypeScript, Rust, Go, Java, C++
+- **GAN-like adversarial architecture**: Multiple specialized agents improve code iteratively
+- **Model selection**: Choose from Llama 3.2, Gemma, and other local models
+- **Agent2agent communication**: Parallel processing with StrandsAgents
+- **MCP integration**: External system coordination
+- **Zero cost**: Completely local with Ollama
 
-1. **Ollama Server**: Install and run Ollama locally
-   ```bash
-   # Install Ollama (see https://ollama.ai)
-   # Pull required models
-   ollama pull llama3.2
-   ollama pull embeddinggemma
-   ```
+## 🏗️ Architecture
 
-2. **Python Environment**: Python 3.8+
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Core Agents
+- **Generator**: Creates initial code solutions
+- **Discriminator**: Finds flaws and suggests improvements (GAN-style)
+- **Optimizer**: Performance and efficiency improvements
+- **Security**: Vulnerability analysis and safety checks
+- **Tester**: Comprehensive test case generation
+- **Reviewer**: Overall code quality assessment
 
-## Quick Start
+### Model Configurations
+- **Speed**: Fast models for quick iteration (270M discriminator)
+- **Balanced**: Mix of quality and speed (default)
+- **Quality**: Larger models for best results
+- **Custom**: Select individual models for each agent
+
+## 🚀 Quick Setup (Windows PowerShell)
+
+### 1. Prerequisites
+```powershell
+# Install Ollama first
+winget install Ollama.Ollama
+# OR download from https://ollama.ai
+
+# Start Ollama service
+ollama serve
+```
+
+### 2. Install Models
+```powershell
+# Required models (pick based on your strategy)
+ollama pull llama3.2:3b   # Main generator
+ollama pull llama3.2:1b   # Fast processing
+ollama pull gemma2:2b     # Balanced performance
+ollama pull gemma:270m    # Ultra-fast discriminator
+
+# Optional quality models
+ollama pull qwen2.5:4b    # High quality generation
+```
+
+### 3. Setup Environment
+```powershell
+# Navigate to code-assistant directory
+cd M:\strandsagents\code-assistant
+
+# Run the Windows setup script
+.\setup_windows.ps1
+
+# OR manual setup:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+## 💻 Usage
 
 ### Basic Usage
-
 ```python
-from coding_assistant import create_coding_agent
 import asyncio
+from adversarial_agents import AdversarialCodingCoordinator, CodeGenerationRequest, LanguageType
 
-async def main():
-    # Create the coding agent
-    agent = create_coding_agent(
-        db_dir="./assistant_data",
-        model_name="llama3.2",
-        ollama_host="http://localhost:11434"
+async def generate_code():
+    # Initialize coordinator
+    coordinator = AdversarialCodingCoordinator()
+
+    # Setup agents with your preferred strategy
+    await coordinator.initialize_agents(strategy="balanced")
+
+    # Create request
+    request = CodeGenerationRequest(
+        requirements="Create a secure user authentication system",
+        language=LanguageType.PYTHON,
+        constraints=["Include error handling", "Add comprehensive tests"]
     )
 
-    # Simple chat
-    response = agent.chat("Help me write a Python function to calculate fibonacci numbers")
-    print(response)
+    # Generate code through adversarial process
+    result = await coordinator.generate_code_adversarially(request)
 
-    # Complex workflow task
-    result = await agent.execute_task(
-        "Analyze this Python project and suggest improvements",
-        task_type="analysis",
-        project_path="."
-    )
+    print(f"Generated code (Score: {result['final_score']:.1f}/10):")
+    print(result['final_code'])
 
-    # Cleanup
-    agent.cleanup()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+# Run
+asyncio.run(generate_code())
 ```
 
 ### Interactive Mode
+```powershell
+# Activate environment
+.\.venv\Scripts\Activate.ps1
 
+# Run interactive interface
+python main.py
+```
+
+### Model Selection
 ```python
-from coding_assistant.example_usage import interactive_demo
-import asyncio
+from adversarial_agents import ModelConfiguration
 
-# Run interactive demo
-asyncio.run(interactive_demo())
+# See available models
+config = ModelConfiguration()
+print(config.available_models)
+
+# Use custom models
+coordinator = AdversarialCodingCoordinator(
+    model_name="llama3.2:3b",  # Your choice
+    host="localhost:11434"     # Ollama host
+)
 ```
 
 ## Architecture
