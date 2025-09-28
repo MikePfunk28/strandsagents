@@ -1,5 +1,4 @@
-from langchain_ollama import OllamaEmbeddings
+from ollama import embed
 
-embeddings = OllamaEmbeddings(model="llama3")
-
-embeddings.embed_query("Hello, world!")
+response = embed(model='llama3.2', input='Hello, world!')
+print(response['embeddings'])

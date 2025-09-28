@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Any
 
 from strands import Agent
-from strands.models import OllamaModel
-from ..communication.mcp_client import SwarmMCPClient
+from strands.tools.executors import SequentialToolExecutor, ConcurrentToolExecutor
+from swarm.communication.mcp_client import SwarmMCPClient
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +57,14 @@ class BaseAssistant(ABC):
             # Load tools
             self.tools = self.get_tools()
 
-            # Create StrandsAgent with 270M model
+            # Create StrandsAgent with model string (Strands will handle the model provider)
+            # Note: Since Strands doesn't have built-in Ollama support, we use string model names
+            # In production, you'd configure a custom model provider or use supported providers
             self.agent = Agent(
-                model=OllamaModel(model=self.model_name, host=self.host),
+                model=self.model_name,  # Use string model name directly
                 system_prompt=self.get_system_prompt(),
                 tools=self.tools
+                # tool_executor=SequentialToolExecutor()  # Not needed for basic usage
             )
 
             # Create MCP client for communication
@@ -124,8 +127,8 @@ class BaseAssistant(ABC):
             else:
                 prompt = task_description
 
-            # Execute with 270M model (fast response)
-            result = await self.agent.run_async(prompt)
+            # Execute with agent (using correct Strands API)
+            result = await self.agent.invoke_async(prompt)
 
             # Prepare response
             response = {

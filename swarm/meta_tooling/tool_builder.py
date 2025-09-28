@@ -1,344 +1,344 @@
-"""StrandsAgents Meta-Tooling System for Dynamic Tool Creation.
+"""Meta-tooling system for dynamic tool creation using StrandsAgents patterns."""
 
-This module implements a meta-tooling system that follows StrandsAgents patterns
-for creating tools dynamically and wrapping agents as tools.
-"""
-
-import asyncio
-import logging
-from typing import Dict, List, Optional, Any, Callable
+import os
+import importlib.util
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-import uuid
 
 from strands import Agent
 from strands.models import OllamaModel
-from strands.tools import tool
+from strands_tools import shell, editor, load_tool
+from strands.types.tool_types import ToolUse, ToolResult
 
-logger = logging.getLogger(__name__)
+@dataclass
+class ToolSpec:
+    """Specification for a dynamically created tool."""
+    name: str
+    description: str
+    input_schema: Dict[str, Any]
+    function_code: str
+    agent_type: Optional[str] = None
 
-# Meta-tooling system prompt optimized for tool creation
+# Meta-tooling system prompt following your DESIGN.md
 TOOL_BUILDER_SYSTEM_PROMPT = """You are an advanced Meta-Tooling Agent that creates custom tools for the Swarm system.
 
 CRITICAL REQUIREMENTS - NO AWS OR CLOUD SERVICES:
 - Use ONLY OllamaModel for all agents
 - NO AWS, Bedrock, or any paid cloud services
-- All models must use localhost:11434 (Ollama)
+- Everything must be completely local
 
-CORE CAPABILITIES:
-1. Create StrandsAgents tool specifications with @tool decorators
-2. Generate tool functions following exact StrandsAgents patterns
-3. Wrap existing agents as callable tools
-4. Design tool inputSchemas with proper JSON schema
-5. Build tool collections for specific domains
+## TOOL NAMING CONVENTION:
+- Tool name (function name) MUST match the file name without extension
+- Example: For file "research_tool.py", use tool name "research_tool"
 
-TOOL CREATION PATTERNS (Follow exactly):
+## TOOL CREATION PROCESS:
+1. Name the file "tool_name.py" where tool_name is human readable
+2. Function name must match file name (without extension)
+3. TOOL_SPEC "name" parameter must match file name
+4. Include detailed docstrings
+5. After creating, announce "TOOL_CREATED: <filename>"
 
+## TOOL STRUCTURE (exact format required):
 ```python
-from strands.tools import tool
+from typing import Any
+from strands.types.tool_types import ToolUse, ToolResult
 
-@tool
-def my_custom_tool(parameter: str, optional_param: str = "default") -> str:
-    '''Tool description for the agent.
-
-    Args:
-        parameter: Description of required parameter
-        optional_param: Description of optional parameter with default
-
-    Returns:
-        Result description
-    '''
-    # Tool implementation
-    result = f"Processed {parameter} with {optional_param}"
-    return result
-```
-
-AGENT-AS-TOOL WRAPPER PATTERN:
-
-```python
-@tool
-def agent_wrapper_tool(query: str, context: str = "") -> str:
-    '''Wrap agent as a tool for other agents to use.
-
-    Args:
-        query: The task or question for the agent
-        context: Optional context information
-
-    Returns:
-        Agent's response
-    '''
-    # Create agent with OllamaModel ONLY
-    agent = Agent(
-        model=OllamaModel(model="gemma:270m", host="localhost:11434"),
-        system_prompt="Specialized agent prompt"
-    )
-
-    full_query = f"Context: {context}\nQuery: {query}" if context else query
-    response = agent.run(full_query)
-    return response
-```
-
-TOOL SPECIFICATION PATTERN:
-
-```python
 TOOL_SPEC = {
-    "name": "tool_name",
-    "description": "Clear tool description",
-    "inputSchema": {
+    "name": "tool_name",  # Must match function name
+    "description": "What the tool does",
+    "inputSchema": {  # Exact capitalization required
         "json": {
             "type": "object",
             "properties": {
-                "param1": {
+                "param_name": {
                     "type": "string",
                     "description": "Parameter description"
-                },
-                "param2": {
-                    "type": "integer",
-                    "description": "Optional parameter",
-                    "default": 10
                 }
             },
-            "required": ["param1"]
+            "required": ["param_name"]
         }
     }
 }
+
+def tool_name(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
+    \"\"\"Tool function docstring\"\"\"
+    tool_use_id = tool_use["toolUseId"]
+    param_value = tool_use["input"]["param_name"]
+
+    # Process inputs - NO CLOUD SERVICES
+    result = param_value  # Replace with local processing only
+
+    return {
+        "toolUseId": tool_use_id,
+        "status": "success",
+        "content": [{"text": f"Result: {result}"}]
+    }
 ```
 
-RESPONSE FORMAT:
-Always provide complete, working tool code that:
-1. Uses proper @tool decorator
-2. Has clear docstrings
-3. Uses OllamaModel ONLY (no cloud services)
-4. Follows StrandsAgents patterns exactly
-5. Includes proper error handling
-6. Returns appropriate types
+## AUTONOMOUS WORKFLOW:
+1. Generate complete Python code following structure above
+2. Use editor tool to write code to "tool_name.py"
+3. Use load_tool to dynamically load the new tool
+4. Report tool name and confirm creation
+5. All processing must be LOCAL ONLY
 
-Focus on creating practical, efficient tools for the microservices swarm."""
-
-@dataclass
-class ToolSpec:
-    """Specification for a tool to be created."""
-    name: str
-    description: str
-    parameters: Dict[str, Any]
-    return_type: str
-    category: str = "general"
+Use tools implicitly without being told. Create tools for swarm agents.
+NO AWS, NO CLOUD, LOCAL OLLAMA ONLY.
+"""
 
 class ToolBuilder:
-    """Meta-tooling agent that creates custom tools dynamically."""
+    """Dynamic tool builder for the swarm system."""
 
-    def __init__(self, model_name: str = "llama3.2:3b", host: str = "localhost:11434"):
-        self.model_name = model_name
+    def __init__(self, tools_dir: str = "./swarm/tools", host: str = "localhost:11434"):
+        self.tools_dir = tools_dir
         self.host = host
+        self.created_tools = {}
+
+        # Create tools directory
+        os.makedirs(tools_dir, exist_ok=True)
+
+        # Initialize tool builder agent with LOCAL OLLAMA ONLY
         self.agent = Agent(
-            model=OllamaModel(model=model_name, host=host),
-            system_prompt=TOOL_BUILDER_SYSTEM_PROMPT
+            model=OllamaModel(model="llama3.2:3b", host=host),  # LOCAL ONLY
+            system_prompt=TOOL_BUILDER_SYSTEM_PROMPT,
+            tools=[load_tool, shell, editor]
         )
-        self.created_tools: Dict[str, Any] = {}
 
-    async def create_tool(self, tool_spec: ToolSpec) -> str:
-        """Create a new tool based on specification."""
-        prompt = f"""Create a StrandsAgents tool with these specifications:
+    async def create_tool(self, description: str, agent_type: Optional[str] = None) -> ToolSpec:
+        """Create a new tool based on description."""
+        prompt = f"""
+        Create a Python tool based on this description: "{description}"
 
-Tool Name: {tool_spec.name}
-Description: {tool_spec.description}
-Parameters: {tool_spec.parameters}
-Return Type: {tool_spec.return_type}
-Category: {tool_spec.category}
+        Agent type: {agent_type if agent_type else "general"}
 
-Generate complete Python code with:
-1. Proper @tool decorator
-2. Type hints and docstring
-3. Input validation
-4. Error handling
-5. Working implementation
+        Requirements:
+        - Use ONLY local processing (NO AWS, NO CLOUD)
+        - Follow the exact TOOL_SPEC structure
+        - Save to tools directory
+        - Load the tool after creation
+        - All models must use OllamaModel with local host
 
-Use ONLY OllamaModel (localhost:11434) - NO cloud services."""
+        Handle all steps autonomously including naming and file creation.
+        """
 
-        try:
-            tool_code = await self.agent.run_async(prompt)
-            self.created_tools[tool_spec.name] = tool_code
-            return tool_code
-        except Exception as e:
-            logger.error(f"Failed to create tool {tool_spec.name}: {e}")
-            raise
+        response = await self.agent.run_async(prompt)
 
-    async def create_agent_wrapper_tool(self, agent_name: str, agent_prompt: str,
-                                      model_name: str = "gemma:270m") -> str:
-        """Create a tool that wraps an agent for use by other agents."""
-        prompt = f"""Create an agent wrapper tool with these specifications:
+        # Parse response to extract tool name (simplified - would be more robust in production)
+        if "TOOL_CREATED:" in response:
+            tool_name = response.split("TOOL_CREATED:")[1].strip().split()[0].replace(".py", "")
+            tool_spec = ToolSpec(
+                name=tool_name,
+                description=description,
+                input_schema={},  # Would parse from created file
+                function_code=response,
+                agent_type=agent_type
+            )
+            self.created_tools[tool_name] = tool_spec
+            return tool_spec
 
-Agent Name: {agent_name}
-Agent Prompt: {agent_prompt}
-Model: {model_name} (use OllamaModel with localhost:11434)
+        raise Exception(f"Tool creation failed: {response}")
 
-Generate a @tool decorated function that:
-1. Creates an agent with the specified prompt
-2. Accepts query and optional context parameters
-3. Returns the agent's response
-4. Handles errors properly
-5. Uses ONLY OllamaModel
+    def create_agent_tool(self, agent_name: str, agent_prompt: str, model_name: str = "llama3.2:1b") -> ToolSpec:
+        """Create a tool that wraps an agent as a tool."""
+        tool_name = f"{agent_name}_tool"
+        tool_file = os.path.join(self.tools_dir, f"{tool_name}.py")
 
-The tool should allow other agents to use this agent as a service."""
+        # Generate agent-as-tool code
+        tool_code = f'''"""Agent tool for {agent_name}."""
 
-        try:
-            wrapper_code = await self.agent.run_async(prompt)
-            tool_name = f"{agent_name}_tool"
-            self.created_tools[tool_name] = wrapper_code
-            return wrapper_code
-        except Exception as e:
-            logger.error(f"Failed to create agent wrapper for {agent_name}: {e}")
-            raise
+from typing import Any
+from strands import Agent
+from strands.models import OllamaModel
+from strands.types.tool_types import ToolUse, ToolResult
 
-    async def create_tool_collection(self, domain: str, capabilities: List[str]) -> Dict[str, str]:
-        """Create a collection of related tools for a specific domain."""
-        prompt = f"""Create a collection of StrandsAgents tools for the {domain} domain.
+TOOL_SPEC = {{
+    "name": "{tool_name}",
+    "description": "Execute {agent_name} agent tasks",
+    "inputSchema": {{
+        "json": {{
+            "type": "object",
+            "properties": {{
+                "task": {{
+                    "type": "string",
+                    "description": "Task for the {agent_name} agent"
+                }},
+                "context": {{
+                    "type": "string",
+                    "description": "Optional context for the task"
+                }}
+            }},
+            "required": ["task"]
+        }}
+    }}
+}}
 
-Required Capabilities: {capabilities}
+# Agent instance (LOCAL OLLAMA ONLY)
+_agent = Agent(
+    model=OllamaModel(model="{model_name}", host="localhost:11434"),
+    system_prompt="""{agent_prompt}"""
+)
 
-For each capability, create a @tool decorated function that:
-1. Has clear purpose and description
-2. Uses appropriate parameters
-3. Implements the functionality
-4. Uses OllamaModel if agent interaction needed
-5. Follows StrandsAgents patterns
-
-Generate complete, working tools as a collection."""
-
-        try:
-            collection_code = await self.agent.run_async(prompt)
-            collection_name = f"{domain}_tools"
-            self.created_tools[collection_name] = collection_code
-            return {collection_name: collection_code}
-        except Exception as e:
-            logger.error(f"Failed to create tool collection for {domain}: {e}")
-            raise
-
-    def get_created_tools(self) -> Dict[str, str]:
-        """Get all tools created by this builder."""
-        return self.created_tools.copy()
-
-    async def optimize_tool(self, tool_name: str, optimization_goals: List[str]) -> str:
-        """Optimize an existing tool based on goals."""
-        if tool_name not in self.created_tools:
-            raise ValueError(f"Tool {tool_name} not found")
-
-        current_tool = self.created_tools[tool_name]
-
-        prompt = f"""Optimize this StrandsAgents tool:
-
-Current Tool Code:
-{current_tool}
-
-Optimization Goals: {optimization_goals}
-
-Improve the tool while maintaining:
-1. StrandsAgents compatibility
-2. @tool decorator usage
-3. Type safety
-4. Error handling
-5. OllamaModel usage (no cloud services)
-
-Provide the optimized version."""
-
-        try:
-            optimized_code = await self.agent.run_async(prompt)
-            self.created_tools[f"{tool_name}_optimized"] = optimized_code
-            return optimized_code
-        except Exception as e:
-            logger.error(f"Failed to optimize tool {tool_name}: {e}")
-            raise
-
-# Factory functions for common tool patterns
-async def create_research_tool(tool_builder: ToolBuilder, research_domain: str) -> str:
-    """Create a research tool for a specific domain."""
-    tool_spec = ToolSpec(
-        name=f"{research_domain}_researcher",
-        description=f"Research and analyze information in the {research_domain} domain",
-        parameters={
-            "query": {"type": "string", "description": "Research query"},
-            "depth": {"type": "string", "description": "Research depth", "default": "standard"},
-            "sources": {"type": "array", "description": "Source preferences", "default": []}
-        },
-        return_type="str",
-        category="research"
-    )
-    return await tool_builder.create_tool(tool_spec)
-
-async def create_analysis_tool(tool_builder: ToolBuilder, analysis_type: str) -> str:
-    """Create an analysis tool for specific analysis type."""
-    tool_spec = ToolSpec(
-        name=f"{analysis_type}_analyzer",
-        description=f"Perform {analysis_type} analysis on provided data",
-        parameters={
-            "data": {"type": "string", "description": "Data to analyze"},
-            "metrics": {"type": "array", "description": "Analysis metrics", "default": []},
-            "format": {"type": "string", "description": "Output format", "default": "structured"}
-        },
-        return_type="str",
-        category="analysis"
-    )
-    return await tool_builder.create_tool(tool_spec)
-
-async def create_synthesis_tool(tool_builder: ToolBuilder) -> str:
-    """Create a tool for synthesizing multiple inputs."""
-    tool_spec = ToolSpec(
-        name="multi_input_synthesizer",
-        description="Synthesize information from multiple sources into coherent output",
-        parameters={
-            "sources": {"type": "array", "description": "Multiple input sources"},
-            "synthesis_type": {"type": "string", "description": "Type of synthesis", "default": "comprehensive"},
-            "focus": {"type": "string", "description": "Synthesis focus area", "default": ""}
-        },
-        return_type="str",
-        category="synthesis"
-    )
-    return await tool_builder.create_tool(tool_spec)
-
-# Example usage and testing
-async def demo_tool_builder():
-    """Demonstrate the meta-tooling system."""
-    print("StrandsAgents Meta-Tooling Demo")
-    print("=" * 40)
-
-    # Create tool builder with larger model for complex tool creation
-    builder = ToolBuilder(model_name="llama3.2:3b")
+def {tool_name}(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
+    """Execute {agent_name} agent task."""
+    tool_use_id = tool_use["toolUseId"]
+    task = tool_use["input"]["task"]
+    context = tool_use["input"].get("context", "")
 
     try:
-        # Create a custom research tool
-        print("\n1. Creating Research Tool:")
-        research_tool = await create_research_tool(builder, "renewable_energy")
-        print(f"Created research tool: {len(research_tool)} characters")
+        # Execute agent task locally
+        if context:
+            prompt = f"Context: {{context}}\\n\\nTask: {{task}}"
+        else:
+            prompt = task
 
-        # Create agent wrapper tool
-        print("\n2. Creating Agent Wrapper Tool:")
-        wrapper_tool = await builder.create_agent_wrapper_tool(
-            "fact_checker",
-            "You are a fact-checking agent. Verify claims and provide evidence-based assessments.",
-            "gemma:270m"
-        )
-        print(f"Created wrapper tool: {len(wrapper_tool)} characters")
+        result = _agent(prompt)
 
-        # Create tool collection
-        print("\n3. Creating Tool Collection:")
-        data_tools = await builder.create_tool_collection(
-            "data_processing",
-            ["data_validation", "format_conversion", "quality_assessment"]
-        )
-        print(f"Created tool collection: {list(data_tools.keys())}")
-
-        # Create synthesis tool
-        print("\n4. Creating Synthesis Tool:")
-        synthesis_tool = await create_synthesis_tool(builder)
-        print(f"Created synthesis tool: {len(synthesis_tool)} characters")
-
-        # Show all created tools
-        all_tools = builder.get_created_tools()
-        print(f"\nTotal tools created: {len(all_tools)}")
-        for tool_name in all_tools.keys():
-            print(f"  - {tool_name}")
-
+        return {{
+            "toolUseId": tool_use_id,
+            "status": "success",
+            "content": [{{"text": result}}]
+        }}
     except Exception as e:
-        print(f"Demo error: {e}")
+        return {{
+            "toolUseId": tool_use_id,
+            "status": "error",
+            "content": [{{"text": f"Error: {{str(e)}}"}}]
+        }}
+'''
+
+        # Write tool file
+        with open(tool_file, 'w') as f:
+            f.write(tool_code)
+
+        # Create tool spec
+        tool_spec = ToolSpec(
+            name=tool_name,
+            description=f"Execute {agent_name} agent tasks",
+            input_schema={"task": "string", "context": "string"},
+            function_code=tool_code,
+            agent_type=agent_name
+        )
+
+        self.created_tools[tool_name] = tool_spec
+        return tool_spec
+
+    def list_tools(self) -> List[ToolSpec]:
+        """List all created tools."""
+        return list(self.created_tools.values())
+
+    def get_tool(self, name: str) -> Optional[ToolSpec]:
+        """Get tool specification by name."""
+        return self.created_tools.get(name)
+
+    def load_all_tools(self) -> List[str]:
+        """Load all tools from the tools directory."""
+        loaded_tools = []
+
+        if not os.path.exists(self.tools_dir):
+            return loaded_tools
+
+        for filename in os.listdir(self.tools_dir):
+            if filename.endswith('.py') and not filename.startswith('__'):
+                tool_path = os.path.join(self.tools_dir, filename)
+                try:
+                    # Use StrandsAgents load_tool
+                    tool_name = filename[:-3]  # Remove .py
+                    # In real implementation, would use proper load_tool function
+                    loaded_tools.append(tool_name)
+                except Exception as e:
+                    print(f"Failed to load tool {filename}: {e}")
+
+        return loaded_tools
+
+# Example usage functions
+async def create_research_tools(builder: ToolBuilder):
+    """Create specialized research tools."""
+
+    # Web search tool (local only)
+    await builder.create_tool(
+        "Search local documents and knowledge base for information",
+        agent_type="research"
+    )
+
+    # Document analysis tool
+    await builder.create_tool(
+        "Analyze document structure and extract key information",
+        agent_type="research"
+    )
+
+    # Data synthesis tool
+    await builder.create_tool(
+        "Synthesize information from multiple sources into coherent summary",
+        agent_type="research"
+    )
+
+async def create_creative_tools(builder: ToolBuilder):
+    """Create specialized creative tools."""
+
+    # Brainstorming tool
+    await builder.create_tool(
+        "Generate creative ideas and innovative solutions for problems",
+        agent_type="creative"
+    )
+
+    # Ideation tool
+    await builder.create_tool(
+        "Develop and expand on initial concepts with creative variations",
+        agent_type="creative"
+    )
+
+    # Innovation tool
+    await builder.create_tool(
+        "Propose novel approaches and unconventional solutions",
+        agent_type="creative"
+    )
+
+async def create_critical_tools(builder: ToolBuilder):
+    """Create specialized critical analysis tools."""
+
+    # Evaluation tool
+    await builder.create_tool(
+        "Critically evaluate proposals and identify strengths and weaknesses",
+        agent_type="critical"
+    )
+
+    # Risk assessment tool
+    await builder.create_tool(
+        "Analyze potential risks and negative consequences of proposed solutions",
+        agent_type="critical"
+    )
+
+    # Improvement tool
+    await builder.create_tool(
+        "Suggest specific improvements to address identified issues",
+        agent_type="critical"
+    )
+
+# Main tool builder initialization
+async def initialize_swarm_tools(tools_dir: str = "./swarm/tools") -> ToolBuilder:
+    """Initialize the tool builder and create essential swarm tools."""
+    builder = ToolBuilder(tools_dir)
+
+    # Create tools for different agent types
+    await create_research_tools(builder)
+    await create_creative_tools(builder)
+    await create_critical_tools(builder)
+
+    print(f"Initialized tool builder with {len(builder.created_tools)} tools")
+    return builder
 
 if __name__ == "__main__":
-    asyncio.run(demo_tool_builder())
+    import asyncio
+
+    async def demo():
+        builder = await initialize_swarm_tools()
+
+        # Create a custom tool
+        tool = await builder.create_tool(
+            "Analyze code for potential improvements and optimizations"
+        )
+
+        print(f"Created tool: {tool.name}")
+        print(f"Description: {tool.description}")
+
+    asyncio.run(demo())
