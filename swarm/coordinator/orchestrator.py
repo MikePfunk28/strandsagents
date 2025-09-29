@@ -11,7 +11,8 @@ from strands import Agent
 from ..agents.base_assistant import BaseAssistant, create_lightweight_assistant
 from ..communication.mcp_client import SwarmMCPClient
 from ..storage.database_manager import DatabaseManager, MemoryEntry
-from ...security import SecurityManager, SecurityEvent, Severity
+from security import SecurityManager
+from security.security_manager import SecurityEvent, Severity
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +204,10 @@ Format as JSON with structure:
     "workflow_steps": ["step1", "step2"],
     "timeline_minutes": 10,
     "dependencies": {{"step2": ["step1"]}}
-}}"""`n`nIf the task references source code or requires annotation, include the 'code_feedback' agent in required_agents and plan for generator -> discriminator -> agitator loop coordination.
+}}
+
+If the task references source code or requires annotation, include the 'code_feedback' agent in required_agents and plan for generator -> discriminator -> agitator loop coordination.
+"""
 
         try:
             analysis_result = await self.orchestrator_agent.run_async(analysis_prompt)
@@ -339,7 +343,10 @@ Format as JSON:
         }}
     ],
     "synthesis_plan": "how to combine results"
-}}"""`n`nIf the task references source code or requires annotation, include the 'code_feedback' agent in required_agents and plan for generator -> discriminator -> agitator loop coordination.
+}}
+
+If the task references source code or requires annotation, include the 'code_feedback' agent in required_agents and plan for generator -> discriminator -> agitator loop coordination.
+"""
 
             execution_plan = await self.orchestrator_agent.run_async(execution_prompt)
 

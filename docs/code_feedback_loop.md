@@ -79,3 +79,32 @@ graph = FeedbackGraph()
 print(graph.describe())
 ```
 This is the same representation returned in every `CodeFeedbackAssistant` response under the `graph` key, allowing dashboards or workflows to render the active feedback circuit.
+
+## Workflow Graph Integration
+- **FeedbackWorkflow** (`graph/feedback_workflow.py`): wraps `FeedbackGraph` inside a dependency-aware workflow (`WorkflowGraph`). Nodes cover input prep, history lookup, guidance application, loop execution, and logging with embeddings. Results persist to `workflow_runs/` and the graph storage layer for later retrieval.
+- **WorkflowGraph Engine** (`graph/workflow_engine.py`): lightweight DAG executor used by the workflow. Register additional nodes or event handlers to extend the pipeline, e.g., auditing or notification steps.
+- **CLI Support** (`run_graph.py`): run `python run_graph.py --code-feedback path/to/file.py --iterations 2 --guidance "Review function headers"` to execute the full loop, view rewards, and locate persisted logs. Interactive mode (`python run_graph.py --interactive`) now includes a `feedback` command.
+
+### Human-in-the-Loop callbacks
+Call `FeedbackWorkflow.add_human_guidance(path, guidance)` before running to enqueue manual hints. Subscribing to events is as simple as:
+```python
+workflow = FeedbackWorkflow()
+
+async def on_iteration(state, payload):
+    print("Iteration", payload.get("iteration_index"), payload.get("discriminator_score", {}).get("reward"))
+
+workflow.register_event_handler("iteration_completed", on_iteration)
+workflow.add_human_guidance("agent.py", "Focus on type hints")
+await workflow.run(file_path="agent.py", iterations=2)
+```
+Each run writes a JSON report under `workflow_runs/` containing the raw generator/discriminator/agitator payloads, making it easy to diff guidance impact across iterations.
+
+## Agent-to-Agent & MCP Integration
+- **In-memory MCP broker** (`swarm/communication/inmemory_mcp.py`) exposes a lightweight message bus mirroring the MCP patterns used in the swarm. It lets orchestration logic exercise agent-to-agent requests without standing up the full socket server.
+- **FeedbackAgentChannel** (`swarm/communication/feedback_channel.py`) provides a thin request/response helper. It tracks correlation IDs and resolves futures when the code-feedback agent responds, making MCP calls feel synchronous from the caller.
+- **FeedbackAgentService** (`swarm/communication/feedback_service.py`) wraps `FeedbackWorkflow` so any MCP client can plug in and service `feedback_request` messages with full workflow execution.
+
+## Adaptive Benchmarking
+- **AdaptiveFeedbackBenchmark** (`swarm_system/learning/adaptive_benchmark.py`) captures run metadata (reward deltas, guidance count, log locations) and generates evolving challenge sets. Every workflow run updates the benchmark automatically via `FeedbackWorkflow`.
+- `summary()` returns aggregate stats, while `build_challenge_set()` surfaces the toughest files to rerun so the loop continues to improve and the model is regularly challenged as memory/guidance changes.
+

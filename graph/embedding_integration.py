@@ -11,7 +11,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 
 from .graph_storage import GraphNode, GraphEdge, GraphStorageManager, create_graph_storage
-from ..embedding_assistant import EmbeddingAssistant
+from embedding_assistant import EmbeddingAssistant
 
 logger = logging.getLogger(__name__)
 

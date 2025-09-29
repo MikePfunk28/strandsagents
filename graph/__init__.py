@@ -10,7 +10,19 @@ Example:
     result = await graph.analyze_code("path/to/code.py")
 """
 
-from .programming_graph import ProgrammingGraph, create_code_analysis_graph, create_data_structure_graph
+from .programming_graph import (
+    ProgrammingGraph,
+    create_code_analysis_graph,
+    create_data_structure_graph,
+)
+from .feedback_workflow import FeedbackWorkflow
+from .workflow_engine import WorkflowGraph
 
 __version__ = "1.0.0"
-__all__ = ["ProgrammingGraph", "create_code_analysis_graph", "create_data_structure_graph"]
+__all__ = [
+    "ProgrammingGraph",
+    "create_code_analysis_graph",
+    "create_data_structure_graph",
+    "FeedbackWorkflow",
+    "WorkflowGraph",
+]
