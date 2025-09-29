@@ -45,6 +45,9 @@ class AgentAuthenticator:
         self.revoked_tokens: set = set()
         self.agent_registry: Dict[str, Dict[str, Any]] = {}
 
+        # For test compatibility
+        self.authenticated_agents: Dict[str, AgentCredentials] = {}
+
         # Security metrics
         self.auth_attempts = 0
         self.successful_auths = 0
@@ -131,6 +134,9 @@ class AgentAuthenticator:
 
         # Store active token
         self.active_tokens[token] = credentials
+
+        # Store in authenticated agents for test compatibility
+        self.authenticated_agents[agent_id] = credentials
 
         # Update registry
         agent_info["last_auth"] = now

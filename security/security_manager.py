@@ -63,6 +63,9 @@ class SecurityManager:
         self.trusted_agents: set = set()
         self.high_security_mode = False
 
+        # Anomaly detection threshold
+        self.anomaly_threshold = 0.8
+
     async def initialize_security(self) -> bool:
         """Initialize the security system.
 
@@ -145,6 +148,26 @@ class SecurityManager:
                 f"Failed to register agent: {str(e)}"
             )
             return False
+
+    async def register_agent(self, agent_id: str, agent_type: str,
+                           capabilities: List[str], trust_level: float = 1.0) -> AgentCredentials:
+        """Register agent and return credentials (test-compatible alias).
+
+        Args:
+            agent_id: Agent identifier
+            agent_type: Type of agent
+            capabilities: Agent capabilities
+            trust_level: Initial trust level (0.0-1.0)
+
+        Returns:
+            Agent credentials
+        """
+        success = await self.register_trusted_agent(agent_id, agent_type, capabilities, trust_level)
+        if success:
+            # Return credentials from authenticator
+            return await self.authenticator.authenticate_agent(agent_id, agent_type)
+        else:
+            raise Exception(f"Failed to register agent {agent_id}")
 
     async def authenticate_and_authorize(self, agent_id: str, agent_type: str,
                                        operation: str, context: Dict[str, Any] = None) -> Tuple[bool, Optional[AgentCredentials]]:
@@ -491,15 +514,19 @@ class SecurityManager:
             except Exception as e:
                 logger.error(f"Security cleanup error: {e}")
 
-    def get_security_status(self) -> Dict[str, Any]:
+    async def get_security_status(self) -> Dict[str, Any]:
         """Get comprehensive security status."""
         return {
+            "timestamp": datetime.now().isoformat(),
+            "orchestrator_id": self.orchestrator_id,
             "threat_level": self.threat_level,
             "high_security_mode": self.high_security_mode,
             "trusted_agents": len(self.trusted_agents),
+            "authenticated_agents": len(self.authenticator.authenticated_agents),
             "security_checks_performed": self.security_checks_performed,
             "security_violations_detected": self.security_violations_detected,
             "blocked_operations": self.blocked_operations,
+            "security_events_count": len(self.security_events),
             "recent_events": len([
                 e for e in self.security_events
                 if datetime.now() - e.timestamp < timedelta(hours=1)

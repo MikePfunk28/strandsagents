@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import uuid
 from typing import Any, Dict, Optional
 
 from .inmemory_mcp import InMemoryMCPClient
@@ -30,7 +31,10 @@ class FeedbackAgentChannel:
         timeout: float = 30.0,
     ) -> Dict[str, Any]:
         loop = asyncio.get_running_loop()
-        correlation_id = await self.client.send_message(
+        correlation_id = str(uuid.uuid4())
+        future: asyncio.Future = loop.create_future()
+        self._pending[correlation_id] = future
+        await self.client.send_message(
             recipient_id=self.target_agent_id,
             message_type="feedback_request",
             payload={
@@ -39,9 +43,8 @@ class FeedbackAgentChannel:
                 "iterations": iterations,
                 "metadata": metadata or {},
             },
+            correlation_id=correlation_id,
         )
-        future: asyncio.Future = loop.create_future()
-        self._pending[correlation_id] = future
         try:
             return await asyncio.wait_for(future, timeout=timeout)
         finally:
