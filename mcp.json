@@ -1,0 +1,44 @@
+{
+	"servers": {
+			"tools Docs": {
+			"type": "sse",
+			"url": "https://gitmcp.io/strands-agents/tools"
+			},
+			"github.com/NightTrek/Ollama-mcp": {
+				"command": "node",
+				"args": [
+					"C:/Users/mikep/mcp-server/ollama-mcp/build/index.js"
+				],
+				"env": {
+					"OLLAMA_HOST": "http://127.0.0.1:11434"
+				},
+				"type": "stdio"
+			},
+			"github.com/Saik0s/mcp-browser-use": {
+				"command": "uvx",
+				"args": [
+					"mcp-server-browser-use"
+				],
+				"env": {
+					"CHROME_DEBUGGING_PORT": "9222",
+					"CHROME_DEBUGGING_HOST": "localhost",
+					"BROWSER_HEADLESS": "false",
+					"MCP_USE_VISION": "true",
+					"MCP_MODEL_PROVIDER": "gemini",
+					"GOOGLE_API_KEY": "AIzaSyAiEDoqY0Vs7lQqSp-qHyQNqH456F49_Mc",
+					"MCP_MODEL_NAME": "gemini-pro",
+					"MCP_TEMPERATURE": "0.3"
+				},
+				"type": "stdio"
+			},
+			"context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"@upstash/context7-mcp@latest"
+			],
+			"gallery": true
+		}
+	}
+}
