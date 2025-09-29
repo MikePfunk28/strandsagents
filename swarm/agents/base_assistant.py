@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Any
 
 from strands import Agent
-from strands.models import OllamaModel
 from ..communication.mcp_client import SwarmMCPClient
 
 logger = logging.getLogger(__name__)
@@ -57,9 +56,8 @@ class BaseAssistant(ABC):
             # Load tools
             self.tools = self.get_tools()
 
-            # Create StrandsAgent with 270M model
+            # Create StrandsAgent with specified system prompt and tools
             self.agent = Agent(
-                model=OllamaModel(model=self.model_name, host=self.host),
                 system_prompt=self.get_system_prompt(),
                 tools=self.tools
             )
@@ -263,6 +261,9 @@ def create_lightweight_assistant(assistant_type: str, assistant_id: Optional[str
     elif assistant_type == "summarizer":
         from .summarizer_assistant.service import SummarizerAssistant
         return SummarizerAssistant(assistant_id)
+    elif assistant_type == "code_feedback":
+        from .code_feedback.service import CodeFeedbackAssistant
+        return CodeFeedbackAssistant(assistant_id)
     else:
         raise ValueError(f"Unknown assistant type: {assistant_type}")
 
