@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 import logging
 
-from strands.models import Model
+from strands.models.ollama import OllamaModel
 
 logger = logging.getLogger(__name__)
 
