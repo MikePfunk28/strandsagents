@@ -1,8 +1,250 @@
-strands-agent>=1.0.0
-strands-agents-tools>=0.2.0
+# ============================================================================
+# CORE STRANDS PACKAGES
+# ============================================================================
+# Base framework
+strands-agents>=1.0.0
 strands-agents-builder
-strands-agents-tools[browser]
-strands-agents[ollama]
+
+# Tools with ALL available extras (official from docs)
+# See: https://github.com/strands-agents/tools/blob/main/README.md
+strands-agents-tools[mem0_memory,local_chromium_browser,agent_core_browser,agent_core_code_interpreter,a2a_client,diagram,rss,use_computer]
+
+# ============================================================================
+# TOOLS ACTUALLY USED IN YOUR CODE:
+# ============================================================================
+# Based on analysis of all .py files in this project, you import these tools:
+#
+# FROM strands_tools:
+#   ✓ http_request        - agent.py, advanced_research.py, reasoning_agent.py, research_assistant.py, thought_agent.py
+#   ✓ handoff_to_user     - agent.py, research_assistant.py, simple_test.py, thought_agent.py
+#   ✓ retrieve            - agent.py, thought_agent.py
+#   ✓ file_read           - agent.py, chunking_assistant.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
+#   ✓ file_write          - agent.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
+#   ✓ editor              - agent.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
+#   ✓ python_repl         - adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
+#   ✓ shell               - adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, strandsagents_test.py, swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
+#   ✓ workflow            - garbage_cleanup.py, financial_assistant.py
+#   ✓ think               - garbage_cleanup.py, thought_agent.py
+#   ✓ use_llm             - memory_assistant.py, meta_tool_assistant.py, thought_agent.py
+#   ✓ calculator          - code-assistant/math_assistant.py
+#   ✓ browser             - simple_test.py
+#   ✓ load_tool           - swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
+#
+# FROM strands_tools.browser:
+#   ✓ LocalChromiumBrowser - agent.py, thought_agent.py, thought_agent_backup.py, debug_browser.py, browser_assistant.py
+#
+# All these tools are included when you install: strands-agents-tools[local_chromium_browser]
+# Additional extras installed: mem0_memory, agent_core_browser, agent_core_code_interpreter, a2a_client, diagram, rss, use_computer
+#
+# ============================================================================
+# STRANDS TOOLS REFERENCE - All tools available after installation:
+# ============================================================================
+#
+# RAG & MEMORY:
+#   - retrieve: Amazon Bedrock Knowledge Bases semantic retrieval
+#   - memory: Agent memory persistence in Bedrock Knowledge Bases
+#   - agent_core_memory: Amazon Bedrock Agent Core Memory integration
+#   - mem0_memory: Agent memory built on Mem0 (requires [mem0_memory] extra)
+#
+# FILE OPERATIONS:
+#   - editor: Advanced file editing (line edits, search, undo)
+#   - file_read: Read and parse files
+#   - file_write: Create and modify files
+#
+# SHELL & SYSTEM:
+#   - environment: Manage environment variables
+#   - shell: Execute shell commands
+#   - cron: Task scheduling with cron jobs
+#   - use_computer: Desktop automation & GUI interactions (requires [use_computer] extra)
+#
+# CODE INTERPRETATION:
+#   - python_repl: Run Python code (NOT supported on Windows - fcntl module)
+#   - code_interpreter: Execute code in isolated sandboxes (requires [agent_core_code_interpreter] extra)
+#
+# WEB & NETWORK:
+#   - http_request: Make API calls, fetch web data
+#   - slack: Slack integration with real-time events
+#   - browser: Automate browser interactions (requires [local_chromium_browser] or [agent_core_browser] extra)
+#   - rss: Manage and process RSS feeds (requires [rss] extra)
+#
+# MULTI-MODAL:
+#   - generate_image_stability: Create images with Stability AI
+#   - image_reader: Process and analyze images
+#   - generate_image: AI images with Amazon Bedrock
+#   - nova_reels: AI videos with Nova Reels on Bedrock
+#   - speak: Text-to-speech (macOS say or Amazon Polly)
+#   - diagram: Create cloud architecture & UML diagrams (requires [diagram] extra)
+#
+# AWS SERVICES:
+#   - use_aws: Interact with AWS services (S3, EC2, etc.)
+#
+# UTILITIES:
+#   - calculator: Mathematical operations
+#   - current_time: Get current date/time
+#   - load_tool: Dynamically load more tools at runtime
+#   - sleep: Pause execution with interrupt support
+#
+# AGENTS & WORKFLOWS:
+#   - graph: Multi-agent systems using Strands SDK Graph
+#   - agent_graph: Create and manage agent graphs
+#   - journal: Structured tasks and logs
+#   - swarm: Coordinate multiple AI agents in swarm/network
+#   - stop: Force stop agent event loop
+#   - handoff_to_user: Human-in-the-loop workflows
+#   - use_agent: Run new AI loop with custom prompts
+#   - think: Deep thinking with parallel agentic reasoning branches
+#   - use_llm: Run new AI loop with custom prompts
+#   - workflow: Orchestrate sequenced workflows
+#   - batch: Call multiple tools from single model request
+#   - a2a_client: Agent-to-agent communication (requires [a2a_client] extra)
+#
+# SEARCH TOOLS:
+#   - tavily_search: Real-time web search
+#   - tavily_extract: Extract clean content from web pages
+#   - tavily_crawl: Intelligent website crawling
+#   - tavily_map: Map website structure
+#
+# ============================================================================
+
+# Memory and vector stores (used with strands tools)
+mem0ai
+lancedb
+qdrant-client
+
+# ============================================================================
+# AI FRAMEWORKS & MODEL PROVIDERS
+# ============================================================================
+anthropic
+openai
+ollama
+
+# AutoGen multi-agent framework
+autogen-agentchat
+autogen-core
+autogen-ext
+autogenstudio
+
+# ============================================================================
+# AZURE AI SERVICES
+# ============================================================================
+azure-ai-agents
+azure-ai-inference
+azure-ai-projects
+azure-identity
+azure-search-documents
+azure-storage-blob
+
+# ============================================================================
+# AWS SERVICES
+# ============================================================================
 boto3
-mem0-ai
 nest-asyncio
+
+# ============================================================================
+# MCP PROTOCOL
+# ============================================================================
+mcp
+
+# ============================================================================
+# WEB FRAMEWORKS
+# ============================================================================
+flask
+fastapi
+uvicorn
+starlette
+
+# ============================================================================
+# WEB SCRAPING & BROWSER AUTOMATION
+# ============================================================================
+scrapy
+lxml
+readability-lxml
+httpx
+beautifulsoup4
+html2text
+playwright  # Installed via strands-agents-tools[local_chromium_browser]
+
+# ============================================================================
+# DATA PROCESSING
+# ============================================================================
+numpy
+pandas
+pyarrow
+
+# ============================================================================
+# FILE PROCESSING
+# ============================================================================
+openpyxl
+pypdf
+python-pptx
+xlrd
+xlsxwriter
+mammoth
+markitdown
+pillow
+
+# ============================================================================
+# DATABASE
+# ============================================================================
+sqlalchemy
+sqlmodel
+psycopg
+alembic
+
+# ============================================================================
+# COMPUTER VISION & AUTOMATION
+# ============================================================================
+opencv-python
+pytesseract
+pyautogui  # Used with strands use_computer tool
+
+# ============================================================================
+# AUDIO
+# ============================================================================
+pydub
+speechrecognition
+
+# ============================================================================
+# ENVIRONMENT & CONFIG
+# ============================================================================
+python-dotenv
+pydantic
+pydantic-settings
+
+# ============================================================================
+# UTILITIES
+# ============================================================================
+rich
+typer
+loguru
+tqdm
+tenacity
+tiktoken
+
+# ============================================================================
+# SLACK INTEGRATION
+# ============================================================================
+slack-bolt
+slack-sdk
+
+# ============================================================================
+# TESTING
+# ============================================================================
+pytest
+pytest-asyncio
+
+# ============================================================================
+# OTHER TOOLS
+# ============================================================================
+youtube-transcript-api
+
+# ============================================================================
+# NOTES:
+# ============================================================================
+# - python_repl tool NOT supported on Windows (requires fcntl module)
+# - Browser tools require: playwright install chromium (run after pip install)
+# - Tavily tools require: export TAVILY_API_KEY=your_key
+# - AWS tools require: export AWS_REGION=us-west-2 (or your region)
+# - Stability AI requires: export STABILITY_API_KEY=sk-xxx
+# - Mem0 backend options: MEM0_API_KEY (platform) or OPENSEARCH_HOST (opensearch) or defaults to FAISS
+# - Set BYPASS_TOOL_CONSENT=true to skip confirmation prompts for sensitive operations

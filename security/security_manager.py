@@ -169,6 +169,106 @@ class SecurityManager:
         else:
             raise Exception(f"Failed to register agent {agent_id}")
 
+    async def verify_message(self, message: str, signature: MessageSignature, sender_id: str) -> VerificationResult:
+        """Verify message integrity and authenticity (test-compatible method).
+
+        Args:
+            message: The message content to verify
+            signature: Message signature object
+            sender_id: ID of the message sender
+
+        Returns:
+            True if message is valid and authentic
+        """
+        try:
+            # Verify the signature matches expected sender
+            if signature.agent_id != sender_id:
+                await self._log_security_event(
+                    "message_verification_failed",
+                    Severity.HIGH,
+                    sender_id,
+                    "Agent ID mismatch in message signature"
+                )
+                return False
+
+            # Use the verifier to check message integrity
+            result = await self.verifier.verify_message_signature(message, signature)
+
+            if not result.is_valid:
+                self.security_violations_detected += 1
+                await self._log_security_event(
+                    "message_integrity_violation",
+                    Severity.HIGH,
+                    sender_id,
+                    f"Message integrity check failed: {result.issues}"
+                )
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Message verification error: {e}")
+            await self._log_security_event(
+                "message_verification_error",
+                Severity.CRITICAL,
+                sender_id,
+                f"Message verification failed with error: {str(e)}"
+            )
+            return VerificationResult(
+                is_valid=False,
+                trust_score=0.0,
+                verification_time=0.0,
+                issues=[f"Verification error: {str(e)}"],
+                metadata={}
+            )
+
+    async def validate_answer(self, answer: str, context: Dict[str, Any]) -> ValidationResult:
+        """Validate agent answer for misinformation prevention (test-compatible method).
+
+        Args:
+            answer: The answer content to validate
+            context: Context information for validation
+
+        Returns:
+            True if answer passes validation checks
+        """
+        try:
+            # Extract context information
+            agent_id = context.get('agent_id', 'unknown')
+            question = context.get('question', '')
+
+            # Use the existing validator with adapted parameters
+            validation_result = await self.validate_agent_answer(
+                question=question,
+                answer=answer,
+                agent_id=agent_id,
+                context=context
+            )
+
+            # Log validation result
+            if not validation_result.is_valid:
+                self.security_violations_detected += 1
+                await self._log_security_event(
+                    "answer_validation_failed",
+                    Severity.MEDIUM,
+                    agent_id,
+                    f"Answer validation failed: {validation_result.issues}"
+                )
+
+            return validation_result
+
+        except Exception as e:
+            logger.error(f"Answer validation error: {e}")
+            return ValidationResult(
+                is_valid=False,
+                confidence_score=0.0,
+                trust_level=0.0,
+                validation_methods=[],
+                issues=[f"Validation error: {str(e)}"],
+                metadata={},
+                validation_time=0.0,
+                cross_check_results={}
+            )
+
     async def authenticate_and_authorize(self, agent_id: str, agent_type: str,
                                        operation: str, context: Dict[str, Any] = None) -> Tuple[bool, Optional[AgentCredentials]]:
         """Authenticate agent and authorize operation.
@@ -368,6 +468,22 @@ class SecurityManager:
         except Exception as e:
             logger.error(f"Failed to report security incident: {e}")
             return False
+
+    async def report_incident(self, incident_type: str, agent_id: str,
+                             description: str, severity: Severity) -> bool:
+        """Report security incident (test-compatible signature).
+
+        Args:
+            incident_type: Type of security incident
+            agent_id: Agent involved in incident
+            description: Incident description
+            severity: Incident severity
+
+        Returns:
+            True if report sent successfully
+        """
+        details = {"description": description}
+        return await self.report_security_incident(incident_type, agent_id, severity, details)
 
     async def _authorize_operation(self, credentials: AgentCredentials,
                                  operation: str, context: Dict[str, Any] = None) -> bool:

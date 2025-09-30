@@ -66,7 +66,7 @@ class FileHistoryEntry:
     operation: str  # 'created', 'modified', 'deleted'
     timestamp: datetime
     content_hash: str
-    metadata: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]] = None
     backup_path: Optional[str] = None
 
 class FileHistoryTracker:

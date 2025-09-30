@@ -4,15 +4,23 @@ from strnads.models.ollama import OllamaModel
 from strands.agent.conversation_manager import SlidingWindowConversationManager
 
 # Create an agent with workflow capability
-agent = Agent(tools=[workflow])
+
 ollama_model = OllamaModel(host="localhost:11434", model="llama3.2")
 think_agent = Agent(
     model=ollama_model,
     tools=[think],
-    conversation_manager=SlidingWindowConversationManager(window_size=30))
+    conversation_manager=SlidingWindowConversationManager(window_size=30)
+)
+workflow_agent = Agent(
+    model=ollama_model,
+    tools=[workflow],
+    conversation_manager=SlidingWindowConversationManager(window_size=30)
+)
 
+#agent = Agent(model=ollama_model, tools=[
+#             workflow], conversation_manager=SlidingWindowConversationManager(window_size=30))
 # Create a multi-agent workflow
-agent.tool.workflow(
+workflow_agent.tool.workflow(
     action="create",
     workflow_id="GarbagaeCleanup",
     tasks=[
@@ -54,16 +62,21 @@ agent.tool.workflow(
     ]
 )
 
-agent.tool.think(
-    action="set_agent",
-    agent=think_agent,
-    workflow_id="AreWeClean",
-    description="Check the files, and the directory to see if we are clean.",
-    system_prompt="You check the files and the directory to see if we are clean."
+workflow_agent.tool.think(
+    thought="Check the files, and the directory to see if we are clean.",
+    system_prompt="You check the files and the directory to see if we are clean.",
+    count=2
 )
 
+model_output = workflow_agent.tool.think(
+    system_prompt="If it is clean, you are finished, say, 'Jobs Done'",
+    count=1
+)
+if str(model_output) != "Jobs Done":
+    think_agent.tool.workflow(action="start", workflow_id="GarbageCleanup")
+
 # Execute workflow (parallel processing where possible)
-agent.tool.workflow(action="start", workflow_id="data_analysis")
+workflow_agent.tool.workflow(action="start", workflow_id="data_analysis")
 
 # Check results
-status = agent.tool.workflow(action="status", workflow_id="data_analysis")
+status = workflow_agent.tool.workflow(action="status", workflow_id="data_analysis")

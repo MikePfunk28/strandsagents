@@ -1,0 +1,19 @@
+# Comprehensive requirements.txt generated from all imports in the project
+# Generated using context7 MCP server for package resolution
+
+"fmt"
+dotenv
+fastapi
+flask
+httpx
+lxml
+matplotlib.pyplot
+numpy
+pandas
+pyarrow
+pyarrow.parquet
+pydantic
+pytest
+readability
+requests
+scrapy

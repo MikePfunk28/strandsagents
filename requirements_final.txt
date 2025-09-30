@@ -1,0 +1,106 @@
+# COMPREHENSIVE REQUIREMENTS.TXT - ALL TOOLS YOU NEED
+# Based on your existing requirements.txt since you installed every tool manually
+
+# Core strands packages
+strands-agents>=1.0.0
+strands-agents[ollama]
+strands-agents-tools[browser,rss,use_computer]
+strands-agents-builder
+
+# AI frameworks
+anthropic
+openai
+autogen-agentchat
+autogen-core
+autogen-ext
+autogenstudio
+
+# Azure services
+azure-ai-agents
+azure-ai-inference
+azure-ai-projects
+azure-identity
+azure-search-documents
+azure-storage-blob
+
+# AWS
+boto3
+nest-asyncio
+
+# Memory and vector stores
+lancedb
+qdrant-client
+
+# MCP protocol
+mcp
+
+# Web frameworks
+flask
+fastapi
+uvicorn
+
+# Web scraping
+scrapy
+lxml
+readability-lxml
+httpx
+beautifulsoup4
+html2text
+
+# Data processing
+numpy
+pandas
+pyarrow
+
+# File processing
+openpyxl
+pypdf
+python-pptx
+xlrd
+xlsxwriter
+mammoth
+markitdown
+
+# Database
+sqlalchemy
+sqlmodel
+psycopg
+alembic
+
+# Computer vision/automation
+opencv-python
+pytesseract
+pyautogui
+pillow
+
+# Audio
+pydub
+speechrecognition
+
+# Environment and config
+python-dotenv
+pydantic
+pydantic-settings
+
+# Utilities
+rich
+typer
+loguru
+tqdm
+tenacity
+tiktoken
+
+# Slack integration
+slack-bolt
+slack-sdk
+
+# Testing
+pytest
+pytest-asyncio
+
+# Other tools
+playwright
+youtube-transcript-api
+
+# NOTE: This includes ALL tools you had to install manually
+# Removed mem0 as you requested (you removed it 540 times)

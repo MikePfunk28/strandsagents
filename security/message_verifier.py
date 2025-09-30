@@ -80,12 +80,13 @@ class MessageVerifier:
         logger.info(f"Registered signing key for agent {agent_id}")
         return True
 
-    async def sign_message(self, message: Dict[str, Any], agent_id: str) -> Optional[MessageSignature]:
+    async def sign_message(self, message, agent_id: str, timestamp=None) -> Optional[MessageSignature]:
         """Sign a message for integrity verification.
 
         Args:
-            message: Message to sign
+            message: Message to sign (Dict or str)
             agent_id: Agent sending the message
+            timestamp: Optional timestamp (for test compatibility)
 
         Returns:
             MessageSignature if successful, None otherwise
@@ -95,15 +96,22 @@ class MessageVerifier:
             return None
 
         try:
-            # Prepare message for signing
-            message_copy = message.copy()
-            message_copy.pop('signature', None)  # Remove any existing signature
+            # Handle both dict and string messages for test compatibility
+            if isinstance(message, str):
+                canonical_message = message
+            else:
+                # Prepare message for signing
+                message_copy = message.copy()
+                message_copy.pop('signature', None)  # Remove any existing signature
+                # Canonicalize message (ensure consistent ordering)
+                canonical_message = json.dumps(message_copy, sort_keys=True, separators=(',', ':'))
 
-            # Canonicalize message (ensure consistent ordering)
-            canonical_message = json.dumps(message_copy, sort_keys=True, separators=(',', ':'))
+            # Generate nonce and timestamp (use provided timestamp if available)
+            if timestamp is None:
+                timestamp = time.time()
+            elif hasattr(timestamp, 'timestamp'):
+                timestamp = timestamp.timestamp()
 
-            # Generate nonce and timestamp
-            timestamp = time.time()
             nonce = self._generate_nonce()
 
             # Create message hash
