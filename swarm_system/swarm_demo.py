@@ -21,13 +21,22 @@ logger = logging.getLogger(__name__)
 
 # Import swarm system components
 try:
-    from .assistants.registry import AssistantRegistry, global_registry
-    from .assistants.base_assistant import AssistantConfig
-    from .assistants.core.text_processor import TextProcessorAssistant
-    from .assistants.core.calculator_assistant import CalculatorAssistant
-    from .utils.database_manager import db_manager
-    from .utils.prompts import get_assistant_prompt
-    from .utils.tools import (
+    import sys
+    import os
+
+    # Add current directory to path for imports
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
+
+    # Try absolute imports (works when run as script)
+    from assistants.registry import AssistantRegistry, global_registry
+    from assistants.base_assistant import AssistantConfig
+    from assistants.core.text_processor import TextProcessorAssistant
+    from assistants.core.calculator_assistant import CalculatorAssistant
+    from utils.database_manager import db_manager
+    from utils.prompts import get_assistant_prompt
+    from utils.tools import (
         create_dynamic_tool, query_knowledge_base,
         store_learning, get_swarm_status
     )
@@ -48,6 +57,11 @@ llama_agent = Agent(
     model=ollama_model,
     tools=[think],
     system_prompt="You are a helpful assistant."
+)
+
+orchestrator_agent = Agent(
+    description="Orchestrator agent for swarm system demo",
+    system_prompt=""
 )
 
 class SwarmDemo:
