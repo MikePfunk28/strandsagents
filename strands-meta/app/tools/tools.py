@@ -52,6 +52,13 @@ def fs_diff(path: str, new: str) -> str:
     return json.dumps(diff_payload)
 
 
+
+@tool(name="think")
+def think(prompt: str) -> str:
+    """Return a short internal reflection string."""
+    return prompt
+
+
 @tool(name="sh.run")
 def sh(command: str, consent: bool = False) -> str:
     """Execute a shell command inside the workspace after explicit consent."""
@@ -73,6 +80,7 @@ _TOOL_REGISTRY: Dict[str, Any] = {
     "fs.read": fs_read,
     "fs.write": fs_write,
     "fs.diff": fs_diff,
+    "think": think,
     "sh.run": sh,
 }
 

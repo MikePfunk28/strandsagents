@@ -10,4 +10,5 @@ class Mentor(BaseAssistant):
     NAME = "mentor"
     PURPOSE = "Teach and supervise via tiny steps"
     SYSTEM = MENTOR_SYSTEM
+    CAPABILITIES = ["think"]
 
