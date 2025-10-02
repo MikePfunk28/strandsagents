@@ -308,3 +308,13 @@ You should combine the best ideas and address the criticisms to create a compreh
 Focus on creating a clear, actionable summary that addresses the original query effectively.
 """),name="summarizer_agent",model=ollama_model
 ```
+
+## Reinforcing the idea
+
+we already have other assistants defined.  That system is the one implemented, I want a much more robust system, like using the prompts and assistants we made.  An assistant should do one thing, have a prompt, use tools, and a model, gemma3 270 or llama3.2, and any code.  Then an agent could be multiple instances of an assistant, plus other assistants, plus code, and maybe a different model for some parts.  However, if we are implementing 20 small agents for our swarm, using 270m, then they need defined roles, we can call them assistants, but they need to be simple, then for the orchestrator, or executor we use the llama3.2.  Anything we need more thought.  We should have many many assistants, and it should be easy to define a tool, meta-tooling, and essentially use that as an agent as tool.  Use agent2agent and mcp for communication, then the agent loop to implement the learning.
+
+
+yes, do not forget memory, or knowledge base.  We should have a cache.db, memory.db, and knowledge.db, where the knowledge will be data gained from the outside, and memory is context.  We also need coderl.db which literally explains what each line of code does, and the Scopes for the file, so we will have one for each file, and they should use embeddings, and similarity lookup.  This is going to be knowledge we also get human in the loop feedback on and can learn from.
+
+## Lora config to update the model with reinforcement learning and RLHF.  Implement this at a later date when we iron out the details.
+We will implement the learning, at a later date as we will need to create a lora config to update the model, and a benchmark to make sure the code we added is actually improving the model.  We can use the prompts to create a benchmark, and then use that to test the model after, compare responses to what we previously gave it.  We will also need to implement a way to get the feedback, make sure it is improving, sorta like self healing code.
