@@ -1,27 +1,42 @@
-import asyncio, argparse
+from __future__ import annotations
+
+import argparse
+import asyncio
+import sys
+from pathlib import Path
+
+if __package__ is None or __package__ == "":
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from app.meta.meta_assistant import MetaAssistant
 from app.orchestrator.router import list_available, set_runtime_model
 
-def cli():
-    p = argparse.ArgumentParser()
-    p.add_argument("--list-models", action="store_true")
-    p.add_argument("--switch", nargs=2, metavar=("TARGET","MODEL_KEY"))
-    args = p.parse_args()
+
+def cli() -> bool:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--list-models", action="store_true")
+    parser.add_argument("--switch", nargs=2, metavar=("TARGET", "MODEL_KEY"))
+    args = parser.parse_args()
+
+    handled = False
     if args.list_models:
-        for k, v in list_available().items():
-            print(f"{k:14s} -> {v}")
-        return
+        for key, model_id in list_available().items():
+            print(f"{key:14s} -> {model_id}")
+        handled = True
     if args.switch:
         target, key = args.switch
         set_runtime_model(target, key)
         print(f"[ok] {target} -> {key}")
+        handled = True
+    return handled
 
-async def demo():
+
+async def demo() -> None:
     meta = MetaAssistant()
-    # simple demo goal
-    res = await meta.run_goal("Create hello world app/main.py with a print statement")
-    print(res.artifacts)
+    result = await meta.run_goal("Create hello world app/main.py with a print statement")
+    print(result.artifacts)
+
 
 if __name__ == "__main__":
-    cli()
-    asyncio.run(demo())
+    if not cli():
+        asyncio.run(demo())

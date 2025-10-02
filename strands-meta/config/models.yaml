@@ -2,10 +2,10 @@ defaults:
   worker: gemma3_tiny
   builder: gemma3_1b
   reviewer: gemma3_1b
-  coordinator: llama3_2_1b
+  coordinator: llama3_2_3b
 
 overrides:
   scaffolder: gemma3_1b
   tester: gemma3_1b
   explainer: gemma3_tiny
-  mentor: llama3_2_1b
+  mentor: llama3_2_3b

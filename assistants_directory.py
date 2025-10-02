@@ -218,7 +218,7 @@ if __name__ == "__main__":
                 break
 
             response = run_{spec.name}_assistant(user_input)
-            print(f"Assistant: {{response}}")
+            print(f"Assistant: {response}")
             print()
 
         except KeyboardInterrupt:
@@ -305,8 +305,8 @@ if __name__ == "__main__":
                     run_function = getattr(assistant_module, f"run_{spec.name}_assistant")
 
                     print(f"🔧 Routing to {assistant_name} assistant...")
-                    response = run_function(query)
-                    print(f"{assistant_name.title()}: {response}")
+                    assistant_response = run_function(query)
+                    print(f"{assistant_name.title()}: {assistant_response}")
                     print()
 
                 except Exception as e:
