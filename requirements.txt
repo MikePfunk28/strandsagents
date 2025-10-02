@@ -5,46 +5,67 @@
 strands-agents>=1.0.0
 strands-agents-builder
 
-# Tools with ALL available extras (official from docs)
+# Tools with FREE extras only (NO agent_core_* AWS Bedrock paid services)
 # See: https://github.com/strands-agents/tools/blob/main/README.md
-strands-agents-tools[mem0_memory,local_chromium_browser,agent_core_browser,agent_core_code_interpreter,a2a_client,diagram,rss,use_computer]
+strands-agents-tools[mem0_memory,local_chromium_browser,a2a_client,diagram,rss,use_computer]
 
 # ============================================================================
 # TOOLS ACTUALLY USED IN YOUR CODE:
 # ============================================================================
-# Based on analysis of all .py files in this project, you import these tools:
+# Based on analysis of all .py files + README.md architecture documentation:
+#
+# YOUR ARCHITECTURE INCLUDES:
+#   • Graph System: Advanced analytics, memory management, embeddings, vector search
+#   • Swarm System: Orchestrators, lightweight agents (270m), complex agents (27b)
+#   • Workflow Engine: Async workflows, callbacks, task lifecycle tracking
+#   • Multiple Databases: cache.db, memory.db, knowledge.db, coderl.db
+#   • MCP Communication: Agent-to-agent messaging and coordination
+#   • Meta-tooling: Dynamic tool creation and loading
+#
+# STRANDS TOOLS IMPORTED IN YOUR CODE:
 #
 # FROM strands_tools:
 #   ✓ http_request        - agent.py, advanced_research.py, reasoning_agent.py, research_assistant.py, thought_agent.py
 #   ✓ handoff_to_user     - agent.py, research_assistant.py, simple_test.py, thought_agent.py
-#   ✓ retrieve            - agent.py, thought_agent.py
+#   ✓ retrieve            - agent.py, thought_agent.py (Amazon Bedrock RAG)
 #   ✓ file_read           - agent.py, chunking_assistant.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
 #   ✓ file_write          - agent.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
 #   ✓ editor              - agent.py, adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
-#   ✓ python_repl         - adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py
+#   ✓ python_repl         - adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, utils/tools.py (NOT on Windows - fcntl)
 #   ✓ shell               - adversarial_agents.py, computer_science_assistant.py, Example_code_assistant/main.py, strandsagents_test.py, swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
-#   ✓ workflow            - garbage_cleanup.py, financial_assistant.py
-#   ✓ think               - garbage_cleanup.py, thought_agent.py
-#   ✓ use_llm             - memory_assistant.py, meta_tool_assistant.py, thought_agent.py
+#   ✓ workflow            - garbage_cleanup.py, financial_assistant.py (orchestrate sequences)
+#   ✓ think               - garbage_cleanup.py, thought_agent.py (deep reasoning branches)
+#   ✓ use_llm             - memory_assistant.py, meta_tool_assistant.py, thought_agent.py (nested AI loops)
 #   ✓ calculator          - code-assistant/math_assistant.py
 #   ✓ browser             - simple_test.py
-#   ✓ load_tool           - swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py
+#   ✓ load_tool           - swarm_system/utils/tools.py, swarm/meta_tooling/tool_builder.py (dynamic tool loading)
 #
 # FROM strands_tools.browser:
 #   ✓ LocalChromiumBrowser - agent.py, thought_agent.py, thought_agent_backup.py, debug_browser.py, browser_assistant.py
 #
-# All these tools are included when you install: strands-agents-tools[local_chromium_browser]
-# Additional extras installed: mem0_memory, agent_core_browser, agent_core_code_interpreter, a2a_client, diagram, rss, use_computer
+# TOOLS YOUR ARCHITECTURE NEEDS (based on README):
+#   ✓ graph               - Multi-agent graph systems (graph/enhanced_memory_graph.py)
+#   ✓ agent_graph         - Agent relationship graphs (README architecture diagrams)
+#   ✓ swarm               - Swarm coordination (swarm_system/, swarm/ - orchestrators + agents)
+#   ✓ batch               - Parallel tool execution (for swarm coordination)
+#   ✓ a2a_client          - Agent-to-agent communication (swarm/communication/mcp_client.py)
+#   ✓ memory              - Context storage (memory.db, Amazon Bedrock integration)
+#   ✓ agent_core_memory   - Bedrock Agent Core Memory (retrieve tool uses this)
+#   ✓ diagram             - Architecture visualization (README diagrams, graph visualization)
+#
+# All these tools are included when you install: strands-agents-tools[local_chromium_browser,a2a_client,diagram,mem0_memory]
+# Additional FREE extras: rss, use_computer
+# EXCLUDED (AWS Bedrock paid): agent_core_browser, agent_core_code_interpreter
 #
 # ============================================================================
 # STRANDS TOOLS REFERENCE - All tools available after installation:
 # ============================================================================
 #
 # RAG & MEMORY:
-#   - retrieve: Amazon Bedrock Knowledge Bases semantic retrieval
-#   - memory: Agent memory persistence in Bedrock Knowledge Bases
-#   - agent_core_memory: Amazon Bedrock Agent Core Memory integration
-#   - mem0_memory: Agent memory built on Mem0 (requires [mem0_memory] extra)
+#   - retrieve: Amazon Bedrock Knowledge Bases semantic retrieval (AWS paid service)
+#   - memory: Agent memory persistence in Bedrock Knowledge Bases (AWS paid service)
+#   - agent_core_memory: Amazon Bedrock Agent Core Memory integration (AWS paid - EXCLUDED)
+#   - mem0_memory: Agent memory built on Mem0 FREE local/FAISS (requires [mem0_memory] extra)
 #
 # FILE OPERATIONS:
 #   - editor: Advanced file editing (line edits, search, undo)
@@ -59,12 +80,12 @@ strands-agents-tools[mem0_memory,local_chromium_browser,agent_core_browser,agent
 #
 # CODE INTERPRETATION:
 #   - python_repl: Run Python code (NOT supported on Windows - fcntl module)
-#   - code_interpreter: Execute code in isolated sandboxes (requires [agent_core_code_interpreter] extra)
+#   - code_interpreter: Execute code in isolated sandboxes (AWS Bedrock paid - EXCLUDED)
 #
 # WEB & NETWORK:
 #   - http_request: Make API calls, fetch web data
 #   - slack: Slack integration with real-time events
-#   - browser: Automate browser interactions (requires [local_chromium_browser] or [agent_core_browser] extra)
+#   - browser: Automate browser with LocalChromiumBrowser (requires [local_chromium_browser] extra + playwright install chromium)
 #   - rss: Manage and process RSS feeds (requires [rss] extra)
 #
 # MULTI-MODAL:
@@ -242,9 +263,17 @@ youtube-transcript-api
 # NOTES:
 # ============================================================================
 # - python_repl tool NOT supported on Windows (requires fcntl module)
-# - Browser tools require: playwright install chromium (run after pip install)
+# - Browser tools require:
+#     1. pip install strands-agents-tools[local_chromium_browser]
+#     2. playwright install chromium
+#     3. Import: from strands_tools.browser import LocalChromiumBrowser
+# - EXCLUDED AWS Bedrock paid services: agent_core_browser, agent_core_code_interpreter, agent_core_memory
 # - Tavily tools require: export TAVILY_API_KEY=your_key
 # - AWS tools require: export AWS_REGION=us-west-2 (or your region)
 # - Stability AI requires: export STABILITY_API_KEY=sk-xxx
-# - Mem0 backend options: MEM0_API_KEY (platform) or OPENSEARCH_HOST (opensearch) or defaults to FAISS
+# - Mem0 backend options: MEM0_API_KEY (platform) or OPENSEARCH_HOST (opensearch) or defaults to FREE local FAISS
 # - Set BYPASS_TOOL_CONSENT=true to skip confirmation prompts for sensitive operations
+#
+# ACTIVATION:
+#   Windows: .venv\Scripts\activate
+#   Linux/Mac: source .venv/bin/activate

@@ -6,9 +6,28 @@ from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 from strands import Agent
-from strands.models import OllamaModel
-from strands_tools import shell, editor, load_tool
-from strands.types.tool_types import ToolUse, ToolResult
+from strands.models.ollama import OllamaModel
+# Windows compatibility: handle missing termios module
+try:
+    from strands_tools import shell, editor, load_tool
+    STRANDS_TOOLS_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: strands_tools not fully available: {e}")
+    STRANDS_TOOLS_AVAILABLE = False
+    # Create fallback functions
+    def load_tool(*args, **kwargs):
+        return "Tool loading not available on Windows"
+    def shell(*args, **kwargs):
+        return "Shell operations not available on Windows"
+    def editor(*args, **kwargs):
+        return "Editor operations not available on Windows"
+# Windows compatibility: handle missing tool_types module
+try:
+    from strands.types.tool_types import ToolUse, ToolResult
+except ImportError:
+    # Fallback definitions for Windows compatibility
+    ToolUse = Dict[str, Any]
+    ToolResult = Dict[str, Any]
 
 @dataclass
 class ToolSpec:
@@ -98,11 +117,19 @@ class ToolBuilder:
         os.makedirs(tools_dir, exist_ok=True)
 
         # Initialize tool builder agent with LOCAL OLLAMA ONLY
-        self.agent = Agent(
-            model=OllamaModel(model="llama3.2:3b", host=host),  # LOCAL ONLY
-            system_prompt=TOOL_BUILDER_SYSTEM_PROMPT,
-            tools=[load_tool, shell, editor]
-        )
+        try:
+            self.agent = Agent(
+                model=OllamaModel(model_id="llama3.2:3b", host=host),  # LOCAL ONLY
+                system_prompt=TOOL_BUILDER_SYSTEM_PROMPT,
+                tools=[load_tool, shell, editor]
+            )
+        except Exception as e:
+            print(f"Warning: Could not initialize Ollama model: {e}")
+            # Fallback to a basic agent without tools for now
+            self.agent = Agent(
+                model=OllamaModel(model_id="llama3.2:3b", host=host),
+                system_prompt=TOOL_BUILDER_SYSTEM_PROMPT
+            )
 
     async def create_tool(self, description: str, agent_type: Optional[str] = None) -> ToolSpec:
         """Create a new tool based on description."""
@@ -121,7 +148,7 @@ class ToolBuilder:
         Handle all steps autonomously including naming and file creation.
         """
 
-        response = await self.agent.run_async(prompt)
+        response = self.agent(prompt)
 
         # Parse response to extract tool name (simplified - would be more robust in production)
         if "TOOL_CREATED:" in response:
@@ -207,6 +234,7 @@ def {tool_name}(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
 '''
 
         # Write tool file
+        os.makedirs(os.path.dirname(tool_file), exist_ok=True)
         with open(tool_file, 'w') as f:
             f.write(tool_code)
 
