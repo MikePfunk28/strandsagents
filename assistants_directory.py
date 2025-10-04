@@ -6,11 +6,15 @@ This creates a proper swarm system where each assistant is defined
 in its own file with its own model, tools, and prompts.
 """
 
+from strands_tools import think, editor, http_request, file_read, file_write
 import os
 import sys
 import importlib.util
 from typing import Dict, Any, List
 from dataclasses import dataclass
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Add current directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +23,18 @@ if current_dir not in sys.path:
 
 from strands.models.ollama import OllamaModel
 from strands import Agent, tool
+
+ollama_model = OllamaModel(
+    host= "https://localhost:11434",
+    model="qwen3:4b",
+)
+
+agent = Agent(
+    model=ollama_model,
+    tools=[think, editor, http_request, file_read, file_write]
+)
+
+
 
 @dataclass
 class AssistantSpec:
@@ -34,7 +50,7 @@ ASSISTANTS = {
     "researcher": AssistantSpec(
         name="researcher",
         file_path="assistants/researcher_assistant.py",
-        model="llama3.2",
+        model=ollama_model,
         description="Research and information gathering specialist",
         tools=["http_request", "file_read"],
         system_prompt="""You are a research specialist focused on gathering accurate information from reliable sources.
@@ -45,7 +61,7 @@ ASSISTANTS = {
     "writer": AssistantSpec(
         name="writer",
         file_path="assistants/writer_assistant.py",
-        model="llama3.2",
+        model=ollama_model,
         description="Content creation and writing specialist",
         tools=["file_write", "editor"],
         system_prompt="""You are a professional writer who creates clear, engaging content.
@@ -56,7 +72,7 @@ ASSISTANTS = {
     "analyst": AssistantSpec(
         name="analyst",
         file_path="assistants/analyst_assistant.py",
-        model="llama3.2",
+        model=ollama_model,
         description="Data analysis and critical thinking specialist",
         tools=["calculator", "think"],
         system_prompt="""You are a critical analyst who examines information objectively.
@@ -100,7 +116,7 @@ ASSISTANTS = {
     "planner": AssistantSpec(
         name="planner",
         file_path="assistants/planner_assistant.py",
-        model="llama3.2",
+        model="qwen3:1.7b",
         description="Strategic planning and organization specialist",
         tools=["think", "editor"],
         system_prompt="""You are a strategic planner who creates detailed plans and organizes complex tasks.
@@ -111,7 +127,7 @@ ASSISTANTS = {
     "summarizer": AssistantSpec(
         name="summarizer",
         file_path="assistants/summarizer_assistant.py",
-        model="llama3.2",
+        model="ollama_model",
         description="Information synthesis and summarization specialist",
         tools=["file_read", "editor"],
         system_prompt="""You are a summarization expert who distills complex information into clear,
@@ -232,7 +248,7 @@ if __name__ == "__main__":
         os.makedirs(os.path.dirname(spec.file_path), exist_ok=True)
 
         # Write the file
-        with open(spec.file_path, 'w') as f:
+        with open(spec.file_path, 'w', encoding='utf-8') as f:
             f.write(file_content)
 
         print(f"✅ Created {spec.name} assistant: {spec.file_path}")

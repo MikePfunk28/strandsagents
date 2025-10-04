@@ -15,6 +15,11 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+try:
+    import aiofiles
+except ImportError:
+    aiofiles = None
+
 # Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -36,8 +41,7 @@ async def run_code_feedback(
     file_path: str,
     iterations: int = 1,
     guidance: Optional[List[str]] = None,
-    metadata: Optional[Dict[str, Any]] = None,
-) -> None:
+    metadata: Optional[Dict[str, Any]] = None,) -> None:
     """Run the code-feedback workflow graph and display results."""
     print(f"[workflow] running code-feedback loop for: {file_path}")
 
@@ -59,8 +63,7 @@ async def run_code_feedback(
     run_info = state.results.get("run", {})
     iterations_payload = state.results.get("iterations", [])
 
-    print("
-=== Workflow Summary ===")
+    print("=== Workflow Summary ===")
     print(f"Run ID       : {run_info.get('id')}")
     print(f"Iterations   : {len(iterations_payload)}")
     history = state.results.get("history", {}).get("reward", {})
@@ -70,8 +73,7 @@ async def run_code_feedback(
     if iterations_payload:
         latest = iterations_payload[-1]
         ds = latest.get("discriminator_score", {})
-        print("
---- Latest Iteration ---")
+        print("--- Latest Iteration ---")
         print(f"Reward     : {ds.get('reward')}")
         print(f"Coverage   : {ds.get('coverage')}")
         print(f"Accuracy   : {ds.get('accuracy')}")
@@ -79,8 +81,7 @@ async def run_code_feedback(
         print(f"Formatting : {ds.get('formatting')}")
         print(f"Summary    : {latest.get('generator_output', {}).get('overall_summary')}")
 
-    print("
-Guidance history:")
+    print("Guidance history:")
     graph_description = workflow.describe()["feedback_graph"]
     print(json.dumps(graph_description.get("loop_guidance", []), indent=2))
 
@@ -104,8 +105,7 @@ async def analyze_code_file(file_path: str, model: str = "llama3.2:3b") -> None:
         print(f"[graph] analysis completed for: {result['file_path']}")
         print(f"graph type : {result['graph_type']}")
         print(f"timestamp  : {result['timestamp']}")
-        print("
-=== Analysis Result ===")
+        print("=== Analysis Result ===")
         print(result["result"])
         print("=======================")
 
@@ -125,8 +125,12 @@ async def analyze_data_structures(code_input: str, model: str = "llama3.2:3b") -
 
     try:
         if Path(code_input).exists():
-            with open(code_input, "r", encoding="utf-8") as file:
-                code_content = file.read()
+            if aiofiles:
+                async with aiofiles.open(code_input, "r", encoding="utf-8") as file:
+                    code_content = await file.read()
+            else:
+                # Fallback to sync I/O in thread
+                code_content = await asyncio.to_thread(Path(code_input).read_text, encoding="utf-8")
             print(f"[graph] reading from file: {code_input}")
         else:
             code_content = code_input
@@ -144,8 +148,7 @@ async def analyze_data_structures(code_input: str, model: str = "llama3.2:3b") -
         print("[graph] data structure analysis completed")
         print(f"graph type : {result['graph_type']}")
         print(f"timestamp  : {result['timestamp']}")
-        print("
-=== Analysis Result ===")
+        print("=== Analysis Result ===")
         print(result["result"])
         print("=======================")
 
@@ -161,8 +164,12 @@ async def debug_issue(error_info: str, code_context: str = "", model: str = "lla
 
     try:
         if code_context and Path(code_context).exists():
-            with open(code_context, "r", encoding="utf-8") as file:
-                code_content = file.read()
+            if aiofiles:
+                async with aiofiles.open(code_context, "r", encoding="utf-8") as file:
+                    code_content = await file.read()
+            else:
+                # Fallback to sync I/O in thread
+                code_content = await asyncio.to_thread(Path(code_context).read_text, encoding="utf-8")
             print(f"[graph] reading code context from: {code_context}")
         else:
             code_content = code_context or "No code context provided"
@@ -180,8 +187,7 @@ async def debug_issue(error_info: str, code_context: str = "", model: str = "lla
         print("[graph] debugging analysis completed")
         print(f"graph type : {result['graph_type']}")
         print(f"timestamp  : {result['timestamp']}")
-        print("
-=== Debug Result ===")
+        print("=== Debug Result ===")
         print(result["result"])
         print("====================")
 
@@ -189,8 +195,8 @@ async def debug_issue(error_info: str, code_context: str = "", model: str = "lla
         print(f"[graph] error debugging issue: {exc}")
 
 
-async def interactive_graph() -> None:
-    """Run graph system in interactive mode."""
+def _print_help() -> None:
+    """Print interactive help."""
     print("Interactive Graph System")
     print("=" * 50)
     print("Commands:")
@@ -202,70 +208,91 @@ async def interactive_graph() -> None:
     print("  quit                       - Exit")
     print("=" * 50)
 
+
+async def _handle_analyze_command(command: str) -> None:
+    """Handle analyze command."""
+    file_path = command[8:].strip()
+    if file_path:
+        await analyze_code_file(file_path)
+    else:
+        print("provide a file path")
+
+
+async def _handle_debug_command(command: str) -> None:
+    """Handle debug command."""
+    error_info = command[6:].strip()
+    if error_info:
+        code_context = (await asyncio.to_thread(input, "Code context (file path or snippet, optional): ")).strip()
+        await debug_issue(error_info, code_context)
+    else:
+        print("provide error information")
+
+
+async def _handle_data_command(command: str) -> None:
+    """Handle data structures command."""
+    data_input = command[5:].strip()
+    if data_input:
+        await analyze_data_structures(data_input)
+    else:
+        print("provide code or file path")
+
+
+async def _handle_feedback_command(command: str) -> None:
+    """Handle feedback command."""
+    file_path = command[9:].strip()
+    if not file_path:
+        print("provide a file path")
+        return
+    
+    guidance = (await asyncio.to_thread(input, "Guidance (comma separated, optional): ")).strip()
+    guidance_items = [item.strip() for item in guidance.split(",") if item.strip()] if guidance else []
+    iterations = (await asyncio.to_thread(input, "Iterations (default 1): ")).strip()
+    try:
+        iteration_count = int(iterations) if iterations else 1
+    except ValueError:
+        iteration_count = 1
+    await run_code_feedback(file_path, iterations=iteration_count, guidance=guidance_items)
+
+
+async def _process_command(command: str) -> bool:
+    """Process a single command. Returns True to continue, False to exit."""
+    if not command:
+        return True
+    
+    cmd_lower = command.lower()
+    if cmd_lower in {"quit", "exit", "q"}:
+        return False
+    
+    if cmd_lower == "status":
+        print("Available graph types: code_analysis, data_structures, debugging, code_feedback")
+    elif cmd_lower.startswith("analyze "):
+        await _handle_analyze_command(command)
+    elif cmd_lower.startswith("debug "):
+        await _handle_debug_command(command)
+    elif cmd_lower.startswith("data "):
+        await _handle_data_command(command)
+    elif cmd_lower.startswith("feedback "):
+        await _handle_feedback_command(command)
+    else:
+        print("unknown command. type 'status' for options")
+    
+    return True
+
+
+async def interactive_graph() -> None:
+    """Run graph system in interactive mode."""
+    _print_help()
+    
     while True:
         try:
-            command = input("
-graph> ").strip()
-            if not command:
-                continue
-            if command.lower() in {"quit", "exit", "q"}:
+            command = (await asyncio.to_thread(input, "graph> ")).strip()
+            if not await _process_command(command):
                 break
-
-            if command.lower() == "status":
-                print("Available graph types: code_analysis, data_structures, debugging, code_feedback")
-                continue
-
-            if command.lower().startswith("analyze "):
-                file_path = command[8:].strip()
-                if file_path:
-                    await analyze_code_file(file_path)
-                else:
-                    print("provide a file path")
-                continue
-
-            if command.lower().startswith("debug "):
-                error_info = command[6:].strip()
-                if error_info:
-                    code_context = input("Code context (file path or snippet, optional): ").strip()
-                    await debug_issue(error_info, code_context)
-                else:
-                    print("provide error information")
-                continue
-
-            if command.lower().startswith("data "):
-                data_input = command[5:].strip()
-                if data_input:
-                    await analyze_data_structures(data_input)
-                else:
-                    print("provide code or file path")
-                continue
-
-            if command.lower().startswith("feedback "):
-                file_path = command[9:].strip()
-                if file_path:
-                    guidance = input("Guidance (comma separated, optional): ").strip()
-                    guidance_items = [item.strip() for item in guidance.split(",") if item.strip()] if guidance else []
-                    iterations = input("Iterations (default 1): ").strip()
-                    try:
-                        iteration_count = int(iterations) if iterations else 1
-                    except ValueError:
-                        iteration_count = 1
-                    await run_code_feedback(
-                        file_path,
-                        iterations=iteration_count,
-                        guidance=guidance_items,
-                    )
-                else:
-                    print("provide a file path")
-                continue
-
-            print("unknown command. type 'status' for options")
-
         except (KeyboardInterrupt, EOFError):
             break
         except Exception as exc:
             print(f"error: {exc}")
-
+    
     print("graph system session ended")
 
 

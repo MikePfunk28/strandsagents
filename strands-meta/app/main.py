@@ -41,7 +41,7 @@ async def interactive_session() -> None:
     print("\nStrands Mentor ready. Describe the assistant you want to build.")
     print("Type 'build' when you want to execute the plan, or 'exit' to quit.\n")
 
-    goal = input("Goal> ").strip()
+    goal = (await asyncio.to_thread(input, "Goal> ")).strip()
     if not goal:
         print("No goal provided. Exiting.")
         return
@@ -60,7 +60,7 @@ async def interactive_session() -> None:
             print(f"\nMentor:\n{mentor_text}\n")
             history.append({"role": "mentor", "text": mentor_text})
 
-        user_reply = input("You> ").strip()
+        user_reply = (await asyncio.to_thread(input, "You> ")).strip()
         if not user_reply:
             continue
 

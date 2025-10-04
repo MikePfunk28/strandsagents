@@ -255,6 +255,24 @@ pytest
 pytest-asyncio
 
 # ============================================================================
+# TRACING & MONITORING
+# ============================================================================
+# OpenTelemetry for distributed tracing
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation
+opentelemetry-exporter-otlp
+
+# LangSmith for LLM tracing (Strands compatible)
+langsmith
+
+# Weights & Biases for experiment tracking
+wandb
+
+# Phoenix for AI observability
+arize-phoenix
+
+# ============================================================================
 # OTHER TOOLS
 # ============================================================================
 youtube-transcript-api
@@ -273,6 +291,12 @@ youtube-transcript-api
 # - Stability AI requires: export STABILITY_API_KEY=sk-xxx
 # - Mem0 backend options: MEM0_API_KEY (platform) or OPENSEARCH_HOST (opensearch) or defaults to FREE local FAISS
 # - Set BYPASS_TOOL_CONSENT=true to skip confirmation prompts for sensitive operations
+#
+# TRACING OPTIONS:
+#   OpenTelemetry: Set OTEL_EXPORTER_OTLP_ENDPOINT for trace collection
+#   LangSmith: Set LANGSMITH_API_KEY and LANGSMITH_PROJECT for LLM tracing
+#   Weights & Biases: Set WANDB_API_KEY and WANDB_PROJECT for experiment tracking
+#   Phoenix: Run 'phoenix serve' and set PHOENIX_COLLECTOR_ENDPOINT
 #
 # ACTIVATION:
 #   Windows: .venv\Scripts\activate
