@@ -10,9 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-
+from ptpython.repl import embed
 from strands import tool
-
+embed(globals(), locals())
 logger = logging.getLogger(__name__)
 
 
