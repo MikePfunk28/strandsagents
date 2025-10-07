@@ -73,7 +73,7 @@ def agent_wrapper_tool(query: str, context: str = "") -> str:
     )
 
     full_query = f"Context: {context}\nQuery: {query}" if context else query
-    response = agent.run(full_query)
+    response = str(agent(full_query))
     return response
 ```
 
@@ -114,6 +114,7 @@ Always provide complete, working tool code that:
 
 Focus on creating practical, efficient tools for the microservices swarm."""
 
+
 @dataclass
 class ToolSpec:
     """Specification for a tool to be created."""
@@ -122,6 +123,7 @@ class ToolSpec:
     parameters: Dict[str, Any]
     return_type: str
     category: str = "general"
+
 
 class ToolBuilder:
     """Meta-tooling agent that creates custom tools dynamically."""
@@ -155,7 +157,7 @@ Generate complete Python code with:
 Use ONLY OllamaModel (localhost:11434) - NO cloud services."""
 
         try:
-            tool_code = await self.agent.run_async(prompt)
+            tool_code = str(self.agent(prompt))
             self.created_tools[tool_spec.name] = tool_code
             return tool_code
         except Exception as e:
@@ -163,7 +165,7 @@ Use ONLY OllamaModel (localhost:11434) - NO cloud services."""
             raise
 
     async def create_agent_wrapper_tool(self, agent_name: str, agent_prompt: str,
-                                      model_name: str = "gemma:270m") -> str:
+                                        model_name: str = "gemma:270m") -> str:
         """Create a tool that wraps an agent for use by other agents."""
         prompt = f"""Create an agent wrapper tool with these specifications:
 
@@ -181,12 +183,13 @@ Generate a @tool decorated function that:
 The tool should allow other agents to use this agent as a service."""
 
         try:
-            wrapper_code = await self.agent.run_async(prompt)
+            wrapper_code = str(self.agent(prompt))
             tool_name = f"{agent_name}_tool"
             self.created_tools[tool_name] = wrapper_code
             return wrapper_code
         except Exception as e:
-            logger.error(f"Failed to create agent wrapper for {agent_name}: {e}")
+            logger.error(
+                f"Failed to create agent wrapper for {agent_name}: {e}")
             raise
 
     async def create_tool_collection(self, domain: str, capabilities: List[str]) -> Dict[str, str]:
@@ -205,7 +208,7 @@ For each capability, create a @tool decorated function that:
 Generate complete, working tools as a collection."""
 
         try:
-            collection_code = await self.agent.run_async(prompt)
+            collection_code = str(self.agent(prompt))
             collection_name = f"{domain}_tools"
             self.created_tools[collection_name] = collection_code
             return {collection_name: collection_code}
@@ -241,7 +244,7 @@ Improve the tool while maintaining:
 Provide the optimized version."""
 
         try:
-            optimized_code = await self.agent.run_async(prompt)
+            optimized_code = str(self.agent(prompt))
             self.created_tools[f"{tool_name}_optimized"] = optimized_code
             return optimized_code
         except Exception as e:
@@ -249,6 +252,8 @@ Provide the optimized version."""
             raise
 
 # Factory functions for common tool patterns
+
+
 async def create_research_tool(tool_builder: ToolBuilder, research_domain: str) -> str:
     """Create a research tool for a specific domain."""
     tool_spec = ToolSpec(
@@ -264,6 +269,7 @@ async def create_research_tool(tool_builder: ToolBuilder, research_domain: str) 
     )
     return await tool_builder.create_tool(tool_spec)
 
+
 async def create_analysis_tool(tool_builder: ToolBuilder, analysis_type: str) -> str:
     """Create an analysis tool for specific analysis type."""
     tool_spec = ToolSpec(
@@ -278,6 +284,7 @@ async def create_analysis_tool(tool_builder: ToolBuilder, analysis_type: str) ->
         category="analysis"
     )
     return await tool_builder.create_tool(tool_spec)
+
 
 async def create_synthesis_tool(tool_builder: ToolBuilder) -> str:
     """Create a tool for synthesizing multiple inputs."""
@@ -295,6 +302,8 @@ async def create_synthesis_tool(tool_builder: ToolBuilder) -> str:
     return await tool_builder.create_tool(tool_spec)
 
 # Example usage and testing
+
+
 async def demo_tool_builder():
     """Demonstrate the meta-tooling system."""
     print("StrandsAgents Meta-Tooling Demo")
