@@ -24,7 +24,7 @@ except ImportError:
     SANDBOX_AVAILABLE = False
     logger.warning("🔧 Sandbox executor not available - code execution disabled")
 
-def agent(model_id: str = "qwen3:8b", tools: List = None, system_prompt: str = "",
+def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
           enable_code_execution: bool = False, sandbox_timeout: int = 30):
     """
     Enhanced @agent decorator that eliminates boilerplate and adds powerful features.
@@ -116,15 +116,15 @@ def _handle_code_execution(query: str, agent: Agent, timeout: int) -> str:
             # Execute code
             result = sandbox.execute_code(code, language)
 
-            if result.get("error"):
-                return f"Code execution failed: {result['error']}"
+            if result.error:
+                return f"Code execution failed: {result.error}"
 
             # Format result
             output = []
-            if result.get("stdout"):
-                output.append(f"Output: {result['stdout']}")
-            if result.get("stderr"):
-                output.append(f"Errors: {result['stderr']}")
+            if result.stdout:
+                output.append(f"Output: {result.stdout}")
+            if result.stderr:
+                output.append(f"Errors: {result.stderr}")
 
             return "\\n".join(output) if output else "Code executed successfully (no output)"
 

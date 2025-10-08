@@ -52,6 +52,15 @@ from .workflow_templates import (
     template_manager
 )
 
+from .model_selector import (
+    ModelSelector,
+    ModelInfo,
+    get_best_model_for_task,
+    list_available_models,
+    get_model_recommendations,
+    model_selector
+)
+
 __all__ = [
     'agent',
     'SandboxExecutor',
@@ -69,5 +78,11 @@ __all__ = [
     'get_workflow_template',
     'list_workflow_templates',
     'execute_workflow',
-    'template_manager'
+    'template_manager',
+    'ModelSelector',
+    'ModelInfo',
+    'get_best_model_for_task',
+    'list_available_models',
+    'get_model_recommendations',
+    'model_selector'
 ]
