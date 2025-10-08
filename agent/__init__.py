@@ -41,6 +41,14 @@ from .agent_decorator import (
 )
 
 from .sandbox_executor import SandboxExecutor, ExecutionResult
+from .sandbox_tool import sandbox_test_code
+from .scaffolder import (
+    AgentConfig,
+    QUESTIONNAIRE,
+    materialise_agent_module,
+    render_agent_module,
+    validate_answers,
+)
 
 from .workflow_templates import (
     WorkflowTemplate,
@@ -61,10 +69,26 @@ from .model_selector import (
     model_selector
 )
 
+from .agent_builder import (
+    AgentBuilder,
+    AgentSpecification,
+    create_agent_interactive,
+    create_agent_from_type,
+    list_agent_types,
+    validate_generated_agent,
+    agent_builder
+)
+
 __all__ = [
     'agent',
     'SandboxExecutor',
     'ExecutionResult',
+    'sandbox_test_code',
+    'AgentConfig',
+    'QUESTIONNAIRE',
+    'materialise_agent_module',
+    'render_agent_module',
+    'validate_answers',
     'list_agents',
     'get_agent_info',
     'call_agent',

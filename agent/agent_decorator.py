@@ -56,7 +56,8 @@ def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
             'system_prompt': system_prompt,
             'enable_code_execution': enable_code_execution,
             'sandbox_timeout': sandbox_timeout,
-            'function': func,
+            'function': None,  # Set after wrapper definition
+            'original_function': func,
             'description': func.__doc__ or "No description available"
         }
 
@@ -88,6 +89,9 @@ def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         wrapper.__annotations__ = func.__annotations__
+
+        # Store wrapper in registry for direct invocation
+        AGENT_REGISTRY[func.__name__]['function'] = wrapper
 
         return wrapper
     return decorator

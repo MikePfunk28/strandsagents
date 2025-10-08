@@ -12,7 +12,7 @@ def get_strandsagents_docs():
 def get_repo_info(repo_url):
     """Get repository information with error handling"""
     try:
-        response = requests.get(repo_url)
+        response = requests.get(repo_url, timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -22,7 +22,7 @@ def get_repo_info(repo_url):
 def get_readme_content(readme_url):
     """Get README content with error handling"""
     try:
-        response = requests.get(readme_url)
+        response = requests.get(readme_url, timeout=10)
         response.raise_for_status()
         readme_data = response.json()
         return base64.b64decode(readme_data['content']).decode('utf-8')
