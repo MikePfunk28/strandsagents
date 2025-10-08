@@ -97,6 +97,16 @@ MEMORY_PROFILE_SETTINGS: Dict[str, Dict[str, Any]] = {
 
 
 @dataclass
+class ScaffoldingResult:
+    """Structured result returned to the UI/backend."""
+
+    ok: bool
+    message: str
+    artifacts: Dict[str, str]
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class Question:
     """Represents a single scaffolding question."""
 
@@ -244,6 +254,28 @@ class AgentConfig:
         if isinstance(self.output_dir, str):
             self.output_dir = Path(self.output_dir)
 
+        self.prompt_source = (self.prompt_source or "inline").lower()
+        if self.prompt_source not in {"inline", "file"}:
+            raise ValueError("prompt_source must be either 'inline' or 'file'")
+
+        prompt_path_obj: Optional[Path] = None
+        if self.prompt_path:
+            prompt_path_obj = Path(self.prompt_path).expanduser()
+            if not prompt_path_obj.is_absolute():
+                prompt_path_obj = (Path.cwd() / prompt_path_obj).resolve()
+        self.prompt_path = prompt_path_obj
+
+        if self.prompt_source == "file":
+            if self.prompt_path is None or not self.prompt_path.exists():
+                raise ValueError("Prompt file path is invalid or does not exist.")
+            self.system_prompt = self.prompt_path.read_text(encoding="utf-8")
+        else:
+            self.system_prompt = self.system_prompt or ""
+
+        self.system_prompt = self.system_prompt.strip()
+        if not self.system_prompt:
+            raise ValueError("System prompt content cannot be empty.")
+
         # Normalise tool selection
         unique_tools = []
         for tool in self.tool_selection:
@@ -270,6 +302,9 @@ class AgentConfig:
                 "model_id": self.model_id,
                 "sandbox_timeout": self.sandbox_timeout,
                 "enable_code_execution": self.enable_code_execution,
+                "prompt_source": self.prompt_source,
+                "prompt_file_source": str(self.prompt_path) if self.prompt_path else None,
+                "system_prompt_length": len(self.system_prompt),
             }
         )
 
@@ -302,7 +337,9 @@ class AgentConfig:
             agent_name=answers["agent_name"],
             display_name=answers.get("display_name", ""),
             description=answers["description"],
-            system_prompt=answers["system_prompt"],
+            system_prompt=answers.get("system_prompt", ""),
+            prompt_source=(answers.get("prompt_source") or "inline"),
+            prompt_path=answers.get("prompt_path") or None,
             model_id=answers.get("model_id") or AVAILABLE_MODELS[0],
             enable_code_execution=_normalise_boolean(
                 answers.get("enable_code_execution", True),
@@ -325,9 +362,11 @@ def validate_answers(answers: Dict[str, Any]) -> None:
             raise ValueError(f"Missing required answer: {question.id}")
 
         if question.id == "agent_name" and value:
-            if not re.fullmatch(r"[^a-zA-Z0-9_]+", value.replace("-", "_")):
+            sanitised = value.replace("-", "_")
+            if not re.fullmatch(r"[a-zA-Z0-9_]+", sanitised):
                 raise ValueError(
-                    "agent_name must contain only letters, numbers, underscores.")
+                    "agent_name must contain only letters, numbers, underscores."
+                )
 
         if question.qtype == "choice" and question.choices and value:
             if value not in question.choices:
@@ -346,6 +385,26 @@ def validate_answers(answers: Dict[str, Any]) -> None:
                 if lowered not in ("true", "false", "yes", "no", "1", "0"):
                     raise ValueError(
                         f"{question.id} must be a boolean-like value")
+
+    prompt_source = (answers.get("prompt_source") or "inline").lower()
+    if prompt_source not in {"inline", "file"}:
+        raise ValueError("prompt_source must be either 'inline' or 'file'")
+
+    if prompt_source == "inline":
+        prompt_text = answers.get("system_prompt", "")
+        if not str(prompt_text).strip():
+            raise ValueError(
+                "system_prompt is required when prompt_source is 'inline'")
+    else:
+        prompt_path = answers.get("prompt_path")
+        if not prompt_path or not str(prompt_path).strip():
+            raise ValueError(
+                "prompt_path is required when prompt_source is 'file'")
+        resolved = Path(str(prompt_path)).expanduser()
+        if not resolved.is_absolute():
+            resolved = (Path.cwd() / resolved).resolve()
+        if not resolved.exists():
+            raise ValueError(f"Prompt file not found at {resolved}")
 
 
 def _normalise_boolean(value: Any, default: bool = False) -> bool:
@@ -392,12 +451,12 @@ def materialise_agent_module(config: AgentConfig) -> Dict[str, Path]:
     prompt_dir.mkdir(parents=True, exist_ok=True)
     metadata_dir.mkdir(parents=True, exist_ok=True)
 
-    module_content = render_agent_module(config)
-    module_path.write_text(module_content, encoding="utf-8")
-
     prompt_path = prompt_dir / f"{config.agent_name}.prompt"
-    prompt_path.write_text(
-        config.system_prompt.strip() + "\n", encoding="utf-8")
+    prompt_text = config.system_prompt.rstrip() + "\n"
+    prompt_path.write_text(prompt_text, encoding="utf-8")
+
+    module_content = render_agent_module(config, module_path, prompt_path)
+    module_path.write_text(module_content, encoding="utf-8")
 
     metadata_path = metadata_dir / f"{config.agent_name}.json"
     metadata_payload = config.metadata.copy()
@@ -426,6 +485,7 @@ def materialise_agent_module(config: AgentConfig) -> Dict[str, Path]:
 
     metadata_path.write_text(json.dumps(
         metadata_payload, indent=2), encoding="utf-8")
+    config.metadata = metadata_payload.copy()
 
     logger.info("Generated agent module at %s", module_path)
 
@@ -441,7 +501,33 @@ def materialise_agent_module(config: AgentConfig) -> Dict[str, Path]:
     return paths
 
 
-def render_agent_module(config: AgentConfig) -> str:
+def generate_agent(answers: Dict[str, Any]) -> ScaffoldingResult:
+    """Programmatic entry point for the UI. Returns structured artifacts."""
+    try:
+        validate_answers(answers)
+        config = AgentConfig.from_answers(answers)
+        paths = materialise_agent_module(config)
+        artifacts = {key: str(value) for key, value in paths.items()}
+
+        message = f"Agent '{config.agent_name}' generated successfully."
+        return ScaffoldingResult(
+            ok=True,
+            message=message,
+            artifacts=artifacts,
+            metadata=config.metadata,
+        )
+
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("Agent scaffolding failed: %s", exc)
+        return ScaffoldingResult(
+            ok=False,
+            message=str(exc),
+            artifacts={},
+            metadata={},
+        )
+
+
+def render_agent_module(config: AgentConfig, module_path: Path, prompt_path: Path) -> str:
     """Render Python module for the generated agent."""
     timestamp = datetime.utcnow().isoformat() + "Z"
 
@@ -462,7 +548,8 @@ def render_agent_module(config: AgentConfig) -> str:
     if not tool_references:
         tool_references = ""
 
-    formatted_prompt = _format_multiline_string(config.system_prompt)
+    prompt_relative = prompt_path.relative_to(module_path.parent)
+    prompt_relative_str = "/".join(prompt_relative.parts)
 
     header = dedent(
         f"""\
@@ -472,7 +559,8 @@ def render_agent_module(config: AgentConfig) -> str:
         """
     ).strip()
 
-    imports_block = "\n".join(["from agent import agent"] + tool_imports)
+    imports = ["from pathlib import Path", "from agent import agent"] + tool_imports
+    imports_block = "\n".join(dict.fromkeys(imports))  # Preserve order, remove duplicates
 
     tools_block = (
         f"TOOLS = [{tool_references}]\n" if tool_references else "TOOLS: list = []\n"
@@ -480,7 +568,8 @@ def render_agent_module(config: AgentConfig) -> str:
 
     function_body = dedent(
         f"""
-        SYSTEM_PROMPT = {formatted_prompt}
+        PROMPT_PATH = Path(__file__).parent / Path(r"{prompt_relative_str}")
+        SYSTEM_PROMPT = PROMPT_PATH.read_text(encoding="utf-8")
 
 
         @agent(
@@ -497,13 +586,6 @@ def render_agent_module(config: AgentConfig) -> str:
     ).strip()
 
     return "\n\n".join([header, imports_block, "", tools_block, "", function_body]) + "\n"
-
-
-def _format_multiline_string(value: str) -> str:
-    """Serialise multi-line text as a triple-quoted Python string."""
-    normalised = dedent(value).strip()
-    escaped = normalised.replace('"""', '\\"""')
-    return f'"""{escaped}"""'
 
 
 def process_context_documents(config: AgentConfig, metadata_dir: Path) -> Optional[Dict[str, Any]]:
@@ -617,11 +699,13 @@ def run_cli() -> None:
     """Entry point for manual execution."""
     print("StrandsAgents deterministic scaffolder\n")
     answers = collect_answers_interactively()
-    validate_answers(answers)
-    config = AgentConfig.from_answers(answers)
-    paths = materialise_agent_module(config)
-    print("\nGeneration complete. Artefacts:")
-    for label, path in paths.items():
+    result = generate_agent(answers)
+    if not result.ok:
+        print(f"\nGeneration failed: {result.message}")
+        return
+
+    print("\nGeneration complete. Artifacts:")
+    for label, path in result.artifacts.items():
         print(f"- {label}: {path}")
 
 

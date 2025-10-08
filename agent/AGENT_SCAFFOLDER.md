@@ -22,7 +22,9 @@ The CLI mirrors the question set below and writes artifacts into `assistants/gen
 | `agent_name` | Python function + filename | Snake_case, becomes module name |
 | `display_name` | Human-readable label | Defaults to title-cased name |
 | `description` | One-line summary | Stored in metadata + docstring |
-| `system_prompt` | Core instructions | Also saved to `.prompt` file |
+| `prompt_source` | `inline` or `file` | Select how the system prompt is supplied |
+| `system_prompt` | Core instructions (inline) | Only required when `prompt_source=inline` |
+| `prompt_path` | Prompt file location | Required when `prompt_source=file`; the file is copied into the generated prompts folder |
 | `model_id` | Ollama model choice | Defaults to `qwen3:8b` |
 | `enable_code_execution` | Toggle sandbox integration | Adds sandbox support when true |
 | `sandbox_timeout` | Execution timeout | Seconds per sandbox call |
@@ -44,6 +46,12 @@ The answers are validated and normalised before generation to keep results deter
 | `assistants/generated/metadata/<agent_name>_embeddings.json` | Optional chunk + embedding payload |
 
 The metadata file references all related artifacts so downstream systems can ingest them.
+The generated agent module always loads its system prompt from the colocated `.prompt` file so multi-line content can be edited freely outside Python source.
+
+## UI / API Integration
+
+Use `agent.scaffolder.generate_agent(answers_dict)` to drive the scaffolder from the app.
+It returns a `ScaffoldingResult` containing a success flag, human-readable message, artifact paths, and the resolved metadata payload—ideal for rendering in the Agent Builder interface instead of reading CLI output.
 
 ## Memory Profiles & Embeddings
 
