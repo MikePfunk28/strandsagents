@@ -196,6 +196,7 @@ AGENT_TYPES = {
     }
 }
 
+
 @dataclass
 class AgentSpecification:
     """Complete specification for agent creation"""
@@ -243,17 +244,20 @@ class AgentSpecification:
 
     def _get_default_model(self) -> str:
         """Get default model for agent type"""
-        agent_config = AGENT_TYPES.get(self.agent_type, AGENT_TYPES["research"])
+        agent_config = AGENT_TYPES.get(
+            self.agent_type, AGENT_TYPES["research"])
         return agent_config["default_model"]
 
     def _get_default_tools(self) -> List[str]:
         """Get default tools for agent type"""
-        agent_config = AGENT_TYPES.get(self.agent_type, AGENT_TYPES["research"])
+        agent_config = AGENT_TYPES.get(
+            self.agent_type, AGENT_TYPES["research"])
         return agent_config["tools"].copy()
 
     def _generate_system_prompt(self) -> str:
         """Generate system prompt from template"""
-        agent_config = AGENT_TYPES.get(self.agent_type, AGENT_TYPES["research"])
+        agent_config = AGENT_TYPES.get(
+            self.agent_type, AGENT_TYPES["research"])
         template = agent_config["system_prompt_template"]
 
         return template.format(
@@ -274,6 +278,7 @@ class AgentSpecification:
         data_copy['created_at'] = datetime.fromisoformat(data['created_at'])
         return cls(**data_copy)
 
+
 class AgentBuilder:
     """Main agent building system"""
 
@@ -282,7 +287,8 @@ class AgentBuilder:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.sandbox = SandboxExecutor()
 
-        logger.info(f"🤖 Agent Builder initialized - Output dir: {self.output_dir}")
+        logger.info(
+            f"🤖 Agent Builder initialized - Output dir: {self.output_dir}")
 
     def create_agent_from_spec(self, spec: AgentSpecification) -> Dict[str, Path]:
         """Create a complete agent from specification"""
@@ -309,7 +315,8 @@ class AgentBuilder:
 
         # Generate metadata
         metadata = self._generate_metadata(spec)
-        metadata_file.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
+        metadata_file.write_text(json.dumps(
+            metadata, indent=2), encoding='utf-8')
 
         # Generate test file
         test_code = self._generate_test_code(spec)
@@ -624,12 +631,14 @@ class AgentBuilder:
         print("\\nAvailable models:")
         available_models = list_available_models()
         for i, model in enumerate(available_models, 1):
-            print(f"{i}. {model['name']} ({model['size']}) - {model['family']}")
+            print(
+                f"{i}. {model['name']} ({model['size']}) - {model['family']}")
 
         recommended_model = get_best_model_for_task(agent_type)
         print(f"\\nRecommended model for {agent_type}: {recommended_model}")
 
-        use_recommended = input("Use recommended model? (y/n): ").lower().startswith('y')
+        use_recommended = input(
+            "Use recommended model? (y/n): ").lower().startswith('y')
         if use_recommended:
             model_id = recommended_model
         else:
@@ -645,11 +654,13 @@ class AgentBuilder:
                     print("Please enter a number")
 
         # Advanced options
-        enable_code = input("Enable code execution? (y/n): ").lower().startswith('y')
+        enable_code = input(
+            "Enable code execution? (y/n): ").lower().startswith('y')
         sandbox_timeout = 45
         if enable_code:
             try:
-                timeout_input = input("Sandbox timeout (seconds, default 45): ").strip()
+                timeout_input = input(
+                    "Sandbox timeout (seconds, default 45): ").strip()
                 if timeout_input:
                     sandbox_timeout = int(timeout_input)
             except ValueError:
@@ -681,7 +692,8 @@ class AgentBuilder:
         # Create base specification from template
         spec = AgentSpecification(
             name=customization.get("name", f"{template_name}_agent"),
-            display_name=customization.get("display_name", f"{template_name.title()} Agent"),
+            display_name=customization.get(
+                "display_name", f"{template_name.title()} Agent"),
             description=customization.get("description", template.description),
             agent_type=template_name,
             workflow_template=template_name
@@ -727,13 +739,28 @@ class AgentBuilder:
         print("🤖 Available Models")
         print("=" * 50)
 
-        models = list_available_models()
-        for model in models:
-            print(f"\\n🔧 {model['name']}")
-            print(f"   Size: {model['size']}")
-            print(f"   Family: {model['family']}")
-            print(f"   Capabilities: {', '.join(model['capabilities'])}")
-            print(f"   Performance Score: {model['performance_score']}")
+        try:
+            models = list_available_models()
+            if not models or not isinstance(models, list):
+                print("No models available or invalid model data")
+                return
+                
+            for model in models:
+                if isinstance(model, dict):
+                    print(f"\\n🔧 {model.get('name', 'Unknown')}")
+                    print(f"   Size: {model.get('size', 'Unknown')}")
+                    print(f"   Family: {model.get('family', 'Unknown')}")
+                    capabilities = model.get('capabilities', [])
+                    if isinstance(capabilities, list):
+                        print(f"   Capabilities: {', '.join(capabilities)}")
+                    else:
+                        print(f"   Capabilities: {capabilities}")
+                    print(f"   Performance Score: {model.get('performance_score', 'Unknown')}")
+        except Exception as e:
+            print(f"Error retrieving models: {e}")
+            print("Using fallback model list:")
+            for i, model_name in enumerate(AVAILABLE_MODELS[:5], 1):
+                print(f"   {i}. {model_name}")
 
     def validate_agent(self, agent_path: Path) -> Dict[str, Any]:
         """Validate a generated agent"""
@@ -741,7 +768,8 @@ class AgentBuilder:
         try:
             # Try to import and test the agent
             import importlib.util
-            spec = importlib.util.spec_from_file_location("test_agent", agent_path)
+            spec = importlib.util.spec_from_file_location(
+                "test_agent", agent_path)
             module = importlib.util.module_from_spec(spec)
 
             # Check if agent function exists
@@ -763,13 +791,17 @@ class AgentBuilder:
         except Exception as e:
             return {"valid": False, "error": str(e)}
 
+
 # Global agent builder instance
 agent_builder = AgentBuilder()
 
 # Convenience functions
+
+
 def create_agent_interactive() -> Dict[str, Path]:
     """Create an agent through interactive prompts"""
     return agent_builder.create_agent_interactive()
+
 
 def create_agent_from_type(agent_type: str, name: str, description: str = "") -> Dict[str, Path]:
     """Create an agent from a specific type"""
@@ -781,17 +813,21 @@ def create_agent_from_type(agent_type: str, name: str, description: str = "") ->
     )
     return agent_builder.create_agent_from_spec(spec)
 
+
 def list_agent_types() -> None:
     """List all available agent types"""
     agent_builder.list_available_types()
+
 
 def list_available_models() -> None:
     """List all available models"""
     agent_builder.list_available_models()
 
+
 def validate_generated_agent(agent_path: str) -> Dict[str, Any]:
     """Validate a generated agent"""
     return agent_builder.validate_agent(Path(agent_path))
+
 
 if __name__ == "__main__":
     print("🤖 StrandsAgents Agent Builder")
@@ -826,10 +862,12 @@ if __name__ == "__main__":
                 print("\\nAvailable workflow templates:")
                 templates = list_workflow_templates()
                 for i, template in enumerate(templates, 1):
-                    print(f"{i}. {template['name']} - {template['description']}")
+                    print(
+                        f"{i}. {template['name']} - {template['description']}")
 
                 try:
-                    template_choice = int(input("\\nSelect template (number): "))
+                    template_choice = int(
+                        input("\\nSelect template (number): "))
                     if 1 <= template_choice <= len(templates):
                         template_id = templates[template_choice - 1]['id']
                         name = input("Agent name: ").strip()
