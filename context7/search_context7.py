@@ -2,7 +2,7 @@ import requests
 import json
 
 # Search for repositories mentioning both context7 and strands
-response = requests.get('https://api.github.com/search/repositories?q=context7+strands')
+response = requests.get('https://api.github.com/search/repositories?q=context7+strands', timeout=10)
 data = json.loads(response.text)
 items = data.get('items', [])
 
@@ -14,7 +14,7 @@ for repo in items[:5]:
     print("---")
 
 # Also search for context7 specifically
-response2 = requests.get('https://api.github.com/search/repositories?q=context7')
+response2 = requests.get('https://api.github.com/search/repositories?q=context7', timeout=10)
 data2 = json.loads(response2.text)
 items2 = data2.get('items', [])
 
