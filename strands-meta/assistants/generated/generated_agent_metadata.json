@@ -1,6 +1,6 @@
 {
   "name": "generated_agent",
-  "description": "Create a research agent for it gets information on the topic from the internet",
+  "description": "Create a meta agent for this will use your login, or auth, or your token and login for you and check your email, then give you the results of your 10 recently recieved emails.",
   "agent_type": "research",
   "model_id": "deepseek-coder:6.7b",
   "tools": [
@@ -9,6 +9,6 @@
     "file_write"
   ],
   "created_by": "MetaAgentBuilder",
-  "created_at": "2025-10-08T22:42:42.281332",
+  "created_at": "2025-10-09T00:13:05.098920",
   "file_path": "assistants\\generated\\generated_agent.py"
 }

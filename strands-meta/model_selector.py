@@ -105,6 +105,86 @@ class ModelSelector:
             performance_score=75,
             recommended_for=["general_tasks", "coding", "analysis", "research"]
         ),
+        "qwen2:7b": ModelInfo(
+            name="qwen2:7b",
+            size="7B",
+            family="qwen",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=78,
+            recommended_for=["general_tasks", "coding", "analysis", "research", "creative_tasks"]
+        ),
+        "qwen2:14b": ModelInfo(
+            name="qwen2:14b",
+            size="14B",
+            family="qwen",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=85,
+            recommended_for=["complex_tasks", "research", "analysis", "coding", "creative_tasks"]
+        ),
+        "qwen2:32b": ModelInfo(
+            name="qwen2:32b",
+            size="32B",
+            family="qwen",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=95,
+            recommended_for=["complex_analysis", "research", "creative_tasks", "coding", "general_tasks"]
+        ),
+        "qwen2:72b": ModelInfo(
+            name="qwen2:72b",
+            size="72B",
+            family="qwen",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=98,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
+        "llama3.1:8b": ModelInfo(
+            name="llama3.1:8b",
+            size="8B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis", "creative"],
+            performance_score=76,
+            recommended_for=["general_tasks", "coding", "analysis", "creative_tasks"]
+        ),
+        "llama3.1:70b": ModelInfo(
+            name="llama3.1:70b",
+            size="70B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=96,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
+        "llama3.1:405b": ModelInfo(
+            name="llama3.1:405b",
+            size="405B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=100,
+            recommended_for=["maximum_performance", "enterprise_tasks", "complex_analysis", "research", "creative_tasks"]
+        ),
+        "mistral:7b": ModelInfo(
+            name="mistral:7b",
+            size="7B",
+            family="mistral",
+            capabilities=["reasoning", "coding", "creative", "analysis"],
+            performance_score=74,
+            recommended_for=["creative_tasks", "coding", "general_tasks", "analysis"]
+        ),
+        "mistral:8x7b": ModelInfo(
+            name="mistral:8x7b",
+            size="56B",
+            family="mistral",
+            capabilities=["reasoning", "coding", "creative", "analysis", "research"],
+            performance_score=88,
+            recommended_for=["complex_tasks", "creative_tasks", "research", "coding", "analysis"]
+        ),
+        "mistral:8x22b": ModelInfo(
+            name="mistral:8x22b",
+            size="176B",
+            family="mistral",
+            capabilities=["reasoning", "coding", "creative", "analysis", "research"],
+            performance_score=97,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
         "codellama:7b": ModelInfo(
             name="codellama:7b",
             size="7B",
@@ -113,6 +193,22 @@ class ModelSelector:
             performance_score=80,
             recommended_for=["coding", "debugging", "code_review", "mathematics"]
         ),
+        "codellama:13b": ModelInfo(
+            name="codellama:13b",
+            size="13B",
+            family="codellama",
+            capabilities=["coding", "code_completion", "debugging", "mathematics"],
+            performance_score=85,
+            recommended_for=["coding", "debugging", "code_review", "mathematics", "analysis"]
+        ),
+        "codellama:34b": ModelInfo(
+            name="codellama:34b",
+            size="34B",
+            family="codellama",
+            capabilities=["coding", "code_completion", "debugging", "mathematics"],
+            performance_score=92,
+            recommended_for=["enterprise_coding", "debugging", "code_review", "mathematics", "analysis"]
+        ),
         "deepseek-coder:6.7b": ModelInfo(
             name="deepseek-coder:6.7b",
             size="6.7B",
@@ -120,6 +216,62 @@ class ModelSelector:
             capabilities=["coding", "mathematics", "problem_solving", "analysis"],
             performance_score=82,
             recommended_for=["coding", "mathematics", "algorithms", "analysis"]
+        ),
+        "deepseek-coder:33b": ModelInfo(
+            name="deepseek-coder:33b",
+            size="33B",
+            family="deepseek",
+            capabilities=["coding", "mathematics", "problem_solving", "analysis"],
+            performance_score=90,
+            recommended_for=["enterprise_coding", "mathematics", "algorithms", "analysis", "research"]
+        ),
+        "claude-3-haiku": ModelInfo(
+            name="claude-3-haiku",
+            size="15B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative"],
+            performance_score=88,
+            recommended_for=["general_tasks", "coding", "analysis", "creative_tasks"]
+        ),
+        "claude-3-sonnet": ModelInfo(
+            name="claude-3-sonnet",
+            size="70B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=95,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
+        "claude-3-opus": ModelInfo(
+            name="claude-3-opus",
+            size="200B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=99,
+            recommended_for=["maximum_performance", "enterprise_tasks", "complex_analysis", "research", "creative_tasks"]
+        ),
+        "gpt-4": ModelInfo(
+            name="gpt-4",
+            size="175B",
+            family="gpt",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=94,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
+        "gpt-4-turbo": ModelInfo(
+            name="gpt-4-turbo",
+            size="175B",
+            family="gpt",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=96,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"]
+        ),
+        "gpt-3.5-turbo": ModelInfo(
+            name="gpt-3.5-turbo",
+            size="175B",
+            family="gpt",
+            capabilities=["reasoning", "coding", "analysis", "creative"],
+            performance_score=80,
+            recommended_for=["general_tasks", "coding", "analysis", "creative_tasks"]
         )
     }
 
@@ -145,7 +297,7 @@ class ModelSelector:
                         model_name = line.split()[0]
                         if model_name in self.MODEL_CAPABILITIES:
                             self.available_models.append(model_name)
-                            logger.info(f"🔍 Found available model: {model_name}")
+                            logger.info(f"[SEARCH] Found available model: {model_name}")
 
                 if not self.available_models:
                     logger.warning("No recognized models found in Ollama")
@@ -159,7 +311,7 @@ class ModelSelector:
             logger.warning("Ollama not available, using fallback models")
             self.available_models = ["llama3.2", "gemma3:1b"]
 
-        logger.info(f"🔍 Available models: {self.available_models}")
+        logger.info(f"[SEARCH] Available models: {self.available_models}")
 
     def select_best_model(self, task_type: str = "general",
                          require_code_execution: bool = False,
@@ -216,7 +368,7 @@ class ModelSelector:
         # Select best model
         best_model = max(model_scores, key=lambda x: x[1])[0]
 
-        logger.info(f"Selected model '{best_model}' for task type '{task_type}'")
+        logger.info(f"[AGENT_BUILDER] Selected model '{best_model}' for task type '{task_type}'")
         return best_model
 
     def get_model_recommendations(self) -> Dict[str, str]:
@@ -266,7 +418,7 @@ def get_model_recommendations() -> Dict[str, str]:
     return model_selector.get_model_recommendations()
 
 if __name__ == "__main__":
-    print("🤖 Model Selector Demo")
+    print("[AGENT] Model Selector Demo")
     print("=" * 50)
 
     # Show available models
@@ -274,17 +426,17 @@ if __name__ == "__main__":
     print(f"Available models: {len(available)}")
 
     for model in available:
-        print(f"\\n🔧 {model['name']} ({model['size']})")
+        print(f"\n[TOOL] {model['name']} ({model['size']})")
         print(f"   Family: {model['family']}")
         print(f"   Capabilities: {', '.join(model['capabilities'])}")
         print(f"   Performance Score: {model['performance_score']}")
         print(f"   Recommended for: {', '.join(model['recommended_for'])}")
 
     # Show recommendations
-    print("\\n🎯 Model Recommendations:")
+    print("\n[TARGET] Model Recommendations:")
     recommendations = get_model_recommendations()
 
     for task_type, model in recommendations.items():
         print(f"   {task_type}: {model}")
 
-    print("\\n✅ Model selector ready!")
+    print("\n[OK] Model selector ready!")

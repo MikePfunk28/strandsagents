@@ -77,7 +77,7 @@ class InteractiveAgentBuilder:
     def create_agent_interactive(self) -> Dict[str, Path]:
         """Create an agent through interactive questionnaire"""
 
-        print("\n🤖 Agent Builder - Interactive Mode")
+        print("\n[AGENT] Agent Builder - Interactive Mode")
         print("=" * 50)
 
         # Get agent name
@@ -122,20 +122,20 @@ class InteractiveAgentBuilder:
             name = input(
                 "Enter agent name (function name, letters/numbers/underscores only): ").strip()
             if not name:
-                print("❌ Agent name is required")
+                print("[ERROR] Agent name is required")
                 continue
             if not re.match(r'^[a-zA-Z0-9_]+$', name):
-                print("❌ Agent name must contain only letters, numbers, and underscores")
+                print("[ERROR] Agent name must contain only letters, numbers, and underscores")
                 continue
             if name in AGENT_REGISTRY:
                 print(
-                    f"⚠️  Agent '{name}' already exists. Choose a different name.")
+                    f"[WARNING] Agent '{name}' already exists. Choose a different name.")
                 continue
             return name
 
     def _get_agent_description(self) -> str:
         """Get agent description from user"""
-        print("\n📝 Agent Description:")
+        print("\n[DOC] Agent Description:")
         print("Describe what this agent should do, its purpose, and capabilities.")
         print("Example: 'A Python coding assistant that can write, debug, and test code'")
         description = input("Description: ").strip()
@@ -143,7 +143,7 @@ class InteractiveAgentBuilder:
 
     def _get_agent_type(self) -> str:
         """Get agent type from user"""
-        print("\n🎯 Agent Type:")
+        print("\n[TARGET] Agent Type:")
         print("Available types:")
         print("  1. research - Information gathering and analysis")
         print("  2. coding - Software development and code generation")
@@ -161,16 +161,16 @@ class InteractiveAgentBuilder:
                 types = ['research', 'coding', 'data_analysis',
                          'creative', 'workflow', 'meta']
                 return types[int(choice) - 1]
-            print("❌ Invalid choice. Please select 1-7 or 'auto'")
+            print("[ERROR] Invalid choice. Please select 1-7 or 'auto'")
 
     def _get_model_selection(self, agent_type: str) -> str:
         """Get model selection from user"""
-        print(f"\n🔧 Model Selection for {agent_type}:")
+        print(f"\n[TOOL] Model Selection for {agent_type}:")
 
         # Show available models
         available_models = list_available_models()
         if not available_models:
-            print("⚠️  No models available, using default")
+            print("[WARNING] No models available, using default")
             return "llama3.2"
 
         print("Available models:")
@@ -180,7 +180,7 @@ class InteractiveAgentBuilder:
 
         # Get best model for task type
         best_model = get_best_model_for_task(agent_type)
-        print(f"\n💡 Recommended model for {agent_type}: {best_model}")
+        print(f"\n[IDEA] Recommended model for {agent_type}: {best_model}")
 
         while True:
             choice = input(
@@ -190,11 +190,11 @@ class InteractiveAgentBuilder:
             if choice.isdigit() and 1 <= int(choice) <= len(available_models):
                 return available_models[int(choice) - 1]['name']
             print(
-                f"❌ Invalid choice. Please select 1-{len(available_models)} or press Enter")
+                f"[ERROR] Invalid choice. Please select 1-{len(available_models)} or press Enter")
 
     def _get_tools_configuration(self) -> List[str]:
         """Get tools configuration from user"""
-        print("\n🛠️  Tools Configuration:")
+        print("\n[TOOLS] Tools Configuration:")
 
         # Common tool categories
         tool_categories = {
@@ -239,14 +239,14 @@ class InteractiveAgentBuilder:
                     if category not in selected_categories:
                         selected_tools.extend(tools)
                         selected_categories.append(category)
-                print(f"✅ Added all {len(tool_categories)} categories ({len(selected_tools)} total tools)")
+                print(f"[OK] Added all {len(tool_categories)} categories ({len(selected_tools)} total tools)")
             elif choice == '7':
                 custom_tools = input(
                     "Enter custom tools (comma-separated): ").strip()
                 if custom_tools:
                     new_tools = [t.strip() for t in custom_tools.split(',')]
                     selected_tools.extend(new_tools)
-                    print(f"✅ Added {len(new_tools)} custom tools")
+                    print(f"[OK] Added {len(new_tools)} custom tools")
             elif choice.isdigit() and 1 <= int(choice) <= 6:
                 category_name = list(tool_categories.keys())[int(choice) - 1]
                 if category_name not in selected_categories:
@@ -254,17 +254,17 @@ class InteractiveAgentBuilder:
                     selected_tools.extend(category_tools)
                     selected_categories.append(category_name)
                     print(
-                        f"✅ Added {len(category_tools)} tools from {category_name}")
+                        f"[OK] Added {len(category_tools)} tools from {category_name}")
                 else:
-                    print(f"⚠️  {category_name} already selected")
+                    print(f"[WARNING] {category_name} already selected")
             else:
-                print("❌ Invalid choice")
+                print("[ERROR] Invalid choice")
 
         return list(set(selected_tools))  # Remove duplicates
 
     def _get_system_prompt(self, name: str, description: str, agent_type: str) -> str:
         """Get or generate system prompt"""
-        print(f"\n📝 System Prompt for {name}:")
+        print(f"\n[DOC] System Prompt for {name}:")
 
         # Generate default prompt based on type
         default_prompts = {
@@ -371,7 +371,7 @@ Guidelines:
 
 Focus on delivering high-quality, specialized responses for your domain.""")
 
-        print(f"💡 Generated default prompt for {agent_type}:")
+        print(f"[IDEA] Generated default prompt for {agent_type}:")
         print("-" * 40)
         print(default_prompt[:200] + "..." if len(default_prompt) > 200 else default_prompt)
         print("-" * 40)
@@ -384,7 +384,7 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
     def _get_code_execution_settings(self) -> tuple[bool, int]:
         """Get code execution settings from user"""
-        print("\n⚡ Code Execution Settings:")
+        print("\n[POWER] Code Execution Settings:")
 
         enable_code = input("Enable code execution? (y/n): ").strip().lower() == 'y'
         if not enable_code:
@@ -397,7 +397,7 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
     def _generate_and_save_agent(self, spec: AgentCreationSpec) -> Dict[str, Path]:
         """Generate and save the agent"""
-        print(f"\n🔧 Generating agent '{spec.name}'...")
+        print(f"\n[TOOL] Generating agent '{spec.name}'...")
 
         # Use the meta builder to create the agent
         result = self.meta_builder.create_agent(
@@ -407,12 +407,12 @@ Focus on delivering high-quality, specialized responses for your domain.""")
         # Also test the meta agent builder function directly
         try:
             meta_response = meta_agent_builder(f"Create a {spec.agent_type} agent for {spec.description}")
-            print(f"🤖 Meta-agent response: {meta_response[:100]}...")
+            print(f"[AGENT] Meta-agent response: {meta_response[:100]}...")
         except Exception as e:
-            print(f"⚠️  Meta-agent test failed: {str(e)}")
+            print(f"[WARNING] Meta-agent test failed: {str(e)}")
 
-        print("✅ Agent generated successfully!")
-        print(f"📁 Files created:")
+        print("[OK] Agent generated successfully!")
+        print(f"[FILE] Files created:")
         for file_type, file_path in result.items():
             print(f"   • {file_type}: {file_path}")
 
@@ -420,17 +420,17 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
     def copy_and_modify_agent(self, existing_name: str) -> Dict[str, Path]:
         """Copy and modify an existing agent"""
-        print(f"\n📋 Copy and Modify Agent: {existing_name}")
+        print(f"\n[LIST] Copy and Modify Agent: {existing_name}")
         print("=" * 50)
 
         if existing_name not in AGENT_REGISTRY:
-            print(f"❌ Agent '{existing_name}' not found")
+            print(f"[ERROR] Agent '{existing_name}' not found")
             return {}
 
         # Get existing agent info
         existing_info = get_agent_info(existing_name)
         if not existing_info:
-            print(f"❌ Could not get info for agent '{existing_name}'")
+            print(f"[ERROR] Could not get info for agent '{existing_name}'")
             return {}
 
         # Get new name
@@ -485,7 +485,7 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
     def list_agents(self):
         """List all available agents"""
-        print("\n🤖 Available Agents:")
+        print("\n[AGENT] Available Agents:")
         print("=" * 50)
 
         agents = list_agents()
@@ -496,7 +496,7 @@ Focus on delivering high-quality, specialized responses for your domain.""")
         for agent_name in agents:
             info = get_agent_info(agent_name)
             if info:
-                print(f"\n🔧 {agent_name}:")
+                print(f"\n[TOOL] {agent_name}:")
                 print(f"   Model: {info.get('model_id', 'Unknown')}")
                 print(f"   Tools: {info.get('tools', [])}")
                 print(f"   Code Execution: {info.get('enable_code_execution', False)}")
@@ -504,11 +504,11 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
     def test_agent(self, agent_name: str):
         """Test an agent with sample queries"""
-        print(f"\n🧪 Testing Agent: {agent_name}")
+        print(f"\n[TEST] Testing Agent: {agent_name}")
         print("=" * 50)
 
         if agent_name not in AGENT_REGISTRY:
-            print(f"❌ Agent '{agent_name}' not found")
+            print(f"[ERROR] Agent '{agent_name}' not found")
             return
 
         # Get test queries based on agent type
@@ -543,24 +543,24 @@ Focus on delivering high-quality, specialized responses for your domain.""")
         queries = test_queries.get(agent_type, test_queries['general'])
 
         for i, query in enumerate(queries, 1):
-            print(f"\n📝 Test {i}: {query}")
+            print(f"\n[DOC] Test {i}: {query}")
             try:
                 agent_func = get_agent_function(agent_name)
                 if agent_func:
                     result = agent_func(query)
-                    print(f"✅ Response: {result[:200]}{'...' if len(result) > 200 else ''}")
+                    print(f"[OK] Response: {result[:200]}{'...' if len(result) > 200 else ''}")
                 else:
-                    print("❌ Could not get agent function")
+                    print("[ERROR] Could not get agent function")
             except Exception as e:
-                print(f"❌ Error: {str(e)}")
+                print(f"[ERROR] Error: {str(e)}")
 
     def run_batch_creation(self, config_file: str):
         """Run batch agent creation from config file"""
-        print(f"\n📦 Batch Agent Creation from: {config_file}")
+        print(f"\n[PACKAGE] Batch Agent Creation from: {config_file}")
         print("=" * 50)
 
         if not os.path.exists(config_file):
-            print(f"❌ Config file '{config_file}' not found")
+            print(f"[ERROR] Config file '{config_file}' not found")
             return
 
         try:
@@ -569,7 +569,7 @@ Focus on delivering high-quality, specialized responses for your domain.""")
 
             agents_config = config.get('agents', [])
             if not agents_config:
-                print("❌ No agents defined in config file")
+                print("[ERROR] No agents defined in config file")
                 return
 
             print(f"Creating {len(agents_config)} agents...")
@@ -578,12 +578,12 @@ Focus on delivering high-quality, specialized responses for your domain.""")
                 try:
                     spec = AgentCreationSpec(**agent_config)
                     result = self._generate_and_save_agent(spec)
-                    print(f"✅ Created agent: {spec.name}")
+                    print(f"[OK] Created agent: {spec.name}")
                 except Exception as e:
-                    print(f"❌ Failed to create agent {agent_config.get('name', 'unknown')}: {str(e)}")
+                    print(f"[ERROR] Failed to create agent {agent_config.get('name', 'unknown')}: {str(e)}")
 
         except Exception as e:
-            print(f"❌ Error reading config file: {str(e)}")
+            print(f"[ERROR] Error reading config file: {str(e)}")
 
 
 class AgentManager:
@@ -594,7 +594,7 @@ class AgentManager:
 
     def list_generated_agents(self):
         """List all generated agents"""
-        print("\n📋 Generated Agents:")
+        print("\n[LIST] Generated Agents:")
         print("=" * 50)
 
         if not self.output_dir.exists():
@@ -611,7 +611,7 @@ class AgentManager:
                 with open(metadata_file, 'r') as f:
                     metadata = json.load(f)
 
-                print(f"\n🤖 {metadata['name']}:")
+                print(f"\n[AGENT] {metadata['name']}:")
                 print(f"   Type: {metadata['agent_type']}")
                 print(f"   Model: {metadata['model_id']}")
                 print(f"   Tools: {', '.join(metadata['tools'])}")
@@ -619,11 +619,11 @@ class AgentManager:
                 print(f"   File: {metadata['file_path']}")
 
             except Exception as e:
-                print(f"❌ Error reading {metadata_file}: {str(e)}")
+                print(f"[ERROR] Error reading {metadata_file}: {str(e)}")
 
     def validate_agent(self, agent_name: str):
         """Validate a generated agent"""
-        print(f"\n🔍 Validating Agent: {agent_name}")
+        print(f"\n[SEARCH] Validating Agent: {agent_name}")
         print("=" * 50)
 
         # Find agent file
@@ -631,11 +631,11 @@ class AgentManager:
         metadata_file = self.output_dir / f"{agent_name}_metadata.json"
 
         if not agent_file.exists():
-            print(f"❌ Agent file not found: {agent_file}")
+            print(f"[ERROR] Agent file not found: {agent_file}")
             return False
 
         if not metadata_file.exists():
-            print(f"❌ Metadata file not found: {metadata_file}")
+            print(f"[ERROR] Metadata file not found: {metadata_file}")
             return False
 
         # Check if agent can be imported and used
@@ -651,27 +651,27 @@ class AgentManager:
             required_parts = ['@agent', 'def ' + agent_name]
             for part in required_parts:
                 if part not in code:
-                    print(f"❌ Missing required component: {part}")
+                    print(f"[ERROR] Missing required component: {part}")
                     return False
 
-            print("✅ Agent file syntax is valid")
-            print("✅ Required components found")
+            print("[OK] Agent file syntax is valid")
+            print("[OK] Required components found")
 
             # Try to load metadata
             with open(metadata_file, 'r') as f:
                 metadata = json.load(f)
 
-            print("✅ Metadata is valid JSON")
-            print(f"✅ Agent type: {metadata.get('agent_type', 'unknown')}")
-            print(f"✅ Model: {metadata.get('model_id', 'unknown')}")
+            print("[OK] Metadata is valid JSON")
+            print(f"[OK] Agent type: {metadata.get('agent_type', 'unknown')}")
+            print(f"[OK] Model: {metadata.get('model_id', 'unknown')}")
 
             return True
 
         except SyntaxError as e:
-            print(f"❌ Syntax error in agent file: {str(e)}")
+            print(f"[ERROR] Syntax error in agent file: {str(e)}")
             return False
         except Exception as e:
-            print(f"❌ Error validating agent: {str(e)}")
+            print(f"[ERROR] Error validating agent: {str(e)}")
             return False
 
 
@@ -733,7 +733,7 @@ def main():
 
         else:
             parser.print_help()
-            print("\n💡 Examples:")
+            print("\n[IDEA] Examples:")
             print("  python agent_builder.py --interactive")
             print("  python agent_builder.py --list")
             print("  python agent_builder.py --copy my_agent")
@@ -741,10 +741,10 @@ def main():
             print("  python agent_builder.py --batch agents.json")
 
     except KeyboardInterrupt:
-        print("\n\n👋 Agent builder interrupted by user")
+        print("\n\n[AGENT] Agent builder interrupted by user")
         sys.exit(0)
     except Exception as e:
-        print(f"\n❌ Error in agent builder: {str(e)}")
+        print(f"\n[ERROR] Error in agent builder: {str(e)}")
         logger.error(f"Agent builder error: {str(e)}")
         sys.exit(1)
 
