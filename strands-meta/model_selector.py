@@ -18,6 +18,28 @@ from dataclasses import dataclass
 
 logger = logging.getLogger("model_selector")
 
+# Remove emoji characters that cause encoding issues on Windows
+def safe_print(text):
+    """Print text with emoji characters replaced for Windows compatibility"""
+    emoji_replacements = {
+        '🔍': '[SEARCH]',
+        '🔧': '[TOOL]',
+        '🎯': '[TARGET]',
+        '✅': '[OK]',
+        '❌': '[ERROR]',
+        '⚠️': '[WARNING]',
+        '💡': '[IDEA]',
+        '🚀': '[LAUNCH]',
+        '🔄': '[SYNC]',
+        '📦': '[PACKAGE]',
+        '🔍': '[FIND]'
+    }
+
+    for emoji, replacement in emoji_replacements.items():
+        text = text.replace(emoji, replacement)
+
+    print(text)
+
 # Add parent directory to path for imports
 try:
     # When run as module
@@ -41,87 +63,63 @@ class ModelInfo:
 class ModelSelector:
     """Intelligent model selection for optimal performance"""
 
-    # Model capability matrix
+    # Model capability matrix - AWS Bedrock compatible models
     MODEL_CAPABILITIES = {
-        "qwen3:32b": ModelInfo(
-            name="qwen3:32b",
-            size="32B",
-            family="qwen",
-            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
-            performance_score=95,
-            recommended_for=["complex_analysis", "research", "creative_tasks", "coding"]
+        "gemma3:270m": ModelInfo(
+            name="gemma3:270m",
+            size="270M",
+            family="gemma",
+            capabilities=["basic_reasoning", "simple_tasks", "light_analysis"],
+            performance_score=45,
+            recommended_for=["simple_tasks", "basic_qa", "light_analysis"]
         ),
-        "qwen3:14b": ModelInfo(
-            name="qwen3:14b",
-            size="14B",
-            family="qwen",
-            capabilities=["reasoning", "coding", "analysis", "creative"],
-            performance_score=85,
-            recommended_for=["analysis", "coding", "research", "creative_tasks"]
-        ),
-        "qwen3:8b": ModelInfo(
-            name="qwen3:8b",
-            size="8B",
-            family="qwen",
+        "gemma3:1b": ModelInfo(
+            name="gemma3:1b",
+            size="1B",
+            family="gemma",
             capabilities=["reasoning", "coding", "analysis"],
-            performance_score=75,
-            recommended_for=["coding", "analysis", "general_tasks"]
+            performance_score=65,
+            recommended_for=["general_tasks", "coding", "analysis"]
         ),
-        "qwen3:4b": ModelInfo(
-            name="qwen3:4b",
-            size="4B",
-            family="qwen",
-            capabilities=["basic_reasoning", "simple_tasks"],
+        "llama3.2:1b": ModelInfo(
+            name="llama3.2:1b",
+            size="1B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis"],
             performance_score=60,
-            recommended_for=["simple_tasks", "light_analysis"]
+            recommended_for=["general_tasks", "coding", "analysis"]
         ),
         "llama3.2:3b": ModelInfo(
             name="llama3.2:3b",
             size="3B",
             family="llama",
-            capabilities=["basic_reasoning", "simple_tasks"],
-            performance_score=55,
-            recommended_for=["simple_tasks", "basic_qa"]
+            capabilities=["reasoning", "coding", "analysis", "creative"],
+            performance_score=70,
+            recommended_for=["general_tasks", "coding", "analysis", "creative_tasks"]
         ),
         "llama3.2": ModelInfo(
             name="llama3.2",
             size="7B",
             family="llama",
-            capabilities=["reasoning", "coding", "analysis"],
-            performance_score=70,
-            recommended_for=["general_tasks", "coding", "analysis"]
-        ),
-        "llama3.1:8b": ModelInfo(
-            name="llama3.1:8b",
-            size="8B",
-            family="llama",
-            capabilities=["reasoning", "coding", "analysis"],
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
             performance_score=75,
-            recommended_for=["coding", "analysis", "general_tasks"]
-        ),
-        "mistral:7b": ModelInfo(
-            name="mistral:7b",
-            size="7B",
-            family="mistral",
-            capabilities=["reasoning", "coding", "creative"],
-            performance_score=72,
-            recommended_for=["creative_tasks", "coding", "general_tasks"]
+            recommended_for=["general_tasks", "coding", "analysis", "research"]
         ),
         "codellama:7b": ModelInfo(
             name="codellama:7b",
             size="7B",
             family="codellama",
-            capabilities=["coding", "code_completion", "debugging"],
-            performance_score=78,
-            recommended_for=["coding", "debugging", "code_review"]
+            capabilities=["coding", "code_completion", "debugging", "mathematics"],
+            performance_score=80,
+            recommended_for=["coding", "debugging", "code_review", "mathematics"]
         ),
         "deepseek-coder:6.7b": ModelInfo(
             name="deepseek-coder:6.7b",
             size="6.7B",
             family="deepseek",
-            capabilities=["coding", "mathematics", "problem_solving"],
-            performance_score=80,
-            recommended_for=["coding", "mathematics", "algorithms"]
+            capabilities=["coding", "mathematics", "problem_solving", "analysis"],
+            performance_score=82,
+            recommended_for=["coding", "mathematics", "algorithms", "analysis"]
         )
     }
 
@@ -150,16 +148,16 @@ class ModelSelector:
                             logger.info(f"🔍 Found available model: {model_name}")
 
                 if not self.available_models:
-                    logger.warning("🔍 No recognized models found in Ollama")
+                    logger.warning("No recognized models found in Ollama")
                     # Add some fallback models
-                    self.available_models = ["llama3.2", "qwen3:4b"]
+                    self.available_models = ["llama3.2", "gemma3:1b"]
             else:
-                logger.warning("🔍 Could not connect to Ollama, using fallback models")
-                self.available_models = ["llama3.2", "qwen3:4b"]
+                logger.warning("Could not connect to Ollama, using fallback models")
+                self.available_models = ["llama3.2", "gemma3:1b"]
 
         except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
-            logger.warning("🔍 Ollama not available, using fallback models")
-            self.available_models = ["llama3.2", "qwen3:4b"]
+            logger.warning("Ollama not available, using fallback models")
+            self.available_models = ["llama3.2", "gemma3:1b"]
 
         logger.info(f"🔍 Available models: {self.available_models}")
 
@@ -170,7 +168,7 @@ class ModelSelector:
         Select the best model for a given task
 
         Args:
-            task_type: Type of task (coding, research, analysis, creative, general)
+            task_type: Type of task (coding, research, analysis, creative, meta, general)
             require_code_execution: Whether code execution is needed
             require_reasoning: Whether advanced reasoning is needed
 
@@ -185,7 +183,7 @@ class ModelSelector:
         ]
 
         if not candidate_models:
-            logger.warning("🔍 No suitable models found, using fallback")
+            logger.warning("No suitable models found, using fallback")
             return "llama3.2"
 
         # Score models based on task requirements
@@ -210,13 +208,15 @@ class ModelSelector:
                 score += 10
             elif task_type == "analysis" and "analysis" in model_info.capabilities:
                 score += 10
+            elif task_type == "meta" and "reasoning" in model_info.capabilities:
+                score += 12  # Meta agents need good reasoning
 
             model_scores.append((model_name, score))
 
         # Select best model
         best_model = max(model_scores, key=lambda x: x[1])[0]
 
-        logger.info(f"🔍 Selected model '{best_model}' for task type '{task_type}'")
+        logger.info(f"Selected model '{best_model}' for task type '{task_type}'")
         return best_model
 
     def get_model_recommendations(self) -> Dict[str, str]:

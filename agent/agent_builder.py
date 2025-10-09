@@ -16,14 +16,15 @@ Features:
 
 import json
 import logging
-import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
-from textwrap import dedent
-from typing import Any, Dict, List, Optional, Tuple
-from agent import agent, SandboxExecutor, WorkflowTemplate
-from agent.model_selector import get_best_model_for_task, list_available_models
+from typing import Any, Dict, List, Optional
+
+from agent.model_selector import (
+    get_best_model_for_task,
+    list_available_models as selector_list_available_models,
+)
 from agent.workflow_templates import get_workflow_template, list_workflow_templates
 
 logger = logging.getLogger("agent_builder")
@@ -285,7 +286,6 @@ class AgentBuilder:
     def __init__(self, output_dir: str = "assistants/generated"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.sandbox = SandboxExecutor()
 
         logger.info(
             f"🤖 Agent Builder initialized - Output dir: {self.output_dir}")
@@ -629,10 +629,18 @@ class AgentBuilder:
 
         # Model selection
         print("\\nAvailable models:")
-        available_models = list_available_models()
+        available_models = selector_list_available_models()
+        if not available_models:
+            available_models = [
+                {"name": name, "size": "N/A", "family": "N/A"}
+                for name in AVAILABLE_MODELS[:5]
+            ]
+
         for i, model in enumerate(available_models, 1):
-            print(
-                f"{i}. {model['name']} ({model['size']}) - {model['family']}")
+            name = model.get("name", "Unknown")
+            size = model.get("size", "Unknown")
+            family = model.get("family", "Unknown")
+            print(f"{i}. {name} ({size}) - {family}")
 
         recommended_model = get_best_model_for_task(agent_type)
         print(f"\\nRecommended model for {agent_type}: {recommended_model}")
@@ -740,7 +748,7 @@ class AgentBuilder:
         print("=" * 50)
 
         try:
-            models = list_available_models()
+            models = selector_list_available_models()
             if not models or not isinstance(models, list):
                 print("No models available or invalid model data")
                 return

@@ -29,7 +29,7 @@ import re
 try:
     # When run as module from parent directory
     from ..agent.agent_decorator import agent, list_agents, get_agent_info, get_agent_function, AGENT_REGISTRY
-    from .meta_agent_builder import MetaAgentBuilder, AgentCreationSpec
+    from .meta_agent_builder import MetaAgentBuilder, AgentCreationSpec, meta_agent_builder
     from ..agent.model_selector import get_best_model_for_task, list_available_models
     from ..agent.sandbox_executor import SandboxExecutor
     from ..agent.workflow_templates import list_workflow_templates
@@ -37,7 +37,7 @@ except ImportError:
     try:
         # When run as script from strands-meta directory
         from agent.agent_decorator import agent, list_agents, get_agent_info, get_agent_function, AGENT_REGISTRY
-        from meta_agent_builder import MetaAgentBuilder, AgentCreationSpec
+        from meta_agent_builder import MetaAgentBuilder, AgentCreationSpec, meta_agent_builder
         from agent.model_selector import get_best_model_for_task, list_available_models
         from agent.sandbox_executor import SandboxExecutor
         from agent.workflow_templates import list_workflow_templates
@@ -48,7 +48,7 @@ except ImportError:
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
         from agent.agent_decorator import agent, list_agents, get_agent_info, get_agent_function, AGENT_REGISTRY
-        from meta_agent_builder import MetaAgentBuilder, AgentCreationSpec
+        from meta_agent_builder import MetaAgentBuilder, AgentCreationSpec, meta_agent_builder
         from agent.model_selector import get_best_model_for_task, list_available_models
         from agent.sandbox_executor import SandboxExecutor
         from agent.workflow_templates import list_workflow_templates
@@ -56,7 +56,7 @@ except ImportError:
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
-    format='🤖 %(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='[AGENT_BUILDER] %(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('agent_builder.log'),
         logging.StreamHandler(sys.stdout)
@@ -120,11 +120,11 @@ class InteractiveAgentBuilder:
         """Get agent name from user"""
         while True:
             name = input(
-                "Enter agent name (function name, no spaces): ").strip()
+                "Enter agent name (function name, letters/numbers/underscores only): ").strip()
             if not name:
                 print("❌ Agent name is required")
                 continue
-            if not name.replace('_', '').isalnum():
+            if not re.match(r'^[a-zA-Z0-9_]+$', name):
                 print("❌ Agent name must contain only letters, numbers, and underscores")
                 continue
             if name in AGENT_REGISTRY:
@@ -208,33 +208,55 @@ class InteractiveAgentBuilder:
 
         selected_tools = []
 
-        print("Select tools by category (or 'custom' for specific tools):")
+        print("Select tools by category (can select multiple, or 'custom' for specific tools):")
         for i, (category, tools) in enumerate(tool_categories.items(), 1):
             print(f"  {i}. {category}: {', '.join(tools)}")
 
         print("  7. Custom tools")
-        print("  8. No tools")
+        print("  8. Select all categories")
+        print("  9. No tools")
+
+        selected_categories = []
 
         while True:
             choice = input(
-                "Select category (1-8) or 'done' to finish: ").strip().lower()
+                "Select category (1-9), 'done' to finish, or 'list' to see current selection: ").strip().lower()
 
             if choice == 'done':
                 break
-            elif choice == '8':
+            elif choice == 'list':
+                if selected_categories:
+                    print(f"Currently selected categories: {', '.join(selected_categories)}")
+                    print(f"Total tools selected: {len(selected_tools)}")
+                else:
+                    print("No categories selected yet")
+                continue
+            elif choice == '9':
                 return []
+            elif choice == '8':
+                # Select all categories
+                for category, tools in tool_categories.items():
+                    if category not in selected_categories:
+                        selected_tools.extend(tools)
+                        selected_categories.append(category)
+                print(f"✅ Added all {len(tool_categories)} categories ({len(selected_tools)} total tools)")
             elif choice == '7':
                 custom_tools = input(
                     "Enter custom tools (comma-separated): ").strip()
                 if custom_tools:
-                    selected_tools.extend([t.strip()
-                                          for t in custom_tools.split(',')])
+                    new_tools = [t.strip() for t in custom_tools.split(',')]
+                    selected_tools.extend(new_tools)
+                    print(f"✅ Added {len(new_tools)} custom tools")
             elif choice.isdigit() and 1 <= int(choice) <= 6:
-                category_tools = list(tool_categories.values())[
-                    int(choice) - 1]
-                selected_tools.extend(category_tools)
-                print(
-                    f"✅ Added {len(category_tools)} tools from {list(tool_categories.keys())[int(choice) - 1]}")
+                category_name = list(tool_categories.keys())[int(choice) - 1]
+                if category_name not in selected_categories:
+                    category_tools = tool_categories[category_name]
+                    selected_tools.extend(category_tools)
+                    selected_categories.append(category_name)
+                    print(
+                        f"✅ Added {len(category_tools)} tools from {category_name}")
+                else:
+                    print(f"⚠️  {category_name} already selected")
             else:
                 print("❌ Invalid choice")
 

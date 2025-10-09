@@ -1,0 +1,14 @@
+{
+  "name": "researcher",
+  "description": "it gets information on the topic from the internet",
+  "agent_type": "research",
+  "model_id": "deepseek-coder:6.7b",
+  "tools": [
+    "http_request",
+    "file_read",
+    "file_write"
+  ],
+  "created_by": "MetaAgentBuilder",
+  "created_at": "2025-10-08T22:42:42.273589",
+  "file_path": "assistants\\generated\\researcher.py"
+}

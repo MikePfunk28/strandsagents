@@ -55,6 +55,37 @@ except ImportError:
 
 logger = logging.getLogger("meta_agent_builder")
 
+# Remove emoji characters that cause encoding issues on Windows
+def safe_print(text):
+    """Print text with emoji characters replaced for Windows compatibility"""
+    emoji_replacements = {
+        '🤖': '[AGENT]',
+        '🔧': '[TOOL]',
+        '🔒': '[SECURE]',
+        '🔍': '[SEARCH]',
+        '📝': '[DOC]',
+        '📋': '[LIST]',
+        '📁': '[FILE]',
+        '🎯': '[TARGET]',
+        '🛠️': '[TOOLS]',
+        '⚡': '[POWER]',
+        '🔗': '[LINK]',
+        '✅': '[OK]',
+        '❌': '[ERROR]',
+        '⚠️': '[WARNING]',
+        '💡': '[IDEA]',
+        '🚀': '[LAUNCH]',
+        '🧪': '[TEST]',
+        '🔄': '[SYNC]',
+        '📦': '[PACKAGE]',
+        '🔍': '[FIND]'
+    }
+
+    for emoji, replacement in emoji_replacements.items():
+        text = text.replace(emoji, replacement)
+
+    print(text)
+
 
 @dataclass
 class AgentCreationSpec:
@@ -117,6 +148,11 @@ class MetaAgentBuilder:
             "workflow": {
                 "description": "Multi-agent workflow orchestration specialist",
                 "default_tools": ["http_request", "file_read", "file_write"],
+                "template": None
+            },
+            "meta": {
+                "description": "Agent creation and management specialist",
+                "default_tools": ["file_write", "python_repl", "http_request"],
                 "template": None
             }
         }
@@ -225,7 +261,7 @@ TOOLS = {spec.tools}
     model_id="{spec.model_id}",
     system_prompt=SYSTEM_PROMPT,
     tools=TOOLS,
-    enable_code_execution={str(spec.enable_code_execution).lower()},
+    enable_code_execution={str(spec.enable_code_execution)},
     sandbox_timeout={spec.sandbox_timeout}
 )
 def {spec.name}(query: str) -> str:
