@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  # Main API Backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8000:8000"  # FastAPI server
+    volumes:
+      - ./agent-builder-platform:/app
+      - ./generated_agents:/app/generated_agents
+      - ./memory_vectors:/app/memory_vectors
+      - ./logs:/app/logs
+    environment:
+      - AWS_REGION=us-east-1
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - database
+    networks:
+      - agent-builder-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./agent-builder-platform/frontend
+      dockerfile: ../Dockerfile
+      target: development
+    ports:
+      - "3000:3000"  # React development server
+    volumes:
+      - ./agent-builder-platform/frontend/src:/app/src
+      - ./agent-builder-platform/frontend/public:/app/public
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    depends_on:
+      - api
+    networks:
+      - agent-builder-network
+    command: npm start
+    restart: unless-stopped
+
+  # Redis for caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agent-builder-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  # PostgreSQL database (optional, for advanced features)
+  database:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=agent_builder
+      - POSTGRES_USER=agent_user
+      - POSTGRES_PASSWORD=agent_password_123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agent-builder-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent_user -d agent_builder"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Memory system with LanceDB
+  memory-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./memory_vectors:/app/memory_vectors
+      - ./memory:/app/memory
+    environment:
+      - LANCEDB_PATH=/app/memory_vectors/memory.db
+      - AWS_REGION=us-east-1
+    networks:
+      - agent-builder-network
+    command: python -c "from memory.memory_integration import MemoryIntegration; import asyncio; asyncio.run(MemoryIntegration().get_embedding_info())"
+    restart: unless-stopped
+
+  # Ollama for local embedding models (optional)
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - agent-builder-network
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - agent-builder-network
+    restart: unless-stopped
+
+  # Monitoring and logging
+  monitoring:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - agent-builder-network
+    restart: unless-stopped
+
+  # Testing service
+  testing:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: testing
+    volumes:
+      - ./tests:/app/tests
+      - ./agent-builder-platform:/app
+    environment:
+      - AWS_REGION=us-east-1
+      - TEST_ENVIRONMENT=true
+    networks:
+      - agent-builder-network
+    command: pytest tests/ -v --cov=. --cov-report=html
+    profiles:
+      - testing
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  agent-builder-network:
+    driver: bridge
+
+# Development environment
+# To start all services:
+#   docker-compose up -d
+#
+# To start only core services:
+#   docker-compose up -d api redis database
+#
+# To run tests:
+#   docker-compose --profile testing run testing
+#
+# To view logs:
+#   docker-compose logs -f [service_name]
+#
+# To stop all services:
+#   docker-compose down

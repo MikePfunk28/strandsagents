@@ -8,3 +8,10 @@
 [AGENT_BUILDER] 2025-10-09 00:13:05,093 - meta_agent_builder - INFO - Meta-agent builder processing: Create a meta agent for this will use your login, or auth, or your token and login for you and check...
 [AGENT_BUILDER] 2025-10-09 00:13:05,096 - meta_agent_builder - INFO - Creating agent: generated_agent
 [AGENT_BUILDER] 2025-10-09 00:13:05,099 - meta_agent_builder - INFO - Agent generated_agent created successfully at assistants\generated\generated_agent.py
+[AGENT_BUILDER] 2025-10-09 14:07:20,521 - docker_sandbox - WARNING - Docker may not be available or configured properly
+[AGENT_BUILDER] 2025-10-09 14:07:20,521 - docker_sandbox - INFO - Docker Sandbox initialized with timeout: 30s
+[AGENT_BUILDER] 2025-10-09 14:56:42,341 - meta_agent_builder - INFO - Creating agent: file_inventory
+[AGENT_BUILDER] 2025-10-09 14:56:42,367 - meta_agent_builder - INFO - Agent file_inventory created successfully at assistants\generated\file_inventory.py
+[AGENT_BUILDER] 2025-10-09 14:56:42,367 - meta_agent_builder - INFO - Meta-agent builder processing: Create a auto agent for A file inventory, that every time you add a file to a project, it adds it an...
+[AGENT_BUILDER] 2025-10-09 14:56:42,378 - meta_agent_builder - INFO - Creating agent: generated_agent
+[AGENT_BUILDER] 2025-10-09 14:56:42,382 - meta_agent_builder - INFO - Agent generated_agent created successfully at assistants\generated\generated_agent.py
