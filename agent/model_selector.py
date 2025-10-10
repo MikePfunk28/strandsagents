@@ -11,6 +11,7 @@ Automatically selects the best available Ollama model based on:
 import subprocess
 import json
 import logging
+import os
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -26,6 +27,9 @@ class ModelInfo:
     capabilities: List[str]
     performance_score: int
     recommended_for: List[str]
+    provider: str = "ollama"
+    context_window: Optional[int] = None
+    memory_requirement_gb: Optional[float] = None
 
 
 class ModelSelector:
@@ -515,43 +519,29 @@ class ModelSelector:
     }
 
     def __init__(self):
-        self.available_models = []
+        self.available_models: List[str] = []
+        self.provider_filter: Optional[str] = None
         self._detect_available_models()
 
-    def _detect_available_models(self):
-        """Detect which models are available on the system"""
-        try:
-            # Check if Ollama is running and get available models
-            result = subprocess.run(
-                ["ollama", "list"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-                check=True
-            )
+    def _detect_available_models(self) -> None:
+        """Detect available models across supported providers."""
+        detected: List[str] = []
 
-            if result.returncode == 0:
-                lines = result.stdout.strip().split('\n')[1:]  # Skip header
-                for line in lines:
-                    if line.strip():
-                        model_name = line.split()[0]
-                        if model_name in self.MODEL_CAPABILITIES:
-                            self.available_models.append(model_name)
-                            logger.info(
-                                f"[MODEL_SELECTOR] Found available model: {model_name}")
+        detected.extend(self._detect_ollama_models())
+        detected.extend(self._bedrock_models())
+        detected.extend(self._llamacpp_models())
 
-                if not self.available_models:
-                    logger.warning("[MODEL_SELECTOR] No recognized models found in Ollama")
-                    # Add some fallback models
-                    self.available_models = ["llama3.2", "qwen3:4b"]
-            else:
-                logger.warning(
-                    "[MODEL_SELECTOR] Could not connect to Ollama, using fallback models")
-                self.available_models = ["llama3.2", "qwen3:4b"]
+        if not detected:
+            detected = ["llama3.2", "qwen3:4b"]
 
-        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
-            logger.warning("[MODEL_SELECTOR] Ollama not available, using fallback models")
-            self.available_models = ["llama3.2", "qwen3:4b"]
+        seen = set()
+        unique: List[str] = []
+        for name in detected:
+            if name in self.MODEL_CAPABILITIES and name not in seen:
+                unique.append(name)
+                seen.add(name)
+
+        self.available_models = unique
 
         logger.info(f"🔍 Available models: {self.available_models}")
 

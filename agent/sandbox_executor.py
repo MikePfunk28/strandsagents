@@ -19,12 +19,20 @@ import os
 import logging
 import json
 import uuid
+import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
 logger = logging.getLogger("enhanced_sandbox")
+
+try:
+    from .docker_sandbox import DockerSandboxExecutor as _DockerSandboxExecutor  # type: ignore
+    DOCKER_SANDBOX_AVAILABLE = True
+except Exception:  # pragma: no cover - docker optional
+    _DockerSandboxExecutor = None  # type: ignore
+    DOCKER_SANDBOX_AVAILABLE = False
 
 @dataclass
 class ExecutionResult:
@@ -82,6 +90,7 @@ class SandboxExecutor:
         self.temp_dir = Path(tempfile.mkdtemp())
         self.sessions: Dict[str, Dict[str, Any]] = {}
         self.session_counter = 0
+        self._docker_executor: Optional[_DockerSandboxExecutor] = None
 
         logger.info(f"🔒 Enhanced Sandbox created at: {self.temp_dir}")
         logger.info(f"🔒 Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
@@ -122,7 +131,9 @@ class SandboxExecutor:
         start_time = datetime.now()
 
         try:
-            if language == "python":
+            if self._should_use_docker(language) and DOCKER_SANDBOX_AVAILABLE:
+                result = self._execute_via_docker(code, language, session_id)
+            elif language == "python":
                 result = self._execute_python_enhanced(code, session)
             elif language == "javascript":
                 result = self._execute_javascript(code, session)
@@ -168,6 +179,30 @@ class SandboxExecutor:
                 language=language,
                 session_id=session_id
             )
+
+    def _should_use_docker(self, language: str) -> bool:
+        interpreter = self.SUPPORTED_LANGUAGES.get(language, {}).get('interpreter')
+        if not interpreter:
+            return False
+
+        if shutil.which(interpreter):
+            return False
+
+        if os.name == 'nt' and language in {'bash', 'python', 'javascript'}:
+            return DOCKER_SANDBOX_AVAILABLE
+
+        return False
+
+    def _ensure_docker_executor(self) -> None:
+        if not DOCKER_SANDBOX_AVAILABLE:
+            raise RuntimeError('Docker sandbox is not available on this system.')
+        if self._docker_executor is None:
+            self._docker_executor = _DockerSandboxExecutor(timeout=self.timeout, max_memory=self.max_memory)
+
+    def _execute_via_docker(self, code: str, language: str, session_id: Optional[str]) -> Dict[str, Any]:
+        self._ensure_docker_executor()
+        docker_result = self._docker_executor.execute_code(code, language, session_id=session_id)
+        return docker_result.to_dict()
 
     def _execute_python(self, code: str) -> Dict[str, Any]:
         """Execute Python code in isolated environment"""
