@@ -8,7 +8,7 @@
 3. ALWAYS organize files in appropriate subdirectories
 4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently, not just MCP
 
-### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
+###  GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
 **MANDATORY PATTERNS:**
 - **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
@@ -21,7 +21,7 @@
 
 **Claude Code's Task tool is the PRIMARY way to spawn agents:**
 ```javascript
-// ✅ CORRECT: Use Claude Code's Task tool for parallel agent execution
+//  CORRECT: Use Claude Code's Task tool for parallel agent execution
 [Single Message]:
   Task("Research agent", "Analyze requirements and patterns...", "researcher")
   Task("Coder agent", "Implement core features...", "coder")
@@ -84,7 +84,7 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 - **Clean Architecture**: Separate concerns
 - **Documentation**: Keep updated
 
-## 🚀 Available Agents (54 Total)
+##  Available Agents (54 Total)
 
 ### Core Development
 `coder`, `reviewer`, `tester`, `planner`, `researcher`
@@ -138,7 +138,7 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 
 **KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
 
-## 🚀 Quick Setup
+##  Quick Setup
 
 ```bash
 # Add MCP servers (Claude Flow required, others optional)
@@ -181,7 +181,7 @@ Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
 - Login: `mcp__flow-nexus__user_login` or `npx flow-nexus@latest login`
 - Access 70+ specialized MCP tools for advanced orchestration
 
-## 🚀 Agent Execution Flow with Claude Code
+##  Agent Execution Flow with Claude Code
 
 ### The Correct Pattern:
 
@@ -201,10 +201,10 @@ Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
   Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
   Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
   Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
-  
+
   // All todos batched together
   TodoWrite { todos: [...8-10 todos...] }
-  
+
   // All file operations together
   Write "backend/server.js"
   Write "frontend/App.jsx"
@@ -235,7 +235,7 @@ npx claude-flow@alpha hooks session-end --export-metrics true
 
 ## 🎯 Concurrent Execution Examples
 
-### ✅ CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
+###  CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
 
 ```javascript
 // Step 1: MCP tools set up coordination (optional, for complex tasks)
@@ -253,7 +253,7 @@ npx claude-flow@alpha hooks session-end --export-metrics true
   Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
   Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
   Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
-  
+
   // Batch ALL todos in ONE call
   TodoWrite { todos: [
     {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
@@ -265,7 +265,7 @@ npx claude-flow@alpha hooks session-end --export-metrics true
     {id: "7", content: "API documentation", status: "pending", priority: "low"},
     {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
   ]}
-  
+
   // Parallel file operations
   Bash "mkdir -p app/{src,tests,docs,config}"
   Write "app/package.json"
@@ -315,13 +315,13 @@ Message 4: Write "file.js"
 
 ## Advanced Features (v2.0.0)
 
-- 🚀 Automatic Topology Selection
-- ⚡ Parallel Execution (2.8-4.4x speed)
+-  Automatic Topology Selection
+-  Parallel Execution (2.8-4.4x speed)
 - 🧠 Neural Training
-- 📊 Bottleneck Analysis
-- 🤖 Smart Auto-Spawning
+-  Bottleneck Analysis
+-  Smart Auto-Spawning
 - 🛡️ Self-Healing Workflows
-- 💾 Cross-Session Memory
+-  Cross-Session Memory
 - 🔗 GitHub Integration
 
 ## Integration Tips

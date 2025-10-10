@@ -22,6 +22,7 @@ from botocore.exceptions import ClientError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class MemoryType(Enum):
     """Types of memory storage"""
     EPISODIC = "episodic"      # Conversation history and interactions
@@ -29,6 +30,7 @@ class MemoryType(Enum):
     PROCEDURAL = "procedural"  # Skills and procedures
     WORKING = "working"        # Short-term active memory
     LONG_TERM = "long_term"    # Persistent knowledge storage
+
 
 class EmbeddingModel(Enum):
     """Available embedding models"""
@@ -39,6 +41,7 @@ class EmbeddingModel(Enum):
     NOMIC_EMBED = "nomic-embed-text:latest"
     BEDROCK_TITAN = "amazon.titan-embed-text-v1"
 
+
 class ChunkingStrategy(Enum):
     """Text chunking strategies"""
     FIXED_SIZE = "fixed_size"
@@ -46,6 +49,7 @@ class ChunkingStrategy(Enum):
     PARAGRAPH_BASED = "paragraph_based"
     SEMANTIC = "semantic"
     HYBRID = "hybrid"
+
 
 @dataclass
 class MemoryChunk:
@@ -62,6 +66,7 @@ class MemoryChunk:
     access_count: int
     last_accessed: Optional[str]
 
+
 @dataclass
 class MemorySearchResult:
     """Search result from memory"""
@@ -70,6 +75,7 @@ class MemorySearchResult:
     rank: int
     context: str
     relevance_score: float
+
 
 @dataclass
 class MemoryContext:
@@ -82,6 +88,7 @@ class MemoryContext:
     conversation_context: List[str]
     project_context: Dict[str, Any]
     timestamp: str
+
 
 class TextChunker:
     """Advanced text chunking with multiple strategies"""
@@ -134,7 +141,8 @@ class TextChunker:
         elif strategy == ChunkingStrategy.HYBRID:
             chunks = self._chunk_hybrid(text, metadata)
 
-        logger.info(f"Created {len(chunks)} chunks using {strategy.value} strategy")
+        logger.info(
+            f"Created {len(chunks)} chunks using {strategy.value} strategy")
         return chunks
 
     def _chunk_fixed_size(self, text: str, metadata: Optional[Dict[str, Any]] = None) -> List[MemoryChunk]:
@@ -189,7 +197,7 @@ class TextChunker:
 
             # Check if we should create a chunk
             if (len(current_chunk) >= config['max_sentences'] or
-                i == len(sentences) - 1):
+                    i == len(sentences) - 1):
 
                 if len(current_chunk) > 0:
                     chunk_text = '. '.join(current_chunk)
@@ -230,7 +238,7 @@ class TextChunker:
             current_chunk.append(paragraph)
 
             if (len(current_chunk) >= config['max_paragraphs'] or
-                i == len(paragraphs) - 1):
+                    i == len(paragraphs) - 1):
 
                 if len(current_chunk) > 0:
                     chunk_text = '\n\n'.join(current_chunk)
@@ -276,7 +284,7 @@ class TextChunker:
             sentence_topic = self._detect_sentence_topic(sentence)
 
             if (current_topic and sentence_topic != current_topic and
-                len(current_chunk) > 0):
+                    len(current_chunk) > 0):
                 # Topic changed, create new chunk
                 chunk_text = '. '.join(current_chunk)
                 if len(chunk_text) >= config['min_chunk_length']:
@@ -383,6 +391,7 @@ class TextChunker:
 
         return 'general'
 
+
 class EmbeddingService:
     """Advanced embedding service with multiple model support"""
 
@@ -463,7 +472,8 @@ class EmbeddingService:
             if normalize:
                 embedding = self._normalize_vector(embedding)
 
-            logger.info(f"Generated Bedrock embedding: {len(embedding)} dimensions")
+            logger.info(
+                f"Generated Bedrock embedding: {len(embedding)} dimensions")
             return embedding
 
         except ClientError as e:
@@ -491,7 +501,8 @@ class EmbeddingService:
             if normalize:
                 embedding = self._normalize_vector(embedding)
 
-            logger.info(f"Generated local embedding ({model.value}): {len(embedding)} dimensions")
+            logger.info(
+                f"Generated local embedding ({model.value}): {len(embedding)} dimensions")
             return embedding
 
         except Exception as e:
@@ -524,6 +535,7 @@ class EmbeddingService:
 
         logger.info(f"Generated {len(embeddings)} embeddings")
         return embeddings
+
 
 class LanceDBVectorStore:
     """LanceDB-based vector storage and retrieval"""
@@ -593,7 +605,8 @@ class LanceDBVectorStore:
                     continue
 
                 # Calculate cosine similarity
-                similarity = self._cosine_similarity(query_embedding, vector_data['embedding'])
+                similarity = self._cosine_similarity(
+                    query_embedding, vector_data['embedding'])
 
                 if similarity >= threshold:
                     # Recreate chunk object
@@ -616,7 +629,8 @@ class LanceDBVectorStore:
                         similarity_score=similarity,
                         rank=len(results),
                         context=self._generate_context(chunk),
-                        relevance_score=self._calculate_relevance_score(chunk, similarity)
+                        relevance_score=self._calculate_relevance_score(
+                            chunk, similarity)
                     )
 
                     results.append(result)
@@ -629,7 +643,8 @@ class LanceDBVectorStore:
             for i, result in enumerate(results):
                 result.rank = i
 
-            logger.info(f"Found {len(results)} similar chunks above threshold {threshold}")
+            logger.info(
+                f"Found {len(results)} similar chunks above threshold {threshold}")
             return results
 
         except Exception as e:
@@ -665,7 +680,8 @@ class LanceDBVectorStore:
         """Generate context summary for chunk"""
         # Extract key sentences or phrases
         sentences = re.split(r'[.!?]+', chunk.content)
-        key_sentences = [s.strip() for s in sentences if len(s.strip()) > 20][:2]
+        key_sentences = [s.strip()
+                         for s in sentences if len(s.strip()) > 20][:2]
 
         if key_sentences:
             return '. '.join(key_sentences) + '.'
@@ -683,8 +699,10 @@ class LanceDBVectorStore:
         # Boost relevance for recently accessed chunks
         if chunk.last_accessed:
             try:
-                last_accessed = datetime.fromisoformat(chunk.last_accessed.replace('Z', '+00:00'))
-                hours_since_access = (datetime.utcnow() - last_accessed.replace(tzinfo=None)).total_seconds() / 3600
+                last_accessed = datetime.fromisoformat(
+                    chunk.last_accessed.replace('Z', '+00:00'))
+                hours_since_access = (
+                    datetime.utcnow() - last_accessed.replace(tzinfo=None)).total_seconds() / 3600
 
                 if hours_since_access < 24:  # Accessed within last 24 hours
                     recency_boost = 0.05
@@ -699,7 +717,8 @@ class LanceDBVectorStore:
         try:
             if chunk_id in self.vectors:
                 self.vectors[chunk_id]['access_count'] += 1
-                self.vectors[chunk_id]['last_accessed'] = datetime.utcnow().isoformat()
+                self.vectors[chunk_id]['last_accessed'] = datetime.utcnow(
+                ).isoformat()
                 return True
         except Exception as e:
             logger.error(f"Failed to update chunk access: {e}")
@@ -709,7 +728,8 @@ class LanceDBVectorStore:
     async def get_storage_stats(self) -> Dict[str, Any]:
         """Get vector storage statistics"""
         total_chunks = len(self.vectors)
-        total_embeddings = sum(1 for v in self.vectors.values() if v.get('embedding'))
+        total_embeddings = sum(
+            1 for v in self.vectors.values() if v.get('embedding'))
 
         # Calculate average embedding dimensions
         dimensions = []
@@ -739,6 +759,7 @@ class LanceDBVectorStore:
         """Estimate storage size in MB"""
         # Rough estimation: each vector entry ~1KB
         return round(len(self.vectors) * 0.001, 2)
+
 
 class MemoryManager:
     """Main memory management system for StrandsAgents"""
@@ -771,7 +792,8 @@ class MemoryManager:
         """Store content in memory with chunking and embedding"""
         try:
             # Get appropriate chunking strategy
-            chunking_strategy = self.chunking_strategies.get(memory_type, ChunkingStrategy.HYBRID)
+            chunking_strategy = self.chunking_strategies.get(
+                memory_type, ChunkingStrategy.HYBRID)
 
             # Chunk the content
             chunks = await self.chunker.chunk_text(
@@ -794,7 +816,8 @@ class MemoryManager:
             # Store in vector database
             await self.vector_store.store_chunks(chunks)
 
-            logger.info(f"Stored {len(chunks)} chunks of type {memory_type.value}")
+            logger.info(
+                f"Stored {len(chunks)} chunks of type {memory_type.value}")
             return chunks
 
         except Exception as e:
@@ -921,12 +944,14 @@ class MemoryManager:
                 chunk = result.chunk
                 chunk.memory_type = MemoryType.LONG_TERM
                 chunk.metadata['consolidated_from'] = 'working_memory'
-                chunk.metadata['consolidation_date'] = datetime.utcnow().isoformat()
+                chunk.metadata['consolidation_date'] = datetime.utcnow(
+                ).isoformat()
 
                 # Update in vector store
                 await self.vector_store.store_chunks([chunk])
 
-            logger.info(f"Consolidated {len(working_memory)} working memory chunks")
+            logger.info(
+                f"Consolidated {len(working_memory)} working memory chunks")
             return True
 
         except Exception as e:
@@ -963,10 +988,12 @@ class MemoryManager:
             return {}
 
 # Convenience function for testing
+
+
 async def test_memory_system():
     """Test the memory system"""
     try:
-        print("🚀 Testing Memory System...")
+        print(" Testing Memory System...")
 
         # Initialize memory manager
         memory_manager = MemoryManager()
@@ -987,7 +1014,7 @@ async def test_memory_system():
             strategy=ChunkingStrategy.HYBRID
         )
 
-        print(f"✅ Created {len(chunks)} chunks")
+        print(f" Created {len(chunks)} chunks")
 
         # Test embedding generation
         embedding_service = EmbeddingService()
@@ -999,7 +1026,7 @@ async def test_memory_system():
         )
 
         if embedding:
-            print(f"✅ Generated embedding: {len(embedding)} dimensions")
+            print(f" Generated embedding: {len(embedding)} dimensions")
         else:
             print("❌ Failed to generate embedding")
 
@@ -1017,7 +1044,7 @@ async def test_memory_system():
             context
         )
 
-        print(f"✅ Stored {len(stored_chunks)} chunks in memory")
+        print(f" Stored {len(stored_chunks)} chunks in memory")
 
         # Test memory search
         search_results = await memory_manager.search_memory(
@@ -1026,11 +1053,11 @@ async def test_memory_system():
             limit=5
         )
 
-        print(f"✅ Found {len(search_results)} relevant chunks")
+        print(f" Found {len(search_results)} relevant chunks")
 
         # Test memory stats
         stats = await memory_manager.get_memory_stats()
-        print(f"✅ Memory stats: {stats}")
+        print(f" Memory stats: {stats}")
 
         print("🎉 Memory System test completed successfully!")
         return True

@@ -39,7 +39,7 @@ try:
     nest_asyncio.apply()
     browser_instance = LocalChromiumBrowser()
     browser_tool = browser_instance.browser
-    print("✅ Browser tool initialized successfully")
+    print(" Browser tool initialized successfully")
 except (Exception) as e:
     browser_tool = None
     print(
@@ -185,7 +185,7 @@ def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
             parts.append(block)
 
     parts.append("## Final Status\n")
-    parts.append("✅ Workflow completed successfully\n")
+    parts.append(" Workflow completed successfully\n")
 
     final_result = "".join(parts)
 
@@ -193,6 +193,7 @@ def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
                 len(final_result))
 
     return final_result
+
 
 def _format_thinking_results(thinking_results: Dict[str, Any]) -> str:
 
@@ -245,10 +246,10 @@ def save_workflow_state(workflow_state: Dict[str, Any]):
 
 
 @tool
-
 def intelligent_workflow_orchestrator(user_query: str, context: str = "", history: List = None) -> Dict[str, Any]:
     """Main orchestrator that thinks first, then decides which agent to call next."""
-    logger.info("Starting intelligent workflow orchestration for: %s", user_query)
+    logger.info(
+        "Starting intelligent workflow orchestration for: %s", user_query)
 
     thinking_results = structured_thinking_pipeline(user_query, context)
 
@@ -285,6 +286,7 @@ def intelligent_workflow_orchestrator(user_query: str, context: str = "", histor
         normalized_decision.get("confidence", "unknown"),
     )
     return orchestration_result
+
 
 def parse_decision_text(decision_text: str) -> Dict[str, Any]:
     """
@@ -438,7 +440,6 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     return result_writer
 
 
-
 AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "planner_agent": {
         "description": "Creates structured plans, decomposes the goal, and identifies next steps.",
@@ -536,6 +537,7 @@ AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     },
 }
 
+
 def _build_meta_tool_catalog() -> Dict[str, Dict[str, Any]]:
     """Expose tool metadata for the meta-tool in a consistent schema."""
     catalog: Dict[str, Dict[str, Any]] = {}
@@ -565,9 +567,11 @@ def _normalize_meta_decision(
         intent = "use_tool"
 
     raw_agent = decision.get("next_agent", "planner_agent")
-    next_agent = raw_agent.strip() if isinstance(raw_agent, str) else "planner_agent"
+    next_agent = raw_agent.strip() if isinstance(
+        raw_agent, str) else "planner_agent"
     if intent == "use_tool" and next_agent not in AGENT_REGISTRY:
-        logger.warning("Unknown agent '%s' requested by meta tool; defaulting to planner_agent", next_agent)
+        logger.warning(
+            "Unknown agent '%s' requested by meta tool; defaulting to planner_agent", next_agent)
         next_agent = "planner_agent"
 
     proposed_tool = None
@@ -583,10 +587,12 @@ def _normalize_meta_decision(
         current_results,
     )
 
-    provided_parameters = decision.get("parameters") if isinstance(decision.get("parameters"), dict) else {}
+    provided_parameters = decision.get("parameters") if isinstance(
+        decision.get("parameters"), dict) else {}
     parameters = {**base_parameters, **provided_parameters}
 
-    reasoning = decision.get("reasoning", "Decision based on meta-tool analysis.")
+    reasoning = decision.get(
+        "reasoning", "Decision based on meta-tool analysis.")
     if not isinstance(reasoning, str) or not reasoning.strip():
         reasoning = "Decision based on meta-tool analysis."
 
@@ -652,16 +658,20 @@ def _execute_decision_step(
     step_index = len(workflow_state.get("completed_steps", [])) + 1
     agent_name = decision.get("next_agent", "planner_agent")
     if agent_name not in AGENT_REGISTRY:
-        logger.warning("Unknown agent '%s' during execution; defaulting to planner_agent", agent_name)
+        logger.warning(
+            "Unknown agent '%s' during execution; defaulting to planner_agent", agent_name)
         agent_name = "planner_agent"
 
-    parameters = decision.get("parameters") if isinstance(decision.get("parameters"), dict) else {}
+    parameters = decision.get("parameters") if isinstance(
+        decision.get("parameters"), dict) else {}
     intent = decision.get("intent", "use_tool")
 
     if intent == "create_tool" and decision.get("tool_spec"):
-        workflow_state.setdefault("pending_tool_specs", []).append(decision["tool_spec"])
+        workflow_state.setdefault(
+            "pending_tool_specs", []).append(decision["tool_spec"])
     if intent == "create_tool" and decision.get("proposed_tool"):
-        workflow_state.setdefault("pending_tool_names", []).append(decision["proposed_tool"])
+        workflow_state.setdefault("pending_tool_names", []).append(
+            decision["proposed_tool"])
 
     try:
         result = _invoke_agent(agent_name, parameters)
@@ -697,7 +707,6 @@ def _finalize_workflow_run(workflow_state: Dict[str, Any]) -> Tuple[str, Dict[st
     artifact_paths["workflow_state"] = workflow_state_path
     workflow_state["artifact_paths"] = artifact_paths
     return final_result, artifact_paths
-
 
 
 def _summarize_thinking_results(
@@ -875,6 +884,7 @@ def _refresh_rolling_summary(existing_summary: str, candidate_memories: List[str
         return existing_summary
     return str(updated).strip()
 
+
 def _persist_memories_to_store(
     final_result: str,
     candidate_memories: List[str],
@@ -940,7 +950,8 @@ def _run_knowledge_pipeline(workflow_state: Dict[str, Any], final_result: str) -
         store_summary=summary_changed and bool(snapshot_summary.strip()),
     )
 
-    _persist_memories_to_store(final_result, candidate_memories, workflow_state)
+    _persist_memories_to_store(
+        final_result, candidate_memories, workflow_state)
 
     logger.info("Knowledge pipeline stored %d candidate memories",
                 len(candidate_memories))
@@ -955,12 +966,15 @@ def execute_thinking_driven_workflow(user_query: str, context: str = "", history
     workflow_state = _initialize_workflow_state(user_query)
     workflow_state["context"] = context
 
-    orchestration_result = intelligent_workflow_orchestrator(user_query, context, history)
-    workflow_state["thinking_results"] = orchestration_result.get("thinking_results", {})
+    orchestration_result = intelligent_workflow_orchestrator(
+        user_query, context, history)
+    workflow_state["thinking_results"] = orchestration_result.get(
+        "thinking_results", {})
     workflow_state["meta_decision"] = orchestration_result.get("meta_decision")
 
     current_decision = orchestration_result.get("decision")
-    steps_executed = _execute_decision_step(current_decision, workflow_state) if current_decision else 0
+    steps_executed = _execute_decision_step(
+        current_decision, workflow_state) if current_decision else 0
 
     workflow_state["total_steps"] = steps_executed
     workflow_state["end_time"] = datetime.now().isoformat()
@@ -968,13 +982,13 @@ def execute_thinking_driven_workflow(user_query: str, context: str = "", history
     final_result, artifact_paths = _finalize_workflow_run(workflow_state)
 
     logger.info("Workflow artifacts saved: %s", artifact_paths)
-    logger.info("Thinking-driven workflow completed in %d steps", steps_executed)
+    logger.info("Thinking-driven workflow completed in %d steps",
+                steps_executed)
 
     global LAST_WORKFLOW_ARTIFACTS
     LAST_WORKFLOW_ARTIFACTS = artifact_paths
 
     return final_result
-
 
 
 if __name__ == "__main__":
@@ -1003,7 +1017,7 @@ if __name__ == "__main__":
             is_repeat = any(entry['query'].lower() == user_input.lower()
                             for entry in research_history)
 
-            print(f"\n🔍 Starting thinking-first workflow for: '{user_input}'")
+            print(f"\n Starting thinking-first workflow for: '{user_input}'")
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
             print(

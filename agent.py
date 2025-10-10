@@ -5,7 +5,7 @@ from strands.agent.conversation_manager import SlidingWindowConversationManager
 import logging
 from dotenv import load_dotenv
 import os
-#from mem0 import MemoryClient
+# from mem0 import MemoryClient
 from datetime import datetime
 import json
 
@@ -240,6 +240,8 @@ def reasoning_result(user_query: str, context: str) -> str:
 
 # Knowledge Base Memory- Need to make sure to only get what
 # is relevant to the current query
+
+
 def knowledge_base_memory():
     """
     Load and return the knowledge base memory.
@@ -257,7 +259,8 @@ def knowledge_base_memory():
             with open(base_memory, "w", encoding="utf-8") as f:
                 initial_content = "Knowledge Base Initialized.\n"
                 f.write(initial_content)
-            logger.info(f"✅ Created knowledgebase.txt with %s characters", (len(initial_content),))
+            logger.info(
+                f" Created knowledgebase.txt with %s characters", (len(initial_content),))
             return initial_content
         except Exception as e:
             logger.error("❌ Failed to create knowledgebase.txt: %s", e)
@@ -267,7 +270,8 @@ def knowledge_base_memory():
     try:
         with open(base_memory, "r", encoding="utf-8") as f:
             content = f.read()
-            logger.info(f"✅ Loaded knowledge base with {len(content)} characters")
+            logger.info(
+                f" Loaded knowledge base with {len(content)} characters")
             return content
     except Exception as e:
         logger.error(f"❌ Failed to read knowledgebase.txt: {e}")
@@ -357,7 +361,7 @@ if __name__ == "__main__":
                             for entry in research_history)
 
             print(
-                f"\n🔍 Starting advanced reasoning workflow for: '{user_input}'")
+                f"\n Starting advanced reasoning workflow for: '{user_input}'")
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
             print("📋 Workflow: Plan → Research → Analyze → Rank → Synthesize → Report")
@@ -372,7 +376,8 @@ if __name__ == "__main__":
             print("\n" + "="*70)
 
             # Store research result in knowledge base
-            append_to_knowledge_base(f"Research Query: {user_input}", "research")
+            append_to_knowledge_base(
+                f"Research Query: {user_input}", "research")
             append_to_knowledge_base(f"Research Result: {result}", "findings")
 
             # Save research output to file for comparison

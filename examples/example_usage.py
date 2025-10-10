@@ -14,9 +14,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+
 async def example_basic_usage():
     """Example: Basic swarm usage with custom configuration."""
-    print("🚀 Starting basic swarm example...")
+    print(" Starting basic swarm example...")
 
     # Create swarm with custom model configuration
     config = {
@@ -31,12 +32,12 @@ async def example_basic_usage():
     try:
         # Start the swarm system
         await swarm.start()
-        print("✅ Swarm system started")
+        print(" Swarm system started")
 
         # Check system status
         status = swarm.get_status()
-        print(f"📊 System status: {status['running']}")
-        print(f"🤖 Orchestrator model: {status['orchestrator_model']}")
+        print(f" System status: {status['running']}")
+        print(f" Orchestrator model: {status['orchestrator_model']}")
         print(f"🔧 Assistant model: {status['assistant_model']}")
         print(f"👥 Active assistants: {len(status['assistants'])}")
 
@@ -72,6 +73,7 @@ async def example_basic_usage():
         await swarm.stop()
         print("🛑 Swarm system stopped")
 
+
 async def example_specialized_swarm():
     """Example: Using a specialized research swarm."""
     print("\n🔬 Starting specialized research swarm example...")
@@ -84,7 +86,7 @@ async def example_specialized_swarm():
 
     try:
         await research_swarm.start()
-        print("✅ Research swarm started")
+        print(" Research swarm started")
 
         # Process research-specific tasks
         tasks = [
@@ -96,13 +98,14 @@ async def example_specialized_swarm():
         for i, task in enumerate(tasks, 1):
             print(f"\n📚 Processing research task {i}...")
             result = await research_swarm.process_task(task)
-            print(f"✅ Task {i} completed: {result.get('status', 'unknown')}")
+            print(f" Task {i} completed: {result.get('status', 'unknown')}")
 
     except Exception as e:
         print(f"❌ Research swarm error: {e}")
     finally:
         await research_swarm.stop()
         print("🛑 Research swarm stopped")
+
 
 async def main():
     """Run all examples."""

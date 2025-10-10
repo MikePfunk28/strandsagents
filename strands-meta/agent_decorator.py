@@ -27,9 +27,11 @@ except ImportError:
     except ImportError:
         # Fallback for when strands is not available
         print("⚠️  Strands library not found, using mock implementations")
+
         class OllamaModel:
             def __init__(self, **kwargs):
                 pass
+
         class Agent:
             def __init__(self, **kwargs):
                 pass
@@ -46,7 +48,9 @@ try:
     SANDBOX_AVAILABLE = True
 except ImportError:
     SANDBOX_AVAILABLE = False
-    logger.warning("🔧 Sandbox executor not available - code execution disabled")
+    logger.warning(
+        "🔧 Sandbox executor not available - code execution disabled")
+
 
 def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
           enable_code_execution: bool = False, sandbox_timeout: int = 30):
@@ -85,14 +89,15 @@ def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
             'description': func.__doc__ or "No description available"
         }
 
-        logger.info(f"🔧 Registered agent: {func.__name__} with model {model_id}")
+        logger.info(
+            f"🔧 Registered agent: {func.__name__} with model {model_id}")
 
         # Return wrapper function that handles both regular queries and code execution
         def wrapper(query: str) -> str:
             try:
                 # Check if this is a code execution request
                 if enable_code_execution and any(keyword in query.lower() for keyword in
-                                                ['execute', 'run code', 'execute python', 'run python']):
+                                                 ['execute', 'run code', 'execute python', 'run python']):
                     return _handle_code_execution(query, agent_instance, sandbox_timeout)
 
                 # Regular agent query
@@ -119,6 +124,7 @@ def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
 
         return wrapper
     return decorator
+
 
 def _handle_code_execution(query: str, agent: Agent, timeout: int) -> str:
     """Handle code execution requests within agent queries"""
@@ -162,6 +168,7 @@ def _handle_code_execution(query: str, agent: Agent, timeout: int) -> str:
     except Exception as e:
         return f"Code execution failed: {str(e)}"
 
+
 def _extract_code_from_query(query: str) -> Optional[str]:
     """Extract code from natural language query"""
     # Look for code blocks (```python ... ```)
@@ -180,6 +187,7 @@ def _extract_code_from_query(query: str) -> Optional[str]:
                 return code_part
 
     return None
+
 
 def _handle_agent_chaining(response: str, original_query: str) -> str:
     """Handle agent-to-agent chaining requests"""
@@ -209,19 +217,23 @@ def _handle_agent_chaining(response: str, original_query: str) -> str:
         logger.error(f"🔗 Agent chaining error: {str(e)}")
         return response
 
+
 def get_agent_function(agent_name: str):
     """Get the wrapper function for an agent"""
     if agent_name in AGENT_REGISTRY:
         return AGENT_REGISTRY[agent_name].get('function')
     return None
 
+
 def list_agents() -> List[str]:
     """List all registered agents"""
     return list(AGENT_REGISTRY.keys())
 
+
 def get_agent_info(agent_name: str) -> Optional[Dict[str, Any]]:
     """Get information about a specific agent"""
     return AGENT_REGISTRY.get(agent_name)
+
 
 def call_agent(agent_name: str, query: str) -> str:
     """Call a specific agent by name"""
@@ -235,19 +247,23 @@ def call_agent(agent_name: str, query: str) -> str:
         return f"Agent {agent_name} not found. Available: {available}"
 
 # Convenience functions for agent management
+
+
 def get_agents_with_code_execution() -> List[str]:
     """Get list of agents that have code execution enabled"""
     return [name for name, info in AGENT_REGISTRY.items()
             if info.get('enable_code_execution', False)]
+
 
 def get_agents_by_model(model_id: str) -> List[str]:
     """Get list of agents using a specific model"""
     return [name for name, info in AGENT_REGISTRY.items()
             if info.get('model_id') == model_id]
 
+
 def print_agent_summary():
     """Print a summary of all registered agents"""
-    print("\\n🤖 Agent Registry Summary")
+    print("\\n Agent Registry Summary")
     print("=" * 50)
 
     for name, info in AGENT_REGISTRY.items():
@@ -257,6 +273,7 @@ def print_agent_summary():
         print(f"   Code Execution: {info.get('enable_code_execution', False)}")
         print(f"   Description: {info['description'][:100]}...")
         print()
+
 
 # Example usage and testing
 if __name__ == "__main__":
@@ -276,7 +293,8 @@ if __name__ == "__main__":
     print(f"Result: {result}")
 
     # Test code execution
-    code_result = example_agent("Execute this Python code: print('Hello from code execution!')")
+    code_result = example_agent(
+        "Execute this Python code: print('Hello from code execution!')")
     print(f"Code execution result: {code_result}")
 
     # Show registry

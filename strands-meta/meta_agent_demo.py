@@ -16,6 +16,8 @@ from agent import agent
 logger = logging.getLogger("meta_agent_demo")
 
 # Simple agent creation using @agent decorator
+
+
 @agent(
     model_id="qwen3:8b",
     tools=["file_write"],
@@ -109,7 +111,7 @@ def {agent_name}(query: str) -> str:
         return f"Error in specialized agent: {{str(e)}}"
 
 if __name__ == "__main__":
-    print("🤖 Specialized {agent_type.title()} Agent")
+    print(" Specialized {agent_type.title()} Agent")
     print("=" * 50)
     print(f"Generated for: {query}")
     print(f"Agent function: {agent_name}")
@@ -127,7 +129,7 @@ if __name__ == "__main__":
             agent_file.write_text(agent_code, encoding='utf-8')
 
             response = f"""
-🤖 Agent Created Successfully!
+ Agent Created Successfully!
 
 📋 Agent Details:
    • Name: {agent_name}
@@ -137,7 +139,7 @@ if __name__ == "__main__":
 📁 Files Created:
    • Agent module: {agent_file}
 
-✅ Your specialized agent is ready to use!
+ Your specialized agent is ready to use!
 
 The @agent decorator system makes agent creation incredibly simple:
 - Single decorator replaces 50+ lines of boilerplate
@@ -151,7 +153,7 @@ The @agent decorator system makes agent creation incredibly simple:
    3. Add additional tools as required
    4. Deploy and integrate with your system
 
-🚀 Example usage:
+ Example usage:
    from {agent_name} import {agent_name}
    result = {agent_name}("Your task here")
 """
@@ -161,7 +163,7 @@ The @agent decorator system makes agent creation incredibly simple:
         # Default help response
         else:
             return """
-🤖 Meta-Agent Builder Ready!
+ Meta-Agent Builder Ready!
 
 I can create specialized AI agents using the @agent decorator system.
 
@@ -188,9 +190,10 @@ Your request: "{query[:100]}{"..." if len(query) > 100 else ""}"
         logger.error(error_msg)
         return error_msg
 
+
 # Example usage and testing
 if __name__ == "__main__":
-    print("🤖 Meta-Agent Builder Demo")
+    print(" Meta-Agent Builder Demo")
     print("=" * 50)
     print("Creating agents that build other agents using @agent decorator")
     print()
@@ -208,11 +211,12 @@ if __name__ == "__main__":
 
         try:
             result = meta_agent_builder(test_query)
-            print(f"Response: {result[:300]}{'...' if len(result) > 300 else ''}")
+            print(
+                f"Response: {result[:300]}{'...' if len(result) > 300 else ''}")
         except Exception as e:
             print(f"Error: {e}")
 
         print()
 
-    print("✅ Meta-Agent Builder demo completed!")
+    print(" Meta-Agent Builder demo completed!")
     print("The @agent decorator enables powerful meta-agent capabilities!")

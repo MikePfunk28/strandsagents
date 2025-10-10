@@ -4,6 +4,8 @@ This test verifies that the security layer is properly integrated
 and provides the expected security features.
 """
 
+from swarm.coordinator.orchestrator import SwarmOrchestrator
+from security import SecurityManager
 import asyncio
 import sys
 import os
@@ -11,8 +13,6 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from security import SecurityManager
-from swarm.coordinator.orchestrator import SwarmOrchestrator
 
 async def test_security_manager_initialization():
     """Test security manager initialization."""
@@ -31,6 +31,7 @@ async def test_security_manager_initialization():
     print("✓ Security status reporting works")
 
     return security_manager
+
 
 async def test_agent_registration_security():
     """Test agent registration with security."""
@@ -63,6 +64,7 @@ async def test_agent_registration_security():
     assert authorized, "Agent not authorized for task execution"
     print("✓ Agent authorization successful")
 
+
 async def test_message_verification():
     """Test message integrity verification."""
     print("\nTesting Message Verification...")
@@ -86,7 +88,8 @@ async def test_message_verification():
     }
 
     # Sign the message
-    signed_message = security_manager.verifier.create_signed_message(test_message, "test_agent_2")
+    signed_message = security_manager.verifier.create_signed_message(
+        test_message, "test_agent_2")
     assert signed_message is not None, "Failed to create signed message"
     assert "signature" in signed_message, "Signed message missing signature"
     print("✓ Message signing successful")
@@ -96,6 +99,7 @@ async def test_message_verification():
     assert is_valid, f"Message verification failed: {verification_result.issues}"
     assert original_message == test_message, "Original message doesn't match"
     print("✓ Message verification successful")
+
 
 async def test_answer_validation():
     """Test answer validation system."""
@@ -129,7 +133,8 @@ async def test_answer_validation():
     )
 
     assert validation_result.confidence_score > 0.6, f"Low confidence score: {validation_result.confidence_score}"
-    print(f"✓ Answer validation successful (confidence: {validation_result.confidence_score:.2f})")
+    print(
+        f"✓ Answer validation successful (confidence: {validation_result.confidence_score:.2f})")
 
     # Test validating a poor answer
     poor_answer = "I don't know much about this topic."
@@ -143,7 +148,9 @@ async def test_answer_validation():
     )
 
     assert validation_result_poor.confidence_score < validation_result.confidence_score, "Poor answer should have lower confidence"
-    print(f"✓ Poor answer detection works (confidence: {validation_result_poor.confidence_score:.2f})")
+    print(
+        f"✓ Poor answer detection works (confidence: {validation_result_poor.confidence_score:.2f})")
+
 
 async def test_orchestrator_security_integration():
     """Test security integration with orchestrator."""
@@ -156,7 +163,8 @@ async def test_orchestrator_security_integration():
     await orchestrator.initialize()
 
     # Check security manager is available
-    assert hasattr(orchestrator, 'security_manager'), "Orchestrator missing security manager"
+    assert hasattr(
+        orchestrator, 'security_manager'), "Orchestrator missing security manager"
     assert orchestrator.security_manager is not None, "Security manager not initialized"
     print("✓ Orchestrator security integration successful")
 
@@ -167,6 +175,7 @@ async def test_orchestrator_security_integration():
 
     # Clean up
     await orchestrator.stop_orchestration()
+
 
 async def test_security_incident_reporting():
     """Test security incident reporting."""
@@ -197,6 +206,7 @@ async def test_security_incident_reporting():
     status = security_manager.get_security_status()
     print(f"✓ Current threat level: {status['threat_level']}")
 
+
 async def run_all_tests():
     """Run all security tests."""
     print("🔒 Running Security Layer Integration Tests\n")
@@ -210,7 +220,7 @@ async def run_all_tests():
         await test_security_incident_reporting()
 
         print("\n🎉 All security tests passed successfully!")
-        print("\n📊 Security Layer Features Verified:")
+        print("\n Security Layer Features Verified:")
         print("  ✓ Agent authentication and authorization")
         print("  ✓ Message integrity verification")
         print("  ✓ Answer validation and quality scoring")
@@ -231,7 +241,7 @@ if __name__ == "__main__":
     success = asyncio.run(run_all_tests())
 
     if success:
-        print("\n✅ Security layer is ready for production use!")
+        print("\n Security layer is ready for production use!")
         sys.exit(0)
     else:
         print("\n❌ Security tests failed - review implementation")

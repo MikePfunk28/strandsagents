@@ -15,8 +15,10 @@ from enum import Enum
 import uuid
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 class SearchStrategy(Enum):
     """Search strategies for agentic search"""
@@ -25,6 +27,7 @@ class SearchStrategy(Enum):
     TECHNICAL = "technical"
     BEST_PRACTICES = "best_practices"
     EXAMPLES = "examples"
+
 
 @dataclass
 class SearchResult:
@@ -37,6 +40,7 @@ class SearchResult:
     timestamp: str
     search_strategy: SearchStrategy
 
+
 @dataclass
 class SearchStep:
     """Individual step in agentic search"""
@@ -47,6 +51,7 @@ class SearchStep:
     reasoning: str
     confidence: float
     processing_time_ms: float
+
 
 @dataclass
 class AgenticSearchResult:
@@ -60,6 +65,7 @@ class AgenticSearchResult:
     confidence_score: float
     processing_time_ms: float
     recommendations: List[str]
+
 
 class MockSearchEngine:
     """Mock search engine for demonstration"""
@@ -85,7 +91,8 @@ class MockSearchEngine:
 
     async def search(self, query: str, strategy: SearchStrategy, limit: int = 5) -> List[SearchResult]:
         """Mock search implementation"""
-        logger.info(f"🔍 Searching with strategy: {strategy.value} for query: {query}")
+        logger.info(
+            f" Searching with strategy: {strategy.value} for query: {query}")
 
         # Simulate search delay
         await asyncio.sleep(0.5)
@@ -96,8 +103,10 @@ class MockSearchEngine:
         query_terms = query.lower().split()
 
         for key, data in self.knowledge_base.items():
-            relevance = sum(1 for term in query_terms if term in key.lower() or term in data['content'].lower())
-            relevance_score = min(relevance / len(query_terms), 1.0) if query_terms else 0.0
+            relevance = sum(1 for term in query_terms if term in key.lower(
+            ) or term in data['content'].lower())
+            relevance_score = min(
+                relevance / len(query_terms), 1.0) if query_terms else 0.0
 
             if relevance_score > 0.3:  # Only include relevant results
                 result = SearchResult(
@@ -115,6 +124,7 @@ class MockSearchEngine:
         results.sort(key=lambda x: x.relevance_score, reverse=True)
         return results[:limit]
 
+
 class AgenticSearchEngine:
     """Agentic search engine with visible reasoning"""
 
@@ -127,12 +137,13 @@ class AgenticSearchEngine:
         search_id = str(uuid.uuid4())
         start_time = time.time()
 
-        logger.info(f"🚀 Starting agentic search: {query}")
+        logger.info(f" Starting agentic search: {query}")
 
         steps = []
 
         # Step 1: Broad search strategy
-        logger.info("🤔 Step 1: THINKING - Starting with broad search to understand context")
+        logger.info(
+            " Step 1: THINKING - Starting with broad search to understand context")
         step1_start = time.time()
 
         broad_query = f"AWS Lambda overview and general information about {query}"
@@ -150,10 +161,12 @@ class AgenticSearchEngine:
         )
         steps.append(step1)
 
-        logger.info(f"✅ Step 1: Found {len(broad_results)} broad results in {step1_time:.0f}ms")
+        logger.info(
+            f" Step 1: Found {len(broad_results)} broad results in {step1_time:.0f}ms")
 
         # Step 2: Specific technical search
-        logger.info("🤔 Step 2: THINKING - Now searching for specific technical details and best practices")
+        logger.info(
+            " Step 2: THINKING - Now searching for specific technical details and best practices")
         step2_start = time.time()
 
         specific_query = f"AWS Lambda best practices, performance optimization, and production considerations for {query}"
@@ -171,10 +184,12 @@ class AgenticSearchEngine:
         )
         steps.append(step2)
 
-        logger.info(f"✅ Step 2: Found {len(specific_results)} technical results in {step2_time:.0f}ms")
+        logger.info(
+            f" Step 2: Found {len(specific_results)} technical results in {step2_time:.0f}ms")
 
         # Step 3: Best practices search
-        logger.info("🤔 Step 3: THINKING - Looking for established best practices and patterns")
+        logger.info(
+            " Step 3: THINKING - Looking for established best practices and patterns")
         step3_start = time.time()
 
         best_practices_query = f"AWS Lambda production best practices, common patterns, and recommendations for {query}"
@@ -192,10 +207,12 @@ class AgenticSearchEngine:
         )
         steps.append(step3)
 
-        logger.info(f"✅ Step 3: Found {len(best_practices_results)} best practice results in {step3_time:.0f}ms")
+        logger.info(
+            f" Step 3: Found {len(best_practices_results)} best practice results in {step3_time:.0f}ms")
 
         # Step 4: Synthesize results
-        logger.info("🤔 Step 4: THINKING - Synthesizing all findings into comprehensive answer")
+        logger.info(
+            " Step 4: THINKING - Synthesizing all findings into comprehensive answer")
         step4_start = time.time()
 
         final_synthesis = await self._synthesize_results(query, steps)
@@ -230,7 +247,8 @@ class AgenticSearchEngine:
         )
 
         self.search_history.append(result)
-        logger.info(f"🎉 Agentic search completed in {total_time:.0f}ms with {overall_confidence:.1%} confidence")
+        logger.info(
+            f"🎉 Agentic search completed in {total_time:.0f}ms with {overall_confidence:.1%} confidence")
 
         return result
 
@@ -259,7 +277,8 @@ Based on comprehensive multi-strategy search across technical documentation and 
 {chr(10).join(f"- {result.content[:100]}..." for step in steps[1:2] for result in step.results[:2])}
 
 ### 3. Best Practices
-{chr(10).join(f"- {result.content[:100]}..." for step in steps[2:3] for result in step.results[:2])}
+{chr(10).join(f"- {result.content[:100]}..." for step in steps[2:3]
+     for result in step.results[:2])}
 
 ## Recommendations
 - Follow AWS Lambda best practices for production applications
@@ -279,16 +298,17 @@ This analysis is based on authoritative AWS documentation and established best p
         recommendations = [
             "📚 Review AWS Lambda documentation for detailed implementation guidance",
             "🔧 Implement proper error handling and retry logic",
-            "📊 Set up CloudWatch monitoring for performance tracking",
+            " Set up CloudWatch monitoring for performance tracking",
             "💰 Optimize memory allocation for cost efficiency",
             "🔒 Follow security best practices for production deployment"
         ]
 
         return recommendations
 
+
 async def main():
     """Demonstrate agentic search functionality"""
-    print("🔍 Agentic Search System Demonstration")
+    print(" Agentic Search System Demonstration")
     print("=" * 60)
 
     # Initialize search engine
@@ -302,17 +322,17 @@ async def main():
     ]
 
     for i, query in enumerate(test_queries, 1):
-        print(f"\n🔍 Test Query {i}: {query}")
+        print(f"\n Test Query {i}: {query}")
         print("-" * 50)
 
         try:
             # Perform agentic search
             result = await search_engine.perform_agentic_search(query)
 
-            print(f"✅ Search completed in {result.processing_time_ms:.0f}ms")
-            print(f"✅ Confidence: {result.confidence_score:.1%}")
-            print(f"✅ Total results: {result.total_results}")
-            print(f"✅ Search steps: {len(result.steps)}")
+            print(f" Search completed in {result.processing_time_ms:.0f}ms")
+            print(f" Confidence: {result.confidence_score:.1%}")
+            print(f" Total results: {result.total_results}")
+            print(f" Search steps: {len(result.steps)}")
 
             # Show step-by-step reasoning
             print("
@@ -336,13 +356,13 @@ async def main():
 
     # Show search statistics
     print("
-📊 Search Statistics:"    print(f"   Total searches: {len(search_engine.search_history)}")
+ Search Statistics:"    print(f"   Total searches: {len(search_engine.search_history)}")
     print(f"   Average confidence: {sum(r.confidence_score for r in search_engine.search_history) / len(search_engine.search_history):.1%}"".1%"
     print(f"   Average processing time: {sum(r.processing_time_ms for r in search_engine.search_engine.search_history) / len(search_engine.search_history):.0f}ms")
 
     print("
 🎉 Agentic Search Demonstration Complete!"    print("
-💡 Key Benefits:"    print("   ✅ Visible reasoning at each step"    print("   ✅ Controlled search process"    print("   ✅ Multiple search strategies"    print("   ✅ Confidence scoring"    print("   ✅ Comprehensive synthesis"    print("   ✅ No runaway requests"
+💡 Key Benefits:"    print("    Visible reasoning at each step"    print("    Controlled search process"    print("    Multiple search strategies"    print("    Confidence scoring"    print("    Comprehensive synthesis"    print("    No runaway requests"
 
 if __name__ == "__main__":
     asyncio.run(main())

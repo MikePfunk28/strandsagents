@@ -7,6 +7,9 @@ in its own file with its own model, tools, and prompts.
 Following official Strands Agents documentation patterns.
 """
 
+from strands_tools import think, editor, http_request, file_read, file_write, calculator
+from strands import Agent, tool
+from strands.models.ollama import OllamaModel
 import os
 import sys
 import importlib.util
@@ -24,9 +27,6 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 # Import all necessary strandsagents components
-from strands.models.ollama import OllamaModel
-from strands import Agent, tool
-from strands_tools import think, editor, http_request, file_read, file_write, calculator
 
 # Setup logging following Strands Agents style guide
 logging.basicConfig(
@@ -54,7 +54,6 @@ llama_model = OllamaModel(
 )
 
 
-
 @dataclass
 class AssistantSpec:
     name: str
@@ -63,6 +62,7 @@ class AssistantSpec:
     description: str
     tools: List[str]
     system_prompt: str
+
 
 # Define all 9 assistants that exist in the assistants directory
 # Using qwen models for better performance (user has 4b and 8b versions)
@@ -167,6 +167,7 @@ ASSISTANTS = {
     )
 }
 
+
 class AssistantManager:
     def __init__(self):
         self.assistants = {}
@@ -242,10 +243,12 @@ System Prompt: {spec.system_prompt[:200]}...
                     spec_module = importlib.util.spec_from_file_location(
                         spec.name, spec.file_path
                     )
-                    assistant_module = importlib.util.module_from_spec(spec_module)
+                    assistant_module = importlib.util.module_from_spec(
+                        spec_module)
                     spec_module.loader.exec_module(assistant_module)
 
-                    run_function = getattr(assistant_module, f"run_{spec.name}_assistant")
+                    run_function = getattr(
+                        assistant_module, f"run_{spec.name}_assistant")
                     return run_function(query)
                 except Exception as e:
                     return f"Error orchestrating task: {str(e)}"
@@ -282,11 +285,19 @@ System Prompt: {spec.system_prompt[:200]}...
             print(f"Warning: Some tools not available on Windows")
             tools_available = False
             # Create fallback functions
-            def http_request(*args, **kwargs): return "Web requests not available on Windows"
+            def http_request(
+                *args, **kwargs): return "Web requests not available on Windows"
+
             def file_read(*args, **kwargs): return "File reading not available"
-            def file_write(*args, **kwargs): return "File writing not available"
-            def editor(*args, **kwargs): return "Editor not available on Windows"
-            def python_repl(*args, **kwargs): return "Python REPL not available on Windows"
+
+            def file_write(
+                *args, **kwargs): return "File writing not available"
+
+            def editor(
+                *args, **kwargs): return "Editor not available on Windows"
+            def python_repl(
+                *args, **kwargs): return "Python REPL not available on Windows"
+
             def shell(*args, **kwargs): return "Shell not available on Windows"
             def think(*args, **kwargs): return "Deep thinking not available"
 
@@ -398,17 +409,17 @@ if __name__ == "__main__":
         with open(spec.file_path, 'w', encoding='utf-8') as f:
             f.write(file_content)
 
-        print(f"✅ Created {spec.name} assistant: {spec.file_path}")
+        print(f" Created {spec.name} assistant: {spec.file_path}")
 
     def create_all_assistants(self):
         """Create all assistant files"""
-        print("🚀 Creating Individual Assistant Files")
+        print(" Creating Individual Assistant Files")
         print("=" * 50)
 
         for name, spec in ASSISTANTS.items():
             self.create_assistant_file(spec)
 
-        print(f"\\n✅ Created {len(ASSISTANTS)} assistant files")
+        print(f"\\n Created {len(ASSISTANTS)} assistant files")
 
     def run_interactive_swarm(self):
         """Run an interactive swarm system"""
@@ -442,7 +453,8 @@ if __name__ == "__main__":
                 # Parse assistant name from input
                 parts = user_input.split(' ', 1)
                 if len(parts) < 2:
-                    print("❌ Please specify an assistant. Example: researcher what is AI?")
+                    print(
+                        "❌ Please specify an assistant. Example: researcher what is AI?")
                     continue
 
                 assistant_name = parts[0]
@@ -461,11 +473,13 @@ if __name__ == "__main__":
                     spec_module = importlib.util.spec_from_file_location(
                         spec.name, spec.file_path
                     )
-                    assistant_module = importlib.util.module_from_spec(spec_module)
+                    assistant_module = importlib.util.module_from_spec(
+                        spec_module)
                     spec_module.loader.exec_module(assistant_module)
 
                     # Get the run function
-                    run_function = getattr(assistant_module, f"run_{spec.name}_assistant")
+                    run_function = getattr(
+                        assistant_module, f"run_{spec.name}_assistant")
 
                     print(f"🔧 Routing to {assistant_name} assistant...")
                     assistant_response = run_function(query)
@@ -481,6 +495,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"Error: {e}")
 
+
 def main():
     """Main function"""
     manager = AssistantManager()
@@ -488,7 +503,7 @@ def main():
     # Initialize meta-tools and orchestrator
     manager.create_meta_tools()
 
-    print("🤖 StrandsAgents Swarm System")
+    print(" StrandsAgents Swarm System")
     print("=" * 50)
     print("This system creates individual assistant files with their own:")
     print("  • Models (Ollama)")
@@ -515,6 +530,7 @@ def main():
         manager.run_interactive_swarm()
     elif choice in ['3', '4']:
         manager.run_intelligent_orchestration()
+
 
 def run_intelligent_orchestration(self):
     """Run intelligent orchestration using AI-powered routing"""
@@ -585,10 +601,12 @@ def run_intelligent_orchestration(self):
                     spec_module = importlib.util.spec_from_file_location(
                         spec.name, spec.file_path
                     )
-                    assistant_module = importlib.util.module_from_spec(spec_module)
+                    assistant_module = importlib.util.module_from_spec(
+                        spec_module)
                     spec_module.loader.exec_module(assistant_module)
 
-                    run_function = getattr(assistant_module, f"run_{spec.name}_assistant")
+                    run_function = getattr(
+                        assistant_module, f"run_{spec.name}_assistant")
                     response = run_function(user_input)
                     print(f"Research Assistant: {response}\\n")
 
@@ -600,6 +618,7 @@ def run_intelligent_orchestration(self):
             break
         except Exception as e:
             print(f"Error: {e}")
+
 
 # Add the method to the AssistantManager class
 AssistantManager.run_intelligent_orchestration = run_intelligent_orchestration

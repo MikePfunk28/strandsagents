@@ -1,5 +1,5 @@
 
-# 🚀 Code Assistant Agent: Introducing the Next-Generation Coding Sidekick
+#  Code Assistant Agent: Introducing the Next-Generation Coding Sidekick
 
 Imagine having a tireless, intelligent programming partner available 24/7, ready to transform your coding experience. The Code Assistant Agent is not just another tool—it's your personal AI-powered coding companion designed to supercharge your development workflow.
 
@@ -20,7 +20,7 @@ The agent leverages advanced AI models to understand context, generate solutions
 
 2. Run `uv run main.py`
 
-## 🤖 How It Works
+##  How It Works
 
 Simply type your coding task or question, and the Code Assistant Agent springs into action:
 

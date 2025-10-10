@@ -5,7 +5,8 @@ from pathlib import Path
 from agent import agent
 
 # Agent specification
-SPEC = {'name': 'check_email', 'description': 'this will use your login, or auth, or your token and login for you and check your email, then give you the results of your 10 recently recieved emails.', 'agent_type': 'meta', 'model_id': 'deepseek-coder:6.7b', 'tools': ['file_write', 'python_repl', 'http_request'], 'system_prompt': 'You are check_email, a specialized meta-agent for creating and managing other agents.\n\nthis will use your login, or auth, or your token and login for you and check your email, then give you the results of your 10 recently recieved emails.\n\nYour capabilities include:\n- Agent design and architecture\n- Tool selection and integration\n- Performance optimization\n- System integration and testing\n\nGuidelines:\n- Design agents for specific, well-defined purposes\n- Select appropriate models and tools\n- Ensure robust error handling\n- Create comprehensive documentation\n\nFocus on building effective, specialized AI agents.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
+SPEC = {'name': 'check_email', 'description': 'this will use your login, or auth, or your token and login for you and check your email, then give you the results of your 10 recently recieved emails.', 'agent_type': 'meta', 'model_id': 'deepseek-coder:6.7b',
+        'tools': ['file_write', 'python_repl', 'http_request'], 'system_prompt': 'You are check_email, a specialized meta-agent for creating and managing other agents.\n\nthis will use your login, or auth, or your token and login for you and check your email, then give you the results of your 10 recently recieved emails.\n\nYour capabilities include:\n- Agent design and architecture\n- Tool selection and integration\n- Performance optimization\n- System integration and testing\n\nGuidelines:\n- Design agents for specific, well-defined purposes\n- Select appropriate models and tools\n- Ensure robust error handling\n- Create comprehensive documentation\n\nFocus on building effective, specialized AI agents.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
 
 # Setup logging
 logger = logging.getLogger("generated_agent")
@@ -31,6 +32,7 @@ Focus on building effective, specialized AI agents."""
 
 # Tools configuration
 TOOLS = ['file_write', 'python_repl', 'http_request']
+
 
 @agent(
     model_id="deepseek-coder:6.7b",
@@ -61,6 +63,7 @@ def check_email(query: str) -> str:
         logger.error(error_msg)
         return error_msg
 
+
 # Metadata
 AGENT_METADATA = {
     "name": "check_email",
@@ -74,7 +77,7 @@ AGENT_METADATA = {
 }
 
 if __name__ == "__main__":
-    print("🤖 Generated Agent: check_email")
+    print(" Generated Agent: check_email")
     print("=" * 50)
     print(f"Type: {SPEC['agent_type']}")
     print(f"Model: {SPEC['model_id']}")
@@ -85,4 +88,4 @@ if __name__ == "__main__":
     test_result = check_email("Hello from meta-agent builder!")
     print(f"Test result: {test_result}")
 
-    print("\n✅ Agent generated and tested successfully!")
+    print("\n Agent generated and tested successfully!")

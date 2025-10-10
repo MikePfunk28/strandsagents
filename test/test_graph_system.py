@@ -105,8 +105,10 @@ class TestFileHistoryTracker(unittest.TestCase):
         tracker = FileHistoryTracker(self.history_file)
 
         # Add some history entries
-        tracker.add_entry("test_file.txt", "created", "test content", {"type": "test"})
-        tracker.add_entry("test_file.txt", "modified", "modified content", {"type": "update"})
+        tracker.add_entry("test_file.txt", "created",
+                          "test content", {"type": "test"})
+        tracker.add_entry("test_file.txt", "modified",
+                          "modified content", {"type": "update"})
 
         # Check history
         history = tracker.get_file_history("test_file.txt")
@@ -412,11 +414,15 @@ class TestEnhancedMemoryGraph(unittest.TestCase):
         graph = EnhancedMemoryGraph("json", self.temp_dir)
 
         # Test different memory types
-        importance = graph._calculate_memory_importance("Short content", "task_result")
-        self.assertEqual(importance, 0.8)  # task_result = 0.9, but short content reduces it
+        importance = graph._calculate_memory_importance(
+            "Short content", "task_result")
+        # task_result = 0.9, but short content reduces it
+        self.assertEqual(importance, 0.8)
 
-        importance = graph._calculate_memory_importance("Long content " * 200, "context")
-        self.assertEqual(importance, 0.7)  # context = 0.6, but long content increases it
+        importance = graph._calculate_memory_importance(
+            "Long content " * 200, "context")
+        # context = 0.6, but long content increases it
+        self.assertEqual(importance, 0.7)
 
     @patch('graph.enhanced_memory_graph.SwarmMCPClient')
     @patch('graph.enhanced_memory_graph.SwarmMCPServer')
@@ -517,7 +523,8 @@ class TestGraphIntegration(unittest.TestCase):
         self.assertIsInstance(storage, GraphStorageManager)
 
         # Test embedding manager creation
-        embedding_manager = create_graph_embedding_manager("json", self.temp_dir)
+        embedding_manager = create_graph_embedding_manager(
+            "json", self.temp_dir)
         self.assertIsInstance(embedding_manager, GraphEmbeddingManager)
 
         # Test enhanced graph creation
@@ -572,7 +579,7 @@ def run_graph_storage_demo():
     print("Running Graph Storage Demo...")
     try:
         asyncio.run(demo_graph_storage())
-        print("✅ Graph Storage Demo completed successfully!")
+        print(" Graph Storage Demo completed successfully!")
     except Exception as e:
         print(f"❌ Graph Storage Demo failed: {e}")
 
@@ -582,7 +589,7 @@ def run_embedding_integration_demo():
     print("Running Embedding Integration Demo...")
     try:
         asyncio.run(demo_embedding_integration())
-        print("✅ Embedding Integration Demo completed successfully!")
+        print(" Embedding Integration Demo completed successfully!")
     except Exception as e:
         print(f"❌ Embedding Integration Demo failed: {e}")
 
@@ -592,7 +599,7 @@ def run_enhanced_memory_demo():
     print("Running Enhanced Memory Graph Demo...")
     try:
         asyncio.run(demo_enhanced_memory_graph())
-        print("✅ Enhanced Memory Graph Demo completed successfully!")
+        print(" Enhanced Memory Graph Demo completed successfully!")
     except Exception as e:
         print(f"❌ Enhanced Memory Graph Demo failed: {e}")
 
@@ -633,7 +640,8 @@ if __name__ == "__main__":
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
 
     if result.failures:
         print("\nFailures:")

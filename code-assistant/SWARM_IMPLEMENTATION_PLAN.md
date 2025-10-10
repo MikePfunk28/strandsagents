@@ -10,7 +10,7 @@ Based on your DESIGN.md, we'll create a swarm system where:
 - **Workflows and orchestrators** coordinate complex multi-agent tasks
 - **Only OllamaModels** - completely local, no paid services
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -286,7 +286,7 @@ MCP_CONFIG = {
 }
 ```
 
-## 📊 Benefits of This Architecture
+##  Benefits of This Architecture
 
 ### 1. **True Microservices**
 - Each agent runs independently
@@ -318,7 +318,7 @@ MCP_CONFIG = {
 - Complete privacy
 - Zero costs
 
-## 🚀 Implementation Priority
+##  Implementation Priority
 
 1. **Phase 1**: Meta-tooling foundation (Week 1)
 2. **Phase 2**: MCP communication (Week 1-2)

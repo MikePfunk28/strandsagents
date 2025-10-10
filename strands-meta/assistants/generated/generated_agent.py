@@ -5,7 +5,8 @@ from pathlib import Path
 from agent import agent
 
 # Agent specification
-SPEC = {'name': 'generated_agent', 'description': 'Create a auto agent for it will check your grammar and spelling in anything you type, you run the model, and give it a path to a document, and it will fix the grammar and spelling', 'agent_type': 'research', 'model_id': 'anthropic.claude-3-5-sonnet-20241022-v2:0', 'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are generated_agent, a specialized research agent.\n\nCreate a auto agent for it will check your grammar and spelling in anything you type, you run the model, and give it a path to a document, and it will fix the grammar and spelling\n\nYour capabilities include:\n- Web research and information gathering\n- Source citation and validation\n- Data analysis and pattern recognition\n- Report generation with confidence levels\n\nGuidelines:\n- Always cite sources for factual claims\n- Distinguish between facts and assumptions\n- Provide balanced, objective analysis\n- Acknowledge uncertainties and limitations\n\nFocus on delivering accurate, well-researched responses.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
+SPEC = {'name': 'generated_agent', 'description': 'Create a auto agent for it will check your grammar and spelling in anything you type, you run the model, and give it a path to a document, and it will fix the grammar and spelling', 'agent_type': 'research', 'model_id': 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are generated_agent, a specialized research agent.\n\nCreate a auto agent for it will check your grammar and spelling in anything you type, you run the model, and give it a path to a document, and it will fix the grammar and spelling\n\nYour capabilities include:\n- Web research and information gathering\n- Source citation and validation\n- Data analysis and pattern recognition\n- Report generation with confidence levels\n\nGuidelines:\n- Always cite sources for factual claims\n- Distinguish between facts and assumptions\n- Provide balanced, objective analysis\n- Acknowledge uncertainties and limitations\n\nFocus on delivering accurate, well-researched responses.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
 
 # Setup logging
 logger = logging.getLogger("generated_agent")
@@ -31,6 +32,7 @@ Focus on delivering accurate, well-researched responses."""
 
 # Tools configuration
 TOOLS = ['http_request', 'file_read', 'file_write']
+
 
 @agent(
     model_id="anthropic.claude-3-5-sonnet-20241022-v2:0",
@@ -61,6 +63,7 @@ def generated_agent(query: str) -> str:
         logger.error(error_msg)
         return error_msg
 
+
 # Metadata
 AGENT_METADATA = {
     "name": "generated_agent",
@@ -74,7 +77,7 @@ AGENT_METADATA = {
 }
 
 if __name__ == "__main__":
-    print("🤖 Generated Agent: generated_agent")
+    print(" Generated Agent: generated_agent")
     print("=" * 50)
     print(f"Type: {SPEC['agent_type']}")
     print(f"Model: {SPEC['model_id']}")
@@ -85,4 +88,4 @@ if __name__ == "__main__":
     test_result = generated_agent("Hello from meta-agent builder!")
     print(f"Test result: {test_result}")
 
-    print("\n✅ Agent generated and tested successfully!")
+    print("\n Agent generated and tested successfully!")

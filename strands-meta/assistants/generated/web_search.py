@@ -5,7 +5,8 @@ from pathlib import Path
 from agent import agent
 
 # Agent specification
-SPEC = {'name': 'web_search', 'description': 'it searches the web for the topic the user enters, pull information from the web on the subject, then compile it and add it to the output.', 'agent_type': 'workflow', 'model_id': 'deepseek-coder:6.7b', 'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are web_search, a specialized workflow orchestration agent.\n\nit searches the web for the topic the user enters, pull information from the web on the subject, then compile it and add it to the output.\n\nYour capabilities include:\n- Process planning and optimization\n- Task decomposition and sequencing\n- Resource allocation and scheduling\n- Quality control and validation\n\nGuidelines:\n- Break complex tasks into manageable steps\n- Identify dependencies and critical paths\n- Monitor progress and adjust as needed\n- Ensure quality at each stage\n\nFocus on efficient, well-coordinated processes.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
+SPEC = {'name': 'web_search', 'description': 'it searches the web for the topic the user enters, pull information from the web on the subject, then compile it and add it to the output.', 'agent_type': 'workflow', 'model_id': 'deepseek-coder:6.7b',
+        'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are web_search, a specialized workflow orchestration agent.\n\nit searches the web for the topic the user enters, pull information from the web on the subject, then compile it and add it to the output.\n\nYour capabilities include:\n- Process planning and optimization\n- Task decomposition and sequencing\n- Resource allocation and scheduling\n- Quality control and validation\n\nGuidelines:\n- Break complex tasks into manageable steps\n- Identify dependencies and critical paths\n- Monitor progress and adjust as needed\n- Ensure quality at each stage\n\nFocus on efficient, well-coordinated processes.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
 
 # Setup logging
 logger = logging.getLogger("generated_agent")
@@ -31,6 +32,7 @@ Focus on efficient, well-coordinated processes."""
 
 # Tools configuration
 TOOLS = ['http_request', 'file_read', 'file_write']
+
 
 @agent(
     model_id="deepseek-coder:6.7b",
@@ -61,6 +63,7 @@ def web_search(query: str) -> str:
         logger.error(error_msg)
         return error_msg
 
+
 # Metadata
 AGENT_METADATA = {
     "name": "web_search",
@@ -74,7 +77,7 @@ AGENT_METADATA = {
 }
 
 if __name__ == "__main__":
-    print("🤖 Generated Agent: web_search")
+    print(" Generated Agent: web_search")
     print("=" * 50)
     print(f"Type: {SPEC['agent_type']}")
     print(f"Model: {SPEC['model_id']}")
@@ -85,4 +88,4 @@ if __name__ == "__main__":
     test_result = web_search("Hello from meta-agent builder!")
     print(f"Test result: {test_result}")
 
-    print("\n✅ Agent generated and tested successfully!")
+    print("\n Agent generated and tested successfully!")

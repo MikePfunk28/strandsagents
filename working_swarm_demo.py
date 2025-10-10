@@ -27,14 +27,19 @@ except ImportError as e:
     print(f"Warning: strands_tools not fully available: {e}")
     STRANDS_TOOLS_AVAILABLE = False
     # Create fallback functions
+
     def load_tool(*args, **kwargs):
         return "Tool loading not available on Windows"
+
     def shell(*args, **kwargs):
         return "Shell operations not available on Windows"
+
     def editor(*args, **kwargs):
         return "Editor operations not available on Windows"
 
 # Simple database manager for demo
+
+
 class SimpleDatabaseManager:
     def __init__(self):
         self.knowledge_base = []
@@ -86,10 +91,13 @@ class SimpleDatabaseManager:
             "coderl": {"exists": True, "records": 0, "size_mb": 0.0}
         }
 
+
 # Global database manager
 db_manager = SimpleDatabaseManager()
 
 # Simple assistant registry
+
+
 class SimpleAssistantRegistry:
     def __init__(self):
         self.assistants = {}
@@ -114,23 +122,29 @@ class SimpleAssistantRegistry:
     def list_instances(self):
         return list(self.instances.keys())
 
+
 # Global registry
 global_registry = SimpleAssistantRegistry()
 
 # Simple base assistant
+
+
 class SimpleBaseAssistant:
     def __init__(self, name, model_id="llama3.2", **kwargs):
         self.name = name
         self.model_id = model_id
-        self.model = OllamaModel(host="http://localhost:11434", model_id=model_id)
+        self.model = OllamaModel(
+            host="http://localhost:11434", model_id=model_id)
         self.agent = Agent(model=self.model, system_prompt=f"You are {name}")
 
     def execute(self, prompt):
         return f"Assistant {self.name} responding to: {prompt[:50]}..."
 
+
 # Register core assistants
 global_registry.register("text_processor", SimpleBaseAssistant)
 global_registry.register("calculator", SimpleBaseAssistant)
+
 
 class SwarmDemo:
     """Working demonstration of the swarm system capabilities."""
@@ -192,9 +206,11 @@ class SwarmDemo:
         cached_data = db_manager.get_cache("demo_key")
         knowledge_results = db_manager.search_knowledge("swarm")
 
-        self.demo_results.append("✅ Database system operational")
-        self.demo_results.append(f"   - Knowledge entries: {len(knowledge_results)}")
-        self.demo_results.append(f"   - Cache working: {cached_data is not None}")
+        self.demo_results.append(" Database system operational")
+        self.demo_results.append(
+            f"   - Knowledge entries: {len(knowledge_results)}")
+        self.demo_results.append(
+            f"   - Cache working: {cached_data is not None}")
         self.demo_results.append(f"   - Memory storage: ID {memory_id}")
 
     async def demo_assistant_registration(self):
@@ -218,11 +234,15 @@ class SwarmDemo:
         text_result = text_assistant.execute("Hello world")
         calc_result = calc_assistant.execute("2 + 2")
 
-        self.demo_results.append("✅ Assistant system operational")
-        self.demo_results.append(f"   - Registered types: {global_registry.list_available_types()}")
-        self.demo_results.append(f"   - Active instances: {len(global_registry.list_instances())}")
-        self.demo_results.append(f"   - Text processor result: {type(text_result)}")
-        self.demo_results.append(f"   - Calculator result: {type(calc_result)}")
+        self.demo_results.append(" Assistant system operational")
+        self.demo_results.append(
+            f"   - Registered types: {global_registry.list_available_types()}")
+        self.demo_results.append(
+            f"   - Active instances: {len(global_registry.list_instances())}")
+        self.demo_results.append(
+            f"   - Text processor result: {type(text_result)}")
+        self.demo_results.append(
+            f"   - Calculator result: {type(calc_result)}")
 
     async def demo_meta_tooling(self):
         """Demonstrate meta-tooling capabilities."""
@@ -269,9 +289,11 @@ def demo_greeter(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
         # Store some learning
         learning_result = "Meta-tooling allows dynamic creation of tools and assistants at runtime"
 
-        self.demo_results.append("✅ Meta-tooling operational")
-        self.demo_results.append(f"   - Dynamic tool creation: {len(tool_code)} chars")
-        self.demo_results.append(f"   - Learning storage: {len(learning_result)} chars")
+        self.demo_results.append(" Meta-tooling operational")
+        self.demo_results.append(
+            f"   - Dynamic tool creation: {len(tool_code)} chars")
+        self.demo_results.append(
+            f"   - Learning storage: {len(learning_result)} chars")
 
     async def demo_swarm_communication(self):
         """Demonstrate swarm communication capabilities."""
@@ -282,11 +304,14 @@ def demo_greeter(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
 
         # Demonstrate knowledge retrieval
         if kb_result:
-            self.demo_results.append("✅ Swarm communication operational")
-            self.demo_results.append(f"   - Knowledge retrieval: {len(str(kb_result))} chars")
-            self.demo_results.append("   - Cross-component communication: Working")
+            self.demo_results.append(" Swarm communication operational")
+            self.demo_results.append(
+                f"   - Knowledge retrieval: {len(str(kb_result))} chars")
+            self.demo_results.append(
+                "   - Cross-component communication: Working")
         else:
-            self.demo_results.append("⚠️  Knowledge base query returned no results")
+            self.demo_results.append(
+                "⚠️  Knowledge base query returned no results")
 
     async def demo_system_status(self):
         """Display overall system status."""
@@ -294,10 +319,12 @@ def demo_greeter(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
 
         # Get database statistics
         db_stats = db_manager.get_stats()
-        total_records = sum(stats.get('records', 0) for stats in db_stats.values() if stats.get('exists', False))
+        total_records = sum(stats.get('records', 0)
+                            for stats in db_stats.values() if stats.get('exists', False))
 
-        self.demo_results.append("✅ System status retrieved")
-        self.demo_results.append(f"   - Total database records: {total_records}")
+        self.demo_results.append(" System status retrieved")
+        self.demo_results.append(
+            f"   - Total database records: {total_records}")
 
     def generate_summary_report(self):
         """Generate a comprehensive summary report."""
@@ -314,12 +341,13 @@ def demo_greeter(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
 
         report.append("")
         report.append("SYSTEM CAPABILITIES DEMONSTRATED:")
-        report.append("✅ Database layer (cache.db, memory.db, knowledge.db, coderl.db)")
-        report.append("✅ Assistant registration and management")
-        report.append("✅ Meta-tooling and dynamic tool creation")
-        report.append("✅ Knowledge base operations")
-        report.append("✅ Swarm communication protocols")
-        report.append("✅ System monitoring and status")
+        report.append(
+            " Database layer (cache.db, memory.db, knowledge.db, coderl.db)")
+        report.append(" Assistant registration and management")
+        report.append(" Meta-tooling and dynamic tool creation")
+        report.append(" Knowledge base operations")
+        report.append(" Swarm communication protocols")
+        report.append(" System monitoring and status")
 
         report.append("")
         report.append("ARCHITECTURE COMPONENTS:")

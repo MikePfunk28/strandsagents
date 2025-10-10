@@ -10,6 +10,12 @@ Tests the complete security layer integration with the orchestrator including:
 - Answer validation during task processing
 """
 
+from security.answer_validator import AnswerContext, ValidationResult, ValidationMethod
+from security.message_verifier import MessageSignature, VerificationResult
+from security.agent_authenticator import AgentCredentials
+from security.secure_reporter import SecurityReport, AnomalyAlert, ReportType, Severity
+from security import SecurityManager, AgentAuthenticator, MessageVerifier, AnswerValidator, SecureReporter
+from swarm.coordinator.orchestrator import SwarmOrchestrator, SwarmTask, AgentAllocation
 import asyncio
 import pytest
 import uuid
@@ -23,16 +29,11 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from swarm.coordinator.orchestrator import SwarmOrchestrator, SwarmTask, AgentAllocation
-from security import SecurityManager, AgentAuthenticator, MessageVerifier, AnswerValidator, SecureReporter
-from security.secure_reporter import SecurityReport, AnomalyAlert, ReportType, Severity
-from security.agent_authenticator import AgentCredentials
-from security.message_verifier import MessageSignature, VerificationResult
-from security.answer_validator import AnswerContext, ValidationResult, ValidationMethod
 
 # Configure logging for test visibility
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class TestOrchestratorSecurity:
     """Test suite for orchestrator security integration."""
@@ -44,7 +45,7 @@ class TestOrchestratorSecurity:
 
         # Mock external dependencies to isolate security testing
         with patch('swarm.coordinator.orchestrator.Agent') as mock_agent, \
-             patch('swarm.coordinator.orchestrator.SwarmMCPClient') as mock_mcp:
+                patch('swarm.coordinator.orchestrator.SwarmMCPClient') as mock_mcp:
 
             mock_agent_instance = MagicMock()
             mock_agent.return_value = mock_agent_instance
@@ -93,7 +94,7 @@ class TestOrchestratorSecurity:
         # Verify orchestrator is registered as trusted agent
         assert orchestrator.orchestrator_id in orchestrator.security_manager.trusted_agents
 
-        logger.info("✅ Security initialization verified")
+        logger.info(" Security initialization verified")
 
     async def test_security_manager_initialization(self, secure_orchestrator):
         """Test 2: Verify security manager is properly initialized."""
@@ -112,7 +113,7 @@ class TestOrchestratorSecurity:
         assert len(security_manager.security_events) >= 0
         assert security_manager.anomaly_threshold > 0
 
-        logger.info("✅ Security manager components verified")
+        logger.info(" Security manager components verified")
 
     async def test_secure_agent_registration(self, secure_orchestrator):
         """Test 3: Test secure agent registration process."""
@@ -154,7 +155,7 @@ class TestOrchestratorSecurity:
         assert agent_id in orchestrator.active_agents
         assert orchestrator.active_agents[agent_id].agent_type == agent_type
 
-        logger.info("✅ Secure agent registration verified")
+        logger.info(" Secure agent registration verified")
 
     async def test_secure_task_submission_and_execution(self, secure_orchestrator):
         """Test 4: Test secure task submission and execution."""
@@ -218,7 +219,7 @@ class TestOrchestratorSecurity:
         assert validation_result.is_valid is True
         assert validation_result.confidence_score > 0.0
 
-        logger.info("✅ Secure task submission and execution verified")
+        logger.info(" Secure task submission and execution verified")
 
     async def test_security_incident_detection(self, secure_orchestrator):
         """Test 5: Test security incident detection and reporting."""
@@ -277,7 +278,7 @@ class TestOrchestratorSecurity:
 
         assert len(suspicious_events) > 0
 
-        logger.info("✅ Security incident detection verified")
+        logger.info(" Security incident detection verified")
 
     async def test_security_status_reporting(self, secure_orchestrator):
         """Test 6: Verify security status reporting works."""
@@ -302,9 +303,10 @@ class TestOrchestratorSecurity:
         assert isinstance(status_report["authenticated_agents"], int)
         assert isinstance(status_report["security_events_count"], int)
         assert 0.0 <= status_report["trust_score_average"] <= 1.0
-        assert status_report["security_level"] in ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        assert status_report["security_level"] in [
+            "LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
-        logger.info("✅ Security status reporting verified")
+        logger.info(" Security status reporting verified")
 
     async def test_agent_security_profiles(self, secure_orchestrator):
         """Test 7: Test agent security profiles."""
@@ -321,7 +323,8 @@ class TestOrchestratorSecurity:
         await security_manager.register_trusted_agent(
             agent_id=high_trust_agent,
             agent_type="critical_analysis",
-            capabilities=["critical_thinking", "validation", "security_review"],
+            capabilities=["critical_thinking",
+                          "validation", "security_review"],
             trust_level=0.9
         )
 
@@ -337,7 +340,8 @@ class TestOrchestratorSecurity:
         assert security_manager.trusted_agents[high_trust_agent]["trust_level"] == 0.9
 
         assert medium_trust_agent in security_manager.authenticator.authenticated_agents
-        medium_agent_data = security_manager.authenticator.authenticated_agents[medium_trust_agent]
+        medium_agent_data = security_manager.authenticator.authenticated_agents[
+            medium_trust_agent]
         assert medium_agent_data["trust_level"] < 0.9
 
         # Test capability verification
@@ -345,7 +349,7 @@ class TestOrchestratorSecurity:
         assert "security_review" in high_trust_capabilities
         assert "critical_thinking" in high_trust_capabilities
 
-        logger.info("✅ Agent security profiles verified")
+        logger.info(" Agent security profiles verified")
 
     async def test_unauthorized_agent_blocking(self, secure_orchestrator):
         """Test 8: Validate that unauthorized agents are blocked."""
@@ -402,7 +406,7 @@ class TestOrchestratorSecurity:
         assert len(recent_events) > 0
         assert recent_events[0].severity == Severity.HIGH
 
-        logger.info("✅ Unauthorized agent blocking verified")
+        logger.info(" Unauthorized agent blocking verified")
 
     async def test_message_integrity_verification(self, secure_orchestrator):
         """Test 9: Test message integrity verification in orchestrator context."""
@@ -456,7 +460,7 @@ class TestOrchestratorSecurity:
 
         assert wrong_agent_verification.is_valid is False
 
-        logger.info("✅ Message integrity verification verified")
+        logger.info(" Message integrity verification verified")
 
     async def test_answer_validation_during_task_processing(self, secure_orchestrator, mock_critical_agent):
         """Test 10: Verify answer validation during task processing."""
@@ -525,9 +529,10 @@ class TestOrchestratorSecurity:
             if not case["expected_valid"]:
                 assert validation_result.confidence_score < 0.5
 
-            logger.info(f"  Case {i+1}: {'✅' if validation_result.is_valid == case['expected_valid'] else '❌'}")
+            logger.info(
+                f"  Case {i+1}: {'' if validation_result.is_valid == case['expected_valid'] else '❌'}")
 
-        logger.info("✅ Answer validation during task processing verified")
+        logger.info(" Answer validation during task processing verified")
 
     async def test_complete_security_integration(self, secure_orchestrator):
         """Test 11: Complete end-to-end security integration test."""
@@ -602,14 +607,15 @@ class TestOrchestratorSecurity:
 
         # Verify all tasks completed securely
         assert len(orchestrator.completed_tasks) == 3
-        assert all(task.results["verified"] for task in orchestrator.completed_tasks)
+        assert all(task.results["verified"]
+                   for task in orchestrator.completed_tasks)
 
         # Verify security state
         assert final_report["authenticated_agents"] >= 3
         assert final_report["trust_score_average"] > 0.5
         assert final_report["security_level"] in ["LOW", "MEDIUM", "HIGH"]
 
-        logger.info("✅ Complete security integration verified")
+        logger.info(" Complete security integration verified")
 
     async def test_performance_metrics(self, secure_orchestrator):
         """Test 12: Verify security performance metrics."""
@@ -636,7 +642,8 @@ class TestOrchestratorSecurity:
             registration_times.append(registration_time)
 
         # Verify performance is reasonable
-        avg_registration_time = sum(registration_times) / len(registration_times)
+        avg_registration_time = sum(
+            registration_times) / len(registration_times)
         assert avg_registration_time < 1.0  # Should be under 1 second per registration
 
         # Test message verification performance
@@ -664,11 +671,12 @@ class TestOrchestratorSecurity:
         logger.info(f"Average registration time: {avg_registration_time:.3f}s")
         logger.info(f"Message verification time: {verify_time:.3f}s")
 
-        logger.info("✅ Security performance metrics verified")
+        logger.info(" Security performance metrics verified")
+
 
 async def run_all_tests():
     """Run all security integration tests."""
-    logger.info("🚀 Starting comprehensive orchestrator security test suite")
+    logger.info(" Starting comprehensive orchestrator security test suite")
     logger.info("=" * 60)
 
     # Create test instance
@@ -695,10 +703,11 @@ async def run_all_tests():
 
             logger.info("=" * 60)
             logger.info("🎉 ALL TESTS PASSED - SECURITY INTEGRATION VERIFIED")
-            logger.info("✅ SwarmOrchestrator security layer is working properly")
-            logger.info("✅ Swarm system is now secure against rogue agents")
-            logger.info("✅ Threat detection capabilities confirmed")
-            logger.info("✅ Performance metrics within acceptable ranges")
+            logger.info(
+                " SwarmOrchestrator security layer is working properly")
+            logger.info(" Swarm system is now secure against rogue agents")
+            logger.info(" Threat detection capabilities confirmed")
+            logger.info(" Performance metrics within acceptable ranges")
 
             return True
 

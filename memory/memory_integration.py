@@ -15,6 +15,7 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class MemoryIntegration:
     """Integration layer for memory system with existing agents"""
 
@@ -207,7 +208,8 @@ Agent: {agent_response}
             # 3. Store in LanceDB vector database
 
             # For now, simulate successful storage
-            logger.info(f"Stored {memory_type} memory chunk: {len(content)} characters")
+            logger.info(
+                f"Stored {memory_type} memory chunk: {len(content)} characters")
             return True
 
         except Exception as e:
@@ -232,10 +234,12 @@ Agent: {agent_response}
         }
 
 # Convenience function for testing
+
+
 async def test_memory_integration():
     """Test the memory integration"""
     try:
-        print("🚀 Testing Memory Integration...")
+        print(" Testing Memory Integration...")
 
         # Initialize integration
         integration = MemoryIntegration()
@@ -248,7 +252,7 @@ async def test_memory_integration():
             initial_context="Starting new agent project for customer support chatbot"
         )
 
-        print(f"✅ Initialized session memory: {context['session_id']}")
+        print(f" Initialized session memory: {context['session_id']}")
 
         # Test conversation storage
         stored = await integration.store_conversation_memory(
@@ -258,7 +262,7 @@ async def test_memory_integration():
             metadata={'phase': 'requirements_gathering'}
         )
 
-        print(f"✅ Stored conversation memory: {stored}")
+        print(f" Stored conversation memory: {stored}")
 
         # Test memory retrieval
         relevant_memory = await integration.retrieve_relevant_memory(
@@ -267,7 +271,7 @@ async def test_memory_integration():
             limit=5
         )
 
-        print(f"✅ Retrieved {len(relevant_memory)} relevant memory items")
+        print(f" Retrieved {len(relevant_memory)} relevant memory items")
 
         # Test project knowledge storage
         knowledge_stored = await integration.store_project_knowledge(
@@ -277,7 +281,7 @@ async def test_memory_integration():
             metadata={'source': 'aws_docs', 'category': 'compute'}
         )
 
-        print(f"✅ Stored project knowledge: {knowledge_stored}")
+        print(f" Stored project knowledge: {knowledge_stored}")
 
         # Test knowledge search
         knowledge_results = await integration.search_project_knowledge(
@@ -286,15 +290,15 @@ async def test_memory_integration():
             limit=5
         )
 
-        print(f"✅ Found {len(knowledge_results)} knowledge items")
+        print(f" Found {len(knowledge_results)} knowledge items")
 
         # Test memory summary
         summary = await integration.get_memory_summary("test-session-456")
-        print(f"✅ Memory summary: {summary}")
+        print(f" Memory summary: {summary}")
 
         # Test embedding info
         embedding_info = await integration.get_embedding_info()
-        print(f"✅ Available models: {len(embedding_info['available_models'])}")
+        print(f" Available models: {len(embedding_info['available_models'])}")
 
         print("🎉 Memory Integration test completed successfully!")
         return True

@@ -9,6 +9,11 @@ This is the proper way to import and use the swarm system:
 - Uses only local Ollama models (no cloud services)
 """
 
+from swarm.agents.summarizer_assistant.service import create_summarizer_assistant
+from swarm.agents.critical_assistant.service import create_critical_assistant
+from swarm.agents.creative_assistant.service import create_creative_assistant
+from swarm.agents.research_assistant.service import create_research_assistant
+from swarm.orchestrator import create_swarm_orchestrator, SwarmOrchestrator
 import asyncio
 import logging
 import sys
@@ -23,11 +28,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import swarm components with proper Strands patterns
-from swarm.orchestrator import create_swarm_orchestrator, SwarmOrchestrator
-from swarm.agents.research_assistant.service import create_research_assistant
-from swarm.agents.creative_assistant.service import create_creative_assistant
-from swarm.agents.critical_assistant.service import create_critical_assistant
-from swarm.agents.summarizer_assistant.service import create_summarizer_assistant
+
 
 class AIAgentSwarmSystem:
     """Main system class for AI Agent Swarm coordination."""
@@ -43,7 +44,8 @@ class AIAgentSwarmSystem:
             if mode == "swarm":
                 logger.info("Initializing AI Agent Swarm System...")
                 self.orchestrator = await create_swarm_orchestrator("main_swarm")
-                logger.info("✅ Swarm orchestrator initialized with 4 specialized agents")
+                logger.info(
+                    " Swarm orchestrator initialized with 4 specialized agents")
 
             elif mode == "individual":
                 logger.info("Initializing individual agents...")
@@ -58,10 +60,10 @@ class AIAgentSwarmSystem:
                 # Start individual agents
                 for agent_type, agent in self.individual_agents.items():
                     await agent.start_service()
-                    logger.info(f"✅ {agent_type} agent started")
+                    logger.info(f" {agent_type} agent started")
 
             self.running = True
-            logger.info(f"🚀 AI Agent System ready in {mode} mode")
+            logger.info(f" AI Agent System ready in {mode} mode")
 
         except Exception as e:
             logger.error(f"❌ Failed to initialize system: {e}")
@@ -74,11 +76,11 @@ class AIAgentSwarmSystem:
 
             if self.orchestrator:
                 await self.orchestrator.stop_swarm_agents()
-                logger.info("✅ Swarm orchestrator stopped")
+                logger.info(" Swarm orchestrator stopped")
 
             for agent_type, agent in self.individual_agents.items():
                 await agent.stop_service()
-                logger.info(f"✅ {agent_type} agent stopped")
+                logger.info(f" {agent_type} agent stopped")
 
             self.running = False
             logger.info("🛑 AI Agent System shutdown complete")
@@ -94,12 +96,14 @@ class AIAgentSwarmSystem:
         try:
             if self.orchestrator:
                 # Use swarm orchestration
-                logger.info(f"Processing request through swarm: {user_input[:50]}...")
+                logger.info(
+                    f"Processing request through swarm: {user_input[:50]}...")
                 result = await self.orchestrator.process_user_request(user_input)
                 return result
             else:
                 # Use individual agents (simplified routing)
-                logger.info(f"Processing request through individual agents: {user_input[:50]}...")
+                logger.info(
+                    f"Processing request through individual agents: {user_input[:50]}...")
 
                 # Simple routing logic (in production, use more sophisticated routing)
                 if any(keyword in user_input.lower() for keyword in ["research", "find", "search", "analyze data"]):
@@ -143,9 +147,10 @@ class AIAgentSwarmSystem:
                 }
             }
 
+
 async def interactive_mode():
     """Run the system in interactive mode."""
-    print("🤖 AI Agent Swarm System - Interactive Mode")
+    print(" AI Agent Swarm System - Interactive Mode")
     print("=" * 50)
 
     # Ask user for mode
@@ -167,7 +172,7 @@ async def interactive_mode():
     try:
         await system.initialize_system(mode)
 
-        print(f"\n✅ System initialized in {mode} mode")
+        print(f"\n System initialized in {mode} mode")
         print("\nAvailable commands:")
         print("- Type your request naturally")
         print("- Type 'status' to see system status")
@@ -186,9 +191,9 @@ async def interactive_mode():
                     break
                 elif user_input.lower() == 'status':
                     status = system.get_system_status()
-                    print(f"\n📊 System Status: {status}")
+                    print(f"\n System Status: {status}")
                 elif user_input:
-                    print("\n🤔 Processing...")
+                    print("\n Processing...")
                     result = await system.process_user_request(user_input)
                     print(f"\n🎉 Result:\n{result}")
                 else:
@@ -203,9 +208,10 @@ async def interactive_mode():
     finally:
         await system.shutdown_system()
 
+
 async def demo_mode():
     """Run demo scenarios."""
-    print("🤖 AI Agent Swarm System - Demo Mode")
+    print(" AI Agent Swarm System - Demo Mode")
     print("=" * 50)
 
     system = AIAgentSwarmSystem()
@@ -222,7 +228,7 @@ async def demo_mode():
 
         for i, request in enumerate(demo_requests, 1):
             print(f"\n🎯 Demo Request {i}: {request}")
-            print("🤔 Processing...")
+            print(" Processing...")
 
             result = await system.process_user_request(request)
             print(f"🎉 Result:\n{result}\n")
@@ -230,7 +236,7 @@ async def demo_mode():
 
         # Show final status
         status = system.get_system_status()
-        print(f"\n📊 Final System Status:")
+        print(f"\n Final System Status:")
         print(f"Mode: {status['mode']}")
         print(f"Status: {status['status']}")
         if 'swarm_status' in status:
@@ -240,6 +246,7 @@ async def demo_mode():
 
     finally:
         await system.shutdown_system()
+
 
 async def test_individual_agents():
     """Test individual agents separately."""
@@ -268,10 +275,12 @@ async def test_individual_agents():
                 "description": request
             })
 
-            print(f"✅ {agent_type} result: {result.get('result', 'No result')[:200]}...")
+            print(
+                f" {agent_type} result: {result.get('result', 'No result')[:200]}...")
 
     finally:
         await system.shutdown_system()
+
 
 def main():
     """Main entry point."""
@@ -289,6 +298,7 @@ def main():
     else:
         # Default to interactive mode
         asyncio.run(interactive_mode())
+
 
 if __name__ == "__main__":
     main()

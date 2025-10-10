@@ -21,12 +21,13 @@ async def main():
         ollama_host="http://localhost:11434"
     )
 
-    print("🤖 Coding Assistant Demo")
+    print(" Coding Assistant Demo")
     print("=" * 50)
 
     # Example 1: Simple chat interaction
     print("\n1. Simple Chat Interaction:")
-    response = agent.chat("Hello! Can you help me write a Python function to calculate fibonacci numbers?")
+    response = agent.chat(
+        "Hello! Can you help me write a Python function to calculate fibonacci numbers?")
     print(f"Assistant: {response}")
 
     # Example 2: Code analysis task
@@ -63,7 +64,8 @@ async def main():
     stats = agent.get_stats()
     print(f"Session ID: {stats['session_id']}")
     print(f"Memory entries: {stats['memory_stats'].get('memory_entries', 0)}")
-    print(f"Knowledge entries: {stats['memory_stats'].get('knowledge_entries', 0)}")
+    print(
+        f"Knowledge entries: {stats['memory_stats'].get('knowledge_entries', 0)}")
     print(f"Model: {stats['model_info']['name']}")
     print(f"Server healthy: {stats['model_info']['server_healthy']}")
 
@@ -79,14 +81,14 @@ async def main():
 
     # Cleanup
     agent.cleanup()
-    print("\n✅ Demo completed!")
+    print("\n Demo completed!")
 
 
 async def interactive_demo():
     """Interactive demo where user can chat with the assistant."""
     agent = create_simple_coding_agent()
 
-    print("🤖 Interactive Coding Assistant")
+    print(" Interactive Coding Assistant")
     print("Type 'quit' to exit, 'stats' for statistics, 'help' for help")
     print("=" * 50)
 
@@ -98,9 +100,10 @@ async def interactive_demo():
                 break
             elif user_input.lower() == 'stats':
                 stats = agent.get_stats()
-                print(f"\n📊 Statistics:")
+                print(f"\n Statistics:")
                 print(f"Session: {stats['session_id']}")
-                print(f"Memory entries: {stats['memory_stats'].get('memory_entries', 0)}")
+                print(
+                    f"Memory entries: {stats['memory_stats'].get('memory_entries', 0)}")
                 print(f"Tools available: {stats['tools_available']}")
                 continue
             elif user_input.lower() == 'help':
@@ -132,14 +135,14 @@ async def interactive_demo():
                 print("🔄 Executing workflow...")
                 result = await agent.execute_task(user_input, task_type)
                 if result['success']:
-                    print(f"\n🤖 Assistant: Workflow completed successfully!")
+                    print(f"\n Assistant: Workflow completed successfully!")
                     print(f"Result: {str(result['result'])[:500]}...")
                 else:
                     print(f"\n❌ Assistant: Workflow failed: {result['error']}")
             else:
                 # Simple chat for general questions
                 response = agent.chat(user_input)
-                print(f"\n🤖 Assistant: {response}")
+                print(f"\n Assistant: {response}")
 
         except KeyboardInterrupt:
             break

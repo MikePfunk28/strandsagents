@@ -14,9 +14,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
+
 async def example_code_analysis():
     """Example: Analyze a Python file using graph workflow."""
-    print("📊 Starting code analysis graph example...")
+    print(" Starting code analysis graph example...")
 
     # Create code analysis graph
     graph = create_code_analysis_graph("llama3.2:3b")
@@ -28,20 +29,21 @@ async def example_code_analysis():
             "include_patterns": True
         })
 
-        print(f"✅ Analysis completed for: {result['file_path']}")
+        print(f" Analysis completed for: {result['file_path']}")
         print(f"📋 Graph type: {result['graph_type']}")
-        print(f"🔍 Result summary: {str(result['result'])[:200]}...")
+        print(f" Result summary: {str(result['result'])[:200]}...")
 
         # Check graph status
         status = graph.get_graph_status()
-        print(f"📊 Graph status: {status}")
+        print(f" Graph status: {status}")
 
     except Exception as e:
         print(f"❌ Error in code analysis: {e}")
 
+
 async def example_data_structure_analysis():
     """Example: Analyze data structures in code."""
-    print("\n🏗️  Starting data structure analysis...")
+    print("\n  Starting data structure analysis...")
 
     # Sample code to analyze
     sample_code = """
@@ -72,12 +74,13 @@ class DatabaseManager:
             "include_optimizations": True
         })
 
-        print(f"✅ Data structure analysis completed")
+        print(f" Data structure analysis completed")
         print(f"📋 Graph type: {result['graph_type']}")
-        print(f"🔍 Analysis: {str(result['result'])[:200]}...")
+        print(f" Analysis: {str(result['result'])[:200]}...")
 
     except Exception as e:
         print(f"❌ Error in data structure analysis: {e}")
+
 
 async def example_debugging_workflow():
     """Example: Debug an issue using graph workflow."""
@@ -106,11 +109,12 @@ def initialize(self):
             "component": "swarm_initialization"
         })
 
-        print(f"✅ Debugging analysis completed")
-        print(f"🔍 Debug result: {str(result['result'])[:200]}...")
+        print(f" Debugging analysis completed")
+        print(f" Debug result: {str(result['result'])[:200]}...")
 
     except Exception as e:
         print(f"❌ Error in debugging: {e}")
+
 
 async def compare_swarm_vs_graph():
     """Compare when to use SWARM vs GRAPH patterns."""
@@ -121,7 +125,7 @@ async def compare_swarm_vs_graph():
     print("   - Best for: Research, creative tasks, open-ended problems")
     print("   - Agents communicate freely and adapt")
 
-    print("\n📊 GRAPH (graph/programming_graph.py):")
+    print("\n GRAPH (graph/programming_graph.py):")
     print("   - Deterministic, structured workflows")
     print("   - Best for: Code analysis, data flows, debugging")
     print("   - Clear dependencies and execution order")
@@ -129,6 +133,7 @@ async def compare_swarm_vs_graph():
     print("\n🎯 Use Cases:")
     print("   SWARM: 'Research AI trends and write a report'")
     print("   GRAPH: 'Analyze this codebase and find optimization opportunities'")
+
 
 async def main():
     """Run all graph examples."""

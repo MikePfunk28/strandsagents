@@ -9,11 +9,12 @@ import os
 # Add the current directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+
 def test_database():
     """Test database functionality"""
     try:
         from swarm_system.utils.database_manager import db_manager
-        print("✅ Database manager imported successfully")
+        print(" Database manager imported successfully")
 
         # Test basic operations
         knowledge_id = db_manager.store_knowledge(
@@ -22,15 +23,16 @@ def test_database():
             source="test_script",
             confidence=0.8
         )
-        print(f"✅ Knowledge stored with ID: {knowledge_id}")
+        print(f" Knowledge stored with ID: {knowledge_id}")
 
         results = db_manager.search_knowledge("test")
-        print(f"✅ Knowledge search returned {len(results)} results")
+        print(f" Knowledge search returned {len(results)} results")
 
         return True
     except Exception as e:
         print(f"❌ Database test failed: {e}")
         return False
+
 
 def test_assistants():
     """Test assistant functionality"""
@@ -39,22 +41,23 @@ def test_assistants():
         from swarm_system.assistants.core.text_processor import TextProcessorAssistant
         from swarm_system.assistants.core.calculator_assistant import CalculatorAssistant
         from swarm_system.assistants.base_assistant import AssistantConfig
-        print("✅ Assistant components imported successfully")
+        print(" Assistant components imported successfully")
 
         # Test registry
         global_registry.register("text_processor", TextProcessorAssistant)
-        print("✅ Text processor registered")
+        print(" Text processor registered")
 
         global_registry.register("calculator", CalculatorAssistant)
-        print("✅ Calculator registered")
+        print(" Calculator registered")
 
         types = global_registry.list_available_types()
-        print(f"✅ Available assistant types: {types}")
+        print(f" Available assistant types: {types}")
 
         return True
     except Exception as e:
         print(f"❌ Assistant test failed: {e}")
         return False
+
 
 def test_tools():
     """Test tool functionality"""
@@ -63,24 +66,25 @@ def test_tools():
             create_dynamic_tool, query_knowledge_base,
             store_learning, get_swarm_status
         )
-        print("✅ Tool functions imported successfully")
+        print(" Tool functions imported successfully")
 
         # Test knowledge base query
         results = query_knowledge_base("test", limit=5)
-        print(f"✅ Knowledge base query working: {len(results)} chars")
+        print(f" Knowledge base query working: {len(results)} chars")
 
         # Test learning storage
         result = store_learning("test_topic", "Test learning content")
-        print(f"✅ Learning storage working: {result[:50]}...")
+        print(f" Learning storage working: {result[:50]}...")
 
         # Test status
         status = get_swarm_status()
-        print(f"✅ Status check working: {len(status)} chars")
+        print(f" Status check working: {len(status)} chars")
 
         return True
     except Exception as e:
         print(f"❌ Tool test failed: {e}")
         return False
+
 
 def main():
     """Run all tests"""
@@ -95,26 +99,28 @@ def main():
 
     results = []
     for test_name, test_func in tests:
-        print(f"\n🔍 Testing {test_name}...")
+        print(f"\n Testing {test_name}...")
         success = test_func()
         results.append((test_name, success))
 
     print("\n" + "=" * 50)
-    print("📊 TEST RESULTS:")
+    print(" TEST RESULTS:")
     for test_name, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = " PASS" if success else "❌ FAIL"
         print(f"{status} - {test_name}")
 
     all_passed = all(success for _, success in results)
-    print(f"\n🎯 Overall: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
+    print(
+        f"\n🎯 Overall: {' ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
 
     if all_passed:
-        print("\n🚀 The swarm system is ready to use!")
+        print("\n The swarm system is ready to use!")
         print("You can now run:")
         print("  python research_assistant.py")
         print("  python -m swarm_system.swarm_demo")
     else:
         print("\n🔧 Some components need fixing before full operation.")
+
 
 if __name__ == "__main__":
     main()

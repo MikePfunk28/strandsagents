@@ -20,6 +20,7 @@ from .agents.base_assistant import create_lightweight_assistant
 
 logger = logging.getLogger(__name__)
 
+
 class SwarmSystem:
     """Main swarm coordination system using local Ollama models."""
 
@@ -40,7 +41,8 @@ class SwarmSystem:
         self.mcp_clients: List[SwarmMCPClient] = []
 
         # Model configuration
-        self.orchestrator_model = self.config.get("orchestrator_model", "llama3.2:3b")
+        self.orchestrator_model = self.config.get(
+            "orchestrator_model", "llama3.2:3b")
         self.assistant_model = self.config.get("assistant_model", "gemma:270m")
         self.available_models = self.config.get("available_models", [
             "gemma:270m", "llama3.2:3b", "qwen:3b", "phi:4b"
@@ -78,7 +80,8 @@ class SwarmSystem:
                 database_manager=self.database_manager
             )
             await self.orchestrator.initialize()
-            logger.info(f"Orchestrator initialized with {self.orchestrator_model}")
+            logger.info(
+                f"Orchestrator initialized with {self.orchestrator_model}")
 
             # Create initial set of lightweight assistants
             await self._create_initial_assistants()
@@ -91,7 +94,8 @@ class SwarmSystem:
 
     async def _create_initial_assistants(self):
         """Create initial set of lightweight assistants."""
-        assistant_types = ["research", "creative", "critical", "summarizer", "code_feedback"]
+        assistant_types = ["research", "creative",
+                           "critical", "summarizer", "code_feedback"]
 
         for assistant_type in assistant_types:
             try:
@@ -106,10 +110,12 @@ class SwarmSystem:
                 if assistant.mcp_client:
                     self.mcp_clients.append(assistant.mcp_client)
 
-                logger.info(f"Created {assistant_type} assistant: {assistant.assistant_id}")
+                logger.info(
+                    f"Created {assistant_type} assistant: {assistant.assistant_id}")
 
             except Exception as e:
-                logger.error(f"Failed to create {assistant_type} assistant: {e}")
+                logger.error(
+                    f"Failed to create {assistant_type} assistant: {e}")
 
     async def start(self):
         """Start the swarm system."""
@@ -224,16 +230,19 @@ class SwarmSystem:
             new_model: Model name to switch to
         """
         if new_model not in self.available_models:
-            raise ValueError(f"Model {new_model} not in available models: {self.available_models}")
+            raise ValueError(
+                f"Model {new_model} not in available models: {self.available_models}")
 
         if component == "orchestrator" and self.orchestrator:
-            logger.info(f"Switching orchestrator model from {self.orchestrator_model} to {new_model}")
+            logger.info(
+                f"Switching orchestrator model from {self.orchestrator_model} to {new_model}")
             self.orchestrator_model = new_model
             self.orchestrator.model_name = new_model
             # Orchestrator will use new model on next task
 
         elif component == "assistants":
-            logger.info(f"Switching assistant model from {self.assistant_model} to {new_model}")
+            logger.info(
+                f"Switching assistant model from {self.assistant_model} to {new_model}")
             self.assistant_model = new_model
             for assistant in self.assistants.values():
                 assistant.model_name = new_model
@@ -266,6 +275,7 @@ class SwarmSystem:
 
 # Factory functions for different swarm configurations
 
+
 def create_research_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSystem:
     """Create a swarm optimized for research tasks."""
     default_config = {
@@ -277,6 +287,7 @@ def create_research_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSyste
         default_config.update(config)
     return SwarmSystem(default_config)
 
+
 def create_development_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSystem:
     """Create a swarm optimized for development tasks."""
     default_config = {
@@ -287,6 +298,7 @@ def create_development_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSy
     if config:
         default_config.update(config)
     return SwarmSystem(default_config)
+
 
 def create_creative_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSystem:
     """Create a swarm optimized for creative tasks."""
@@ -301,6 +313,7 @@ def create_creative_swarm(config: Optional[Dict[str, Any]] = None) -> SwarmSyste
 
 # CLI and demo functions (clearly marked as examples)
 
+
 async def demo_basic_task():
     """Demo function: Shows basic task processing."""
     print("🔄 Demo: Basic task processing")
@@ -314,11 +327,12 @@ async def demo_basic_task():
             context={"domain": "ai_research"}
         )
 
-        print(f"✅ Task completed: {result.get('status', 'unknown')}")
-        print(f"📊 Result: {result.get('result', 'No result')}")
+        print(f" Task completed: {result.get('status', 'unknown')}")
+        print(f" Result: {result.get('result', 'No result')}")
 
     finally:
         await swarm.stop()
+
 
 async def demo_model_switching():
     """Demo function: Shows model switching capabilities."""
@@ -340,10 +354,11 @@ async def demo_model_switching():
 
         # Process a task with new models
         result = await swarm.process_task("Test with new models")
-        print(f"✅ Task with new models: {result.get('status', 'unknown')}")
+        print(f" Task with new models: {result.get('status', 'unknown')}")
 
     finally:
         await swarm.stop()
+
 
 def main():
     """Main entry point for CLI usage."""
@@ -351,12 +366,12 @@ def main():
 
     parser = argparse.ArgumentParser(description="Swarm System CLI")
     parser.add_argument("--mode", choices=["run", "demo-basic", "demo-switching"],
-                       default="run", help="Operation mode")
+                        default="run", help="Operation mode")
     parser.add_argument("--config", help="Path to configuration file")
     parser.add_argument("--orchestrator-model", default="llama3.2:3b",
-                       help="Model for orchestrator")
+                        help="Model for orchestrator")
     parser.add_argument("--assistant-model", default="gemma:270m",
-                       help="Model for assistants")
+                        help="Model for assistants")
 
     args = parser.parse_args()
 
@@ -386,6 +401,7 @@ def main():
         asyncio.run(demo_basic_task())
     elif args.mode == "demo-switching":
         asyncio.run(demo_model_switching())
+
 
 if __name__ == "__main__":
     main()

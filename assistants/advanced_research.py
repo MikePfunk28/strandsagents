@@ -18,6 +18,8 @@ ollama_model = OllamaModel(
 )
 
 # Setup comprehensive logging
+
+
 def setup_logging():
     """Configure comprehensive logging for the research system."""
     # Create logs directory if it doesn't exist
@@ -60,26 +62,29 @@ def setup_logging():
 
     return logger
 
+
 # Initialize logger
 logger = setup_logging()
 
 # Log system startup
-logger.info("🚀 Advanced Research System Starting Up")
-logger.info("📊 Model: qwen3:1.7b")
-logger.info(f"🌐 Host: {ollama_model.host}")
+logger.info(" Advanced Research System Starting Up")
+logger.info(" Model: qwen3:1.7b")
+logger.info(f" Host: {ollama_model.host}")
 logger.info("=" * 80)
+
 
 @tool
 def query_decomposer(query: str) -> str:
     """Break down complex queries into specific searchable components."""
     session_id = str(uuid.uuid4())[:8]
-    logger.info(f"🔍 [Tool #{session_id}] QUERY_DECOMPOSER - Starting query decomposition")
-    logger.info(f"🔍 [Tool #{session_id}] Input query: {query}")
-    logger.info(f"🔍 [Tool #{session_id}] Query length: {len(query)} characters")
+    logger.info(
+        f" [Tool #{session_id}] QUERY_DECOMPOSER - Starting query decomposition")
+    logger.info(f" [Tool #{session_id}] Input query: {query}")
+    logger.info(f" [Tool #{session_id}] Query length: {len(query)} characters")
 
     start_time = time.time()
     try:
-        logger.debug(f"🔍 [Tool #{session_id}] Creating decomposer agent...")
+        logger.debug(f" [Tool #{session_id}] Creating decomposer agent...")
 
         decomposer = Agent(
             model=ollama_model,
@@ -91,19 +96,23 @@ def query_decomposer(query: str) -> str:
             Format as structured output."""
         )
 
-        logger.debug(f"🔍 [Tool #{session_id}] Agent created, processing query...")
+        logger.debug(
+            f" [Tool #{session_id}] Agent created, processing query...")
         prompt = f"Decompose this query: {query}"
-        logger.debug(f"🔍 [Tool #{session_id}] Full prompt: {prompt}")
+        logger.debug(f" [Tool #{session_id}] Full prompt: {prompt}")
 
         result = str(decomposer(prompt))
 
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.info(f"🔍 [Tool #{session_id}] QUERY_DECOMPOSER - Completed successfully")
-        logger.info(f"🔍 [Tool #{session_id}] Processing time: {duration:.2f}")
-        logger.info(f"🔍 [Tool #{session_id}] Output length: {len(result)} characters")
-        logger.debug(f"🔍 [Tool #{session_id}] Decomposition result: {result[:500]}{'...' if len(result) > 500 else ''}")
+        logger.info(
+            f" [Tool #{session_id}] QUERY_DECOMPOSER - Completed successfully")
+        logger.info(f" [Tool #{session_id}] Processing time: {duration:.2f}")
+        logger.info(
+            f" [Tool #{session_id}] Output length: {len(result)} characters")
+        logger.debug(
+            f" [Tool #{session_id}] Decomposition result: {result[:500]}{'...' if len(result) > 500 else ''}")
 
         return result
 
@@ -111,19 +120,24 @@ def query_decomposer(query: str) -> str:
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.error(f"🔍 [Tool #{session_id}] QUERY_DECOMPOSER - Failed after {duration:.2f}")
-        logger.error(f"🔍 [Tool #{session_id}] Error type: {type(e).__name__}")
-        logger.error(f"🔍 [Tool #{session_id}] Error message: {str(e)}")
-        logger.debug(f"🔍 [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
+        logger.error(
+            f" [Tool #{session_id}] QUERY_DECOMPOSER - Failed after {duration:.2f}")
+        logger.error(f" [Tool #{session_id}] Error type: {type(e).__name__}")
+        logger.error(f" [Tool #{session_id}] Error message: {str(e)}")
+        logger.debug(
+            f" [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
 
         raise
+
 
 @tool
 def multi_search(search_terms: str) -> str:
     """Execute multiple search strategies with different approaches."""
     session_id = str(uuid.uuid4())[:8]
-    logger.info(f"🌐 [Tool #{session_id}] MULTI_SEARCH - Starting multi-strategy search")
-    logger.info(f"🌐 [Tool #{session_id}] Search terms length: {len(search_terms)} characters")
+    logger.info(
+        f" [Tool #{session_id}] MULTI_SEARCH - Starting multi-strategy search")
+    logger.info(
+        f" [Tool #{session_id}] Search terms length: {len(search_terms)} characters")
 
     # Add safety limits
     MAX_REQUESTS = 10  # Limit HTTP requests to prevent runaway
@@ -131,10 +145,14 @@ def multi_search(search_terms: str) -> str:
 
     start_time = time.time()
     try:
-        logger.info(f"🌐 [Tool #{session_id}] THINKING: I need to search for '{search_terms[:100]}...'")
-        logger.info(f"🌐 [Tool #{session_id}] THINKING: I should use authoritative sources like AWS docs, GitHub, and technical blogs")
-        logger.info(f"🌐 [Tool #{session_id}] THINKING: I'll start with broad searches, then focus on specific technical details")
-        logger.info(f"🌐 [Tool #{session_id}] THINKING: I need to extract key facts, code examples, and best practices")
+        logger.info(
+            f" [Tool #{session_id}] THINKING: I need to search for '{search_terms[:100]}...'")
+        logger.info(
+            f" [Tool #{session_id}] THINKING: I should use authoritative sources like AWS docs, GitHub, and technical blogs")
+        logger.info(
+            f" [Tool #{session_id}] THINKING: I'll start with broad searches, then focus on specific technical details")
+        logger.info(
+            f" [Tool #{session_id}] THINKING: I need to extract key facts, code examples, and best practices")
 
         # Create controlled searcher agent
         searcher = Agent(
@@ -161,20 +179,24 @@ For: {search_terms}
 Be efficient and focused. Stop when you have good information."""
         )
 
-        logger.info(f"🌐 [Tool #{session_id}] EXECUTING: Creating focused search strategy...")
+        logger.info(
+            f" [Tool #{session_id}] EXECUTING: Creating focused search strategy...")
 
         # Execute controlled search
         prompt = f"Execute focused, efficient search for: {search_terms}. Use maximum {MAX_REQUESTS} requests and {MAX_ITERATIONS} iterations."
-        logger.info(f"🌐 [Tool #{session_id}] PROMPT: {prompt}")
+        logger.info(f" [Tool #{session_id}] PROMPT: {prompt}")
 
         result = str(searcher(prompt))
 
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.info(f"🌐 [Tool #{session_id}] SUCCESS: Search completed in {duration:.2f}s")
-        logger.info(f"🌐 [Tool #{session_id}] RESULTS: {len(result)} characters")
-        logger.info(f"🌐 [Tool #{session_id}] SUMMARY: Extracted key information and best practices")
+        logger.info(
+            f" [Tool #{session_id}] SUCCESS: Search completed in {duration:.2f}s")
+        logger.info(
+            f" [Tool #{session_id}] RESULTS: {len(result)} characters")
+        logger.info(
+            f" [Tool #{session_id}] SUMMARY: Extracted key information and best practices")
 
         return result
 
@@ -182,29 +204,38 @@ Be efficient and focused. Stop when you have good information."""
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.error(f"🌐 [Tool #{session_id}] FAILED: Search failed after {duration:.2f}s")
-        logger.error(f"🌐 [Tool #{session_id}] ERROR: {type(e).__name__}: {str(e)}")
+        logger.error(
+            f" [Tool #{session_id}] FAILED: Search failed after {duration:.2f}s")
+        logger.error(
+            f" [Tool #{session_id}] ERROR: {type(e).__name__}: {str(e)}")
 
         # Return safe fallback response
         return f"Search completed with limitations. Key findings for '{search_terms[:50]}...': 1) Use AWS best practices, 2) Follow security guidelines, 3) Implement proper error handling."
+
 
 @tool
 def content_analyzer(content: str, query: str) -> str:
     """Analyze content relevance and extract key information."""
     session_id = str(uuid.uuid4())[:8]
-    logger.info(f"📊 [Tool #{session_id}] CONTENT_ANALYZER - Starting content analysis")
-    logger.info(f"📊 [Tool #{session_id}] Content length: {len(content)} characters")
-    logger.info(f"📊 [Tool #{session_id}] Query length: {len(query)} characters")
-    logger.debug(f"📊 [Tool #{session_id}] Query: {query}")
-    logger.debug(f"📊 [Tool #{session_id}] Content preview: {content[:300]}{'...' if len(content) > 300 else ''}")
+    logger.info(
+        f" [Tool #{session_id}] CONTENT_ANALYZER - Starting content analysis")
+    logger.info(
+        f" [Tool #{session_id}] Content length: {len(content)} characters")
+    logger.info(
+        f" [Tool #{session_id}] Query length: {len(query)} characters")
+    logger.debug(f" [Tool #{session_id}] Query: {query}")
+    logger.debug(
+        f" [Tool #{session_id}] Content preview: {content[:300]}{'...' if len(content) > 300 else ''}")
 
     start_time = time.time()
     try:
-        logger.debug(f"📊 [Tool #{session_id}] Creating analyzer agent with sliding window...")
+        logger.debug(
+            f" [Tool #{session_id}] Creating analyzer agent with sliding window...")
 
         analyzer = Agent(
             model=ollama_model,
-            conversation_manager=SlidingWindowConversationManager(window_size=15),
+            conversation_manager=SlidingWindowConversationManager(
+                window_size=15),
             system_prompt="""You are a content analysis expert. For the given content:
             1. Score relevance to the original query (1-10)
             2. Extract key facts and evidence
@@ -213,19 +244,24 @@ def content_analyzer(content: str, query: str) -> str:
             5. Note source credibility indicators"""
         )
 
-        logger.debug(f"📊 [Tool #{session_id}] Agent created, analyzing content...")
+        logger.debug(
+            f" [Tool #{session_id}] Agent created, analyzing content...")
         prompt = f"Analyze this content for query '{query}':\n\n{content}"
-        logger.debug(f"📊 [Tool #{session_id}] Full prompt length: {len(prompt)} characters")
+        logger.debug(
+            f" [Tool #{session_id}] Full prompt length: {len(prompt)} characters")
 
         result = str(analyzer(prompt))
 
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.info(f"📊 [Tool #{session_id}] CONTENT_ANALYZER - Completed successfully")
-        logger.info(f"📊 [Tool #{session_id}] Processing time: {duration:.2f}s")
-        logger.info(f"📊 [Tool #{session_id}] Analysis length: {len(result)} characters")
-        logger.debug(f"📊 [Tool #{session_id}] Analysis preview: {result[:500]}{'...' if len(result) > 500 else ''}")
+        logger.info(
+            f" [Tool #{session_id}] CONTENT_ANALYZER - Completed successfully")
+        logger.info(f" [Tool #{session_id}] Processing time: {duration:.2f}s")
+        logger.info(
+            f" [Tool #{session_id}] Analysis length: {len(result)} characters")
+        logger.debug(
+            f" [Tool #{session_id}] Analysis preview: {result[:500]}{'...' if len(result) > 500 else ''}")
 
         return result
 
@@ -233,22 +269,29 @@ def content_analyzer(content: str, query: str) -> str:
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.error(f"📊 [Tool #{session_id}] CONTENT_ANALYZER - Failed after {duration:.2f}s")
-        logger.error(f"📊 [Tool #{session_id}] Error type: {type(e).__name__}")
-        logger.error(f"📊 [Tool #{session_id}] Error message: {str(e)}")
-        logger.debug(f"📊 [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
+        logger.error(
+            f" [Tool #{session_id}] CONTENT_ANALYZER - Failed after {duration:.2f}s")
+        logger.error(f" [Tool #{session_id}] Error type: {type(e).__name__}")
+        logger.error(f" [Tool #{session_id}] Error message: {str(e)}")
+        logger.debug(
+            f" [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
 
         raise
+
 
 @tool
 def similarity_ranker(findings: str, query: str) -> str:
     """Rank and filter findings by semantic similarity to query."""
     session_id = str(uuid.uuid4())[:8]
-    logger.info(f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Starting similarity ranking")
-    logger.info(f"🎯 [Tool #{session_id}] Findings length: {len(findings)} characters")
-    logger.info(f"🎯 [Tool #{session_id}] Query length: {len(query)} characters")
+    logger.info(
+        f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Starting similarity ranking")
+    logger.info(
+        f"🎯 [Tool #{session_id}] Findings length: {len(findings)} characters")
+    logger.info(
+        f"🎯 [Tool #{session_id}] Query length: {len(query)} characters")
     logger.debug(f"🎯 [Tool #{session_id}] Query: {query}")
-    logger.debug(f"🎯 [Tool #{session_id}] Findings preview: {findings[:300]}{'...' if len(findings) > 300 else ''}")
+    logger.debug(
+        f"🎯 [Tool #{session_id}] Findings preview: {findings[:300]}{'...' if len(findings) > 300 else ''}")
 
     start_time = time.time()
     try:
@@ -264,19 +307,24 @@ def similarity_ranker(findings: str, query: str) -> str:
             5. Create a priority-ordered summary"""
         )
 
-        logger.debug(f"🎯 [Tool #{session_id}] Agent created, ranking findings...")
+        logger.debug(
+            f"🎯 [Tool #{session_id}] Agent created, ranking findings...")
         prompt = f"Rank findings by similarity to '{query}':\n\n{findings}"
-        logger.debug(f"🎯 [Tool #{session_id}] Full prompt length: {len(prompt)} characters")
+        logger.debug(
+            f"🎯 [Tool #{session_id}] Full prompt length: {len(prompt)} characters")
 
         result = str(ranker(prompt))
 
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.info(f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Completed successfully")
+        logger.info(
+            f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Completed successfully")
         logger.info(f"🎯 [Tool #{session_id}] Processing time: {duration:.2f}s")
-        logger.info(f"🎯 [Tool #{session_id}] Ranked results length: {len(result)} characters")
-        logger.debug(f"🎯 [Tool #{session_id}] Ranked results preview: {result[:500]}{'...' if len(result) > 500 else ''}")
+        logger.info(
+            f"🎯 [Tool #{session_id}] Ranked results length: {len(result)} characters")
+        logger.debug(
+            f"🎯 [Tool #{session_id}] Ranked results preview: {result[:500]}{'...' if len(result) > 500 else ''}")
 
         return result
 
@@ -284,74 +332,93 @@ def similarity_ranker(findings: str, query: str) -> str:
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.error(f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Failed after {duration:.2f}s")
+        logger.error(
+            f"🎯 [Tool #{session_id}] SIMILARITY_RANKER - Failed after {duration:.2f}s")
         logger.error(f"🎯 [Tool #{session_id}] Error type: {type(e).__name__}")
         logger.error(f"🎯 [Tool #{session_id}] Error message: {str(e)}")
-        logger.debug(f"🎯 [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
+        logger.debug(
+            f"🎯 [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
 
         raise
+
 
 def run_research_workflow(user_input):
     """Advanced research workflow with query decomposition and similarity analysis."""
     workflow_id = str(uuid.uuid4())[:8]
     total_start_time = time.time()
 
-    logger.info(f"🚀 [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Starting research workflow")
-    logger.info(f"🚀 [Workflow #{workflow_id}] User input: {user_input}")
-    logger.info(f"🚀 [Workflow #{workflow_id}] Input length: {len(user_input)} characters")
+    logger.info(
+        f" [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Starting research workflow")
+    logger.info(f" [Workflow #{workflow_id}] User input: {user_input}")
+    logger.info(
+        f" [Workflow #{workflow_id}] Input length: {len(user_input)} characters")
 
     try:
         # Step 1: Query Decomposition
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 1 - Query Decomposition starting...")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 1 - Query Decomposition starting...")
         step1_start = time.time()
 
         decomposition = query_decomposer(user_input)
 
         step1_end = time.time()
         step1_duration = step1_end - step1_start
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 1 - Query Decomposition completed in {step1_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 1 - Decomposition length: {len(decomposition)} characters")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 1 - Query Decomposition completed in {step1_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 1 - Decomposition length: {len(decomposition)} characters")
 
         # Step 2: Multi-Strategy Search
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 2 - Multi-Strategy Search starting...")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 2 - Multi-Strategy Search starting...")
         step2_start = time.time()
 
         search_results = multi_search(decomposition)
 
         step2_end = time.time()
         step2_duration = step2_end - step2_start
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 2 - Multi-Strategy Search completed in {step2_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 2 - Search results length: {len(search_results)} characters")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 2 - Multi-Strategy Search completed in {step2_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 2 - Search results length: {len(search_results)} characters")
 
         # Step 3: Content Analysis
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 3 - Content Analysis starting...")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 3 - Content Analysis starting...")
         step3_start = time.time()
 
         analysis = content_analyzer(search_results, user_input)
 
         step3_end = time.time()
         step3_duration = step3_end - step3_start
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 3 - Content Analysis completed in {step3_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 3 - Analysis length: {len(analysis)} characters")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 3 - Content Analysis completed in {step3_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 3 - Analysis length: {len(analysis)} characters")
 
         # Step 4: Similarity Ranking
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 4 - Similarity Ranking starting...")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 4 - Similarity Ranking starting...")
         step4_start = time.time()
 
         ranked_findings = similarity_ranker(analysis, user_input)
 
         step4_end = time.time()
         step4_duration = step4_end - step4_start
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 4 - Similarity Ranking completed in {step4_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 4 - Ranked findings length: {len(ranked_findings)} characters")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 4 - Similarity Ranking completed in {step4_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 4 - Ranked findings length: {len(ranked_findings)} characters")
 
         # Step 5: Final Synthesis
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 5 - Final Synthesis starting...")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 5 - Final Synthesis starting...")
         step5_start = time.time()
 
         synthesizer = Agent(
             model=ollama_model,
-            conversation_manager=SlidingWindowConversationManager(window_size=20),
+            conversation_manager=SlidingWindowConversationManager(
+                window_size=20),
             system_prompt="""You are an expert research synthesizer. Create a comprehensive report that:
             1. Directly answers the original question
             2. Provides supporting evidence with sources
@@ -360,9 +427,11 @@ def run_research_workflow(user_input):
             5. Includes confidence levels for key claims"""
         )
 
-        logger.debug(f"🚀 [Workflow #{workflow_id}] STEP 5 - Synthesizer agent created, generating final report...")
+        logger.debug(
+            f" [Workflow #{workflow_id}] STEP 5 - Synthesizer agent created, generating final report...")
         synthesis_prompt = f"Create a comprehensive research report for: '{user_input}'\n\nBased on these ranked findings:\n\n{ranked_findings}"
-        logger.debug(f"🚀 [Workflow #{workflow_id}] STEP 5 - Synthesis prompt length: {len(synthesis_prompt)} characters")
+        logger.debug(
+            f" [Workflow #{workflow_id}] STEP 5 - Synthesis prompt length: {len(synthesis_prompt)} characters")
 
         final_report = synthesizer(synthesis_prompt)
 
@@ -372,18 +441,27 @@ def run_research_workflow(user_input):
         total_end_time = time.time()
         total_duration = total_end_time - total_start_time
 
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 5 - Final Synthesis completed in {step5_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}] STEP 5 - Final report length: {len(final_report)} characters")
-        logger.info(f"🚀 [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Completed successfully in {total_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 5 - Final Synthesis completed in {step5_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}] STEP 5 - Final report length: {len(final_report)} characters")
+        logger.info(
+            f" [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Completed successfully in {total_duration:.2f}s")
 
         # Log step-by-step timing summary
-        logger.info(f"🚀 [Workflow #{workflow_id}] TIMING SUMMARY:")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Step 1 (Decomposition): {step1_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Step 2 (Search): {step2_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Step 3 (Analysis): {step3_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Step 4 (Ranking): {step4_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Step 5 (Synthesis): {step5_duration:.2f}s")
-        logger.info(f"🚀 [Workflow #{workflow_id}]   Total: {total_duration:.2f}s")
+        logger.info(f" [Workflow #{workflow_id}] TIMING SUMMARY:")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Step 1 (Decomposition): {step1_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Step 2 (Search): {step2_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Step 3 (Analysis): {step3_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Step 4 (Ranking): {step4_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Step 5 (Synthesis): {step5_duration:.2f}s")
+        logger.info(
+            f" [Workflow #{workflow_id}]   Total: {total_duration:.2f}s")
 
         return final_report
 
@@ -391,15 +469,19 @@ def run_research_workflow(user_input):
         total_end_time = time.time()
         total_duration = total_end_time - total_start_time
 
-        logger.error(f"🚀 [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Failed after {total_duration:.2f}s")
-        logger.error(f"🚀 [Workflow #{workflow_id}] Error type: {type(e).__name__}")
-        logger.error(f"🚀 [Workflow #{workflow_id}] Error message: {str(e)}")
-        logger.debug(f"🚀 [Workflow #{workflow_id}] Full traceback: {traceback.format_exc()}")
+        logger.error(
+            f" [Workflow #{workflow_id}] RESEARCH_WORKFLOW - Failed after {total_duration:.2f}s")
+        logger.error(
+            f" [Workflow #{workflow_id}] Error type: {type(e).__name__}")
+        logger.error(f" [Workflow #{workflow_id}] Error message: {str(e)}")
+        logger.debug(
+            f" [Workflow #{workflow_id}] Full traceback: {traceback.format_exc()}")
 
         raise
 
+
 if __name__ == "__main__":
-    logger.info("🚀 MAIN - Advanced Research Assistant starting...")
+    logger.info(" MAIN - Advanced Research Assistant starting...")
     print("\n🔬 Advanced Research Assistant")
     print("Multi-agent system with query decomposition, similarity ranking, and sliding window analysis.")
     print("\nType 'exit' to quit.")
@@ -411,18 +493,21 @@ if __name__ == "__main__":
             try:
                 user_input = input("\n> ")
                 if user_input.lower() == "exit":
-                    logger.info("🚀 MAIN - User requested exit")
+                    logger.info(" MAIN - User requested exit")
                     print("\nGoodbye!")
                     break
 
                 session_count += 1
-                logger.info(f"🚀 MAIN - Starting research session #{session_count}")
-                logger.info(f"🚀 MAIN - User input: {user_input}")
+                logger.info(
+                    f" MAIN - Starting research session #{session_count}")
+                logger.info(f" MAIN - User input: {user_input}")
 
                 final_report = run_research_workflow(user_input)
 
-                logger.info(f"🚀 MAIN - Research session #{session_count} completed successfully")
-                logger.info(f"🚀 MAIN - Final report length: {len(final_report)} characters")
+                logger.info(
+                    f" MAIN - Research session #{session_count} completed successfully")
+                logger.info(
+                    f" MAIN - Final report length: {len(final_report)} characters")
 
                 print("\n" + "="*60)
                 print("📋 RESEARCH REPORT")
@@ -430,28 +515,30 @@ if __name__ == "__main__":
                 print(final_report)
 
             except KeyboardInterrupt:
-                logger.info("🚀 MAIN - Keyboard interrupt received")
+                logger.info(" MAIN - Keyboard interrupt received")
                 print("\n\nExecution interrupted. Exiting...")
                 break
             except Exception as e:
                 session_count += 1
-                logger.error(f"🚀 MAIN - Error in session #{session_count}: {str(e)}")
-                logger.error(f"🚀 MAIN - Error type: {type(e).__name__}")
-                logger.debug(f"🚀 MAIN - Full traceback: {traceback.format_exc()}")
+                logger.error(
+                    f" MAIN - Error in session #{session_count}: {str(e)}")
+                logger.error(f" MAIN - Error type: {type(e).__name__}")
+                logger.debug(
+                    f" MAIN - Full traceback: {traceback.format_exc()}")
 
                 print(f"\nError: {str(e)}")
                 print("Please try a different request.")
 
     except Exception as e:
-        logger.critical("🚀 MAIN - Critical error in main loop")
-        logger.critical(f"🚀 MAIN - Error type: {type(e).__name__}")
-        logger.critical(f"🚀 MAIN - Error message: {str(e)}")
-        logger.critical(f"🚀 MAIN - Full traceback: {traceback.format_exc()}")
+        logger.critical(" MAIN - Critical error in main loop")
+        logger.critical(f" MAIN - Error type: {type(e).__name__}")
+        logger.critical(f" MAIN - Error message: {str(e)}")
+        logger.critical(f" MAIN - Full traceback: {traceback.format_exc()}")
 
         print(f"\nCritical error: {str(e)}")
         print("Shutting down...")
 
     finally:
-        logger.info("🚀 MAIN - Advanced Research Assistant shutting down...")
-        logger.info(f"🚀 MAIN - Total sessions processed: {session_count}")
+        logger.info(" MAIN - Advanced Research Assistant shutting down...")
+        logger.info(f" MAIN - Total sessions processed: {session_count}")
         logger.info("👋 MAIN - Goodbye!")

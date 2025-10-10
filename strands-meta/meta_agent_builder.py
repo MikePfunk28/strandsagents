@@ -33,7 +33,8 @@ except ImportError:
         import sys
         import os
         # Add the parent directory to Python path
-        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        parent_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)
 
@@ -50,35 +51,38 @@ except ImportError:
             from workflow_templates import get_workflow_template, list_workflow_templates
         except ImportError as e:
             print(f"❌ Could not import required modules: {e}")
-            print("💡 Make sure you're running from the correct directory or have the agent module installed")
+            print(
+                "💡 Make sure you're running from the correct directory or have the agent module installed")
             raise
 
 logger = logging.getLogger("meta_agent_builder")
 
 # Remove emoji characters that cause encoding issues on Windows
+
+
 def safe_print(text):
     """Print text with emoji characters replaced for Windows compatibility"""
     emoji_replacements = {
-        '🤖': '[AGENT]',
+        '': '[AGENT]',
         '🔧': '[TOOL]',
         '🔒': '[SECURE]',
-        '🔍': '[SEARCH]',
+        '': '[SEARCH]',
         '📝': '[DOC]',
         '📋': '[LIST]',
         '📁': '[FILE]',
         '🎯': '[TARGET]',
         '🛠️': '[TOOLS]',
-        '⚡': '[POWER]',
+        '': '[POWER]',
         '🔗': '[LINK]',
-        '✅': '[OK]',
+        '': '[OK]',
         '❌': '[ERROR]',
         '⚠️': '[WARNING]',
         '💡': '[IDEA]',
-        '🚀': '[LAUNCH]',
+        '': '[LAUNCH]',
         '🧪': '[TEST]',
         '🔄': '[SYNC]',
         '📦': '[PACKAGE]',
-        '🔍': '[FIND]'
+        '': '[FIND]'
     }
 
     for emoji, replacement in emoji_replacements.items():
@@ -299,7 +303,7 @@ AGENT_METADATA = {{
 }}
 
 if __name__ == "__main__":
-    print("🤖 Generated Agent: {spec.name}")
+    print(" Generated Agent: {spec.name}")
     print("=" * 50)
     print(f"Type: {{SPEC['agent_type']}}")
     print(f"Model: {{SPEC['model_id']}}")
@@ -310,7 +314,7 @@ if __name__ == "__main__":
     test_result = {spec.name}("Hello from meta-agent builder!")
     print(f"Test result: {{test_result}}")
 
-    print("\\n✅ Agent generated and tested successfully!")
+    print("\\n Agent generated and tested successfully!")
 '''
 
         return generation_code
@@ -498,7 +502,7 @@ Focus on building effective, specialized AI agents."""
         """List the meta-agent's capabilities"""
 
         return """
-🤖 Meta-Agent Builder Capabilities:
+ Meta-Agent Builder Capabilities:
 ===================================
 
 I can create specialized AI agents using the @agent decorator system:
@@ -533,12 +537,14 @@ The generated agent will include:
    • Built-in testing capabilities
    • Full documentation and metadata
 
-🚀 EXAMPLE:
+ EXAMPLE:
    "Create a Python coding agent that can write and test functions"
    → Automatically generates a complete, working coding agent!
 """
 
 # Create the meta-agent function (without @agent decorator to avoid import issues)
+
+
 def meta_agent_builder(query: str) -> str:
     """
     Meta-Agent Builder: Creates specialized AI agents using the @agent decorator.
@@ -561,7 +567,7 @@ def meta_agent_builder(query: str) -> str:
 
         # Check if this is a request to create an agent
         create_keywords = ["create", "build",
-            "generate", "make an agent", "new agent"]
+                           "generate", "make an agent", "new agent"]
         if any(keyword in query.lower() for keyword in create_keywords):
 
             # Extract agent requirements from query
@@ -581,7 +587,7 @@ def meta_agent_builder(query: str) -> str:
             result = builder.create_agent(name, description)
 
             response = f"""
-🤖 Agent Created Successfully!
+ Agent Created Successfully!
 
 📋 Agent Details:
    • Name: {name}
@@ -593,8 +599,8 @@ def meta_agent_builder(query: str) -> str:
             for file_type, file_path in result.items():
                 response += f"   • {file_type}: {file_path}\n"
 
-            response +="""
-✅ Your new agent is ready to use!
+            response += """
+ Your new agent is ready to use!
    Import it and start using the specialized capabilities immediately.
 
 🎯 Next Steps:
@@ -603,7 +609,7 @@ def meta_agent_builder(query: str) -> str:
    3. Customize the system prompt if needed
    4. Deploy and integrate with your system
 
-The @agent decorator system makes this process incredibly simple! 🚀"
+The @agent decorator system makes this process incredibly simple! "
 """
             return response
 
@@ -614,7 +620,7 @@ The @agent decorator system makes this process incredibly simple! 🚀"
         # Check if this is a model/capability analysis request
         elif any(keyword in query.lower() for keyword in ["models", "available", "list"]):
             available_models = list_available_models()
-            response = "🤖 Available Models for Agent Creation:"
+            response = " Available Models for Agent Creation:"
             for model in available_models:
                 response += f"\\n🔧 {model['name']}"
                 response += f"\\n   Size: {model['size']}"
@@ -627,7 +633,7 @@ The @agent decorator system makes this process incredibly simple! 🚀"
         # Default response
         else:
             return f"""
-🤖 Meta-Agent Builder Ready!
+ Meta-Agent Builder Ready!
 
 I can help you create specialized AI agents using the @agent decorator system.
 
@@ -638,7 +644,7 @@ I can help you create specialized AI agents using the @agent decorator system.
    • "Make a creative agent for content writing"
    • "Show me available models and capabilities"
 
-Just describe what kind of agent you need, and I'll create it for you! 🚀
+Just describe what kind of agent you need, and I'll create it for you!
 
 Your request: "{query[:100]}{"..." if len(query) > 100 else ""}"
 """
@@ -649,6 +655,8 @@ Your request: "{query[:100]}{"..." if len(query) > 100 else ""}"
         return error_msg
 
 # Convenience functions for direct use
+
+
 def create_agent_from_description(description: str, name: str = "auto") -> Dict[str, Path]:
     """Create an agent from a natural language description"""
 
@@ -661,15 +669,17 @@ def create_agent_from_description(description: str, name: str = "auto") -> Dict[
 
     return builder.create_agent(name, description)
 
+
 def list_agent_creation_capabilities() -> str:
     """List what kinds of agents can be created"""
 
     builder = MetaAgentBuilder()
     return builder.list_capabilities()
 
+
 # Example usage and testing
 if __name__ == "__main__":
-    print("🤖 Meta-Agent Builder Demo")
+    print(" Meta-Agent Builder Demo")
     print("=" * 50)
 
     # Test the meta-agent
@@ -686,9 +696,10 @@ if __name__ == "__main__":
 
         try:
             result = meta_agent_builder(test_query)
-            print(f"Response: {result[:200]}{'...' if len(result) > 200 else ''}")
+            print(
+                f"Response: {result[:200]}{'...' if len(result) > 200 else ''}")
         except Exception as e:
             print(f"Error: {e}")
 
-    print("\\n✅ Meta-Agent Builder demo completed!")
+    print("\\n Meta-Agent Builder demo completed!")
     print("\\nThe @agent decorator system enables powerful meta-agent capabilities!")

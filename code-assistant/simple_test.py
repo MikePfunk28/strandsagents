@@ -7,6 +7,7 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def test_basic_functionality():
     """Test basic functionality without requiring Ollama."""
     print("Testing Coding Assistant Basic Functionality")
@@ -36,9 +37,10 @@ def test_basic_functionality():
 
         # Test 3: Ollama model (without requiring connection)
         print("\n3. Testing Ollama model...")
-        ollama_model = create_ollama_model("llama3.2", "http://localhost:11434")
+        ollama_model = create_ollama_model(
+            "llama3.2", "http://localhost:11434")
         info = ollama_model.model_info
-        print(f"✅ Ollama model created: {info['name']}")
+        print(f" Ollama model created: {info['name']}")
 
         # Test 4: Coding assistant
         print("\n4. Testing coding assistant...")
@@ -47,7 +49,7 @@ def test_basic_functionality():
             model_name="llama3.2",
             session_id="test_session"
         )
-        print(f"✅ Coding assistant created: {assistant.session_id}")
+        print(f" Coding assistant created: {assistant.session_id}")
 
         # Test 5: Simple coding agent
         print("\n5. Testing simple coding agent...")
@@ -56,7 +58,7 @@ def test_basic_functionality():
             model_name="llama3.2"
         )
         stats = agent.get_stats()
-        print(f"✅ Simple coding agent created")
+        print(f" Simple coding agent created")
         print(f"   Session: {stats['session_id']}")
         print(f"   Tools: {stats['tools_available']}")
         print(f"   Categories: {len(stats['context_categories'])}")
@@ -69,7 +71,7 @@ def test_basic_functionality():
             memory_type="test",
             importance=0.8
         )
-        print(f"✅ Memory added: {memory_id}")
+        print(f" Memory added: {memory_id}")
 
         # Test 7: Conversation
         print("\n7. Testing conversation...")
@@ -80,12 +82,14 @@ def test_basic_functionality():
         context = agent.assistant.memory_manager.get_conversation_context(
             agent.assistant.session_id
         )
-        print(f"✅ Conversation context: {len(context['recent_messages'])} messages")
+        print(
+            f" Conversation context: {len(context['recent_messages'])} messages")
 
         # Test 8: Classification
         print("\n8. Testing content classification...")
-        classification = agent.assistant._classify_query("How do I write a Python function?")
-        print(f"✅ Classification: {classification['primary_category']}")
+        classification = agent.assistant._classify_query(
+            "How do I write a Python function?")
+        print(f" Classification: {classification['primary_category']}")
 
         # Cleanup
         agent.cleanup()
@@ -98,6 +102,7 @@ def test_basic_functionality():
         import traceback
         traceback.print_exc()
         return False
+
 
 def test_tools():
     """Test the tool functionality."""
@@ -131,7 +136,8 @@ def test_tools():
         if read_result['success'] and read_result['content'] == test_content:
             print("[OK] File read working")
         else:
-            print(f"❌ File read failed: {read_result.get('error', 'Content mismatch')}")
+            print(
+                f"❌ File read failed: {read_result.get('error', 'Content mismatch')}")
 
         # Cleanup test file
         import os
@@ -144,6 +150,7 @@ def test_tools():
     except Exception as e:
         print(f"\n❌ Tool test failed: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("Starting Starting Coding Assistant Tests")

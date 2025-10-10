@@ -20,6 +20,7 @@ except ImportError as e:
     print("Make sure the agent file exists and is properly formatted")
     raise
 
+
 class TestTestAgentAgent:
     """Test suite for {spec.display_name}"""
 
@@ -75,6 +76,7 @@ class TestTestAgentAgent:
             # This would test CALL_AGENT functionality if implemented
             pass
 
+
 if __name__ == "__main__":
     # Run basic functionality test
     print("🧪 Running Test Agent Tests")
@@ -93,4 +95,4 @@ if __name__ == "__main__":
     print("Testing error handling...")
     test_instance.test_error_handling()
 
-    print("\n✅ All tests completed!")
+    print("\n All tests completed!")

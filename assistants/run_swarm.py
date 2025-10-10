@@ -7,6 +7,7 @@ Usage:
     python run_swarm.py --status           # Show system status
 """
 
+from swarm import SwarmSystem, create_research_swarm, create_development_swarm
 import asyncio
 import argparse
 import logging
@@ -16,7 +17,6 @@ from pathlib import Path
 # Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from swarm import SwarmSystem, create_research_swarm, create_development_swarm
 
 # Setup logging
 logging.basicConfig(
@@ -24,9 +24,10 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+
 async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = None):
     """Run swarm in interactive mode."""
-    print(f"🚀 Starting {swarm_type} swarm system...")
+    print(f" Starting {swarm_type} swarm system...")
 
     # Create swarm based on type
     if swarm_type == "research":
@@ -38,12 +39,12 @@ async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = 
 
     try:
         await swarm.start()
-        print("✅ Swarm system started successfully!")
+        print(" Swarm system started successfully!")
 
         # Show initial status
         status = swarm.get_status()
-        print(f"📊 System running: {status['running']}")
-        print(f"🤖 Orchestrator: {status['orchestrator_model']}")
+        print(f" System running: {status['running']}")
+        print(f" Orchestrator: {status['orchestrator_model']}")
         print(f"🔧 Assistants: {status['assistant_model']}")
         print(f"👥 Active assistants: {len(status['assistants'])}")
 
@@ -68,8 +69,8 @@ async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = 
 
                 elif command.lower() == 'status':
                     status = swarm.get_status()
-                    print(f"📊 Running: {status['running']}")
-                    print(f"🤖 Orchestrator: {status['orchestrator_model']}")
+                    print(f" Running: {status['running']}")
+                    print(f" Orchestrator: {status['orchestrator_model']}")
                     print(f"🔧 Assistants: {status['assistant_model']}")
                     print(f"👥 Assistants: {len(status['assistants'])}")
 
@@ -78,7 +79,7 @@ async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = 
                     if task_desc:
                         print(f"🔄 Processing task: {task_desc}")
                         result = await swarm.process_task(task_desc)
-                        print(f"✅ Status: {result.get('status', 'unknown')}")
+                        print(f" Status: {result.get('status', 'unknown')}")
                         if result.get('result'):
                             print(f"📝 Result: {result['result']}")
                     else:
@@ -90,11 +91,12 @@ async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = 
                         component, model = parts
                         try:
                             await swarm.switch_model(component, model)
-                            print(f"✅ Switched {component} to {model}")
+                            print(f" Switched {component} to {model}")
                         except Exception as e:
                             print(f"❌ Error switching model: {e}")
                     else:
-                        print("❌ Usage: switch <orchestrator|assistants> <model_name>")
+                        print(
+                            "❌ Usage: switch <orchestrator|assistants> <model_name>")
 
                 else:
                     print("❌ Unknown command. Type 'quit' to exit.")
@@ -111,7 +113,8 @@ async def run_interactive_swarm(swarm_type: str = "basic", model_config: dict = 
     finally:
         print("\n🛑 Shutting down swarm...")
         await swarm.stop()
-        print("✅ Swarm stopped")
+        print(" Swarm stopped")
+
 
 async def run_single_task(task: str, swarm_type: str = "basic", model_config: dict = None):
     """Run a single task and exit."""
@@ -127,11 +130,11 @@ async def run_single_task(task: str, swarm_type: str = "basic", model_config: di
 
     try:
         await swarm.start()
-        print("✅ Swarm started")
+        print(" Swarm started")
 
         result = await swarm.process_task(task)
 
-        print(f"✅ Task completed: {result.get('status', 'unknown')}")
+        print(f" Task completed: {result.get('status', 'unknown')}")
         if result.get('result'):
             print(f"📝 Result:\n{result['result']}")
 
@@ -140,9 +143,10 @@ async def run_single_task(task: str, swarm_type: str = "basic", model_config: di
     finally:
         await swarm.stop()
 
+
 async def show_status(swarm_type: str = "basic", model_config: dict = None):
     """Show swarm status without starting interactive mode."""
-    print(f"📊 Checking {swarm_type} swarm status...")
+    print(f" Checking {swarm_type} swarm status...")
 
     if swarm_type == "research":
         swarm = create_research_swarm(model_config)
@@ -155,7 +159,7 @@ async def show_status(swarm_type: str = "basic", model_config: dict = None):
         await swarm.start()
         status = swarm.get_status()
 
-        print("📊 Swarm System Status:")
+        print(" Swarm System Status:")
         print(f"   Running: {status['running']}")
         print(f"   Orchestrator Model: {status['orchestrator_model']}")
         print(f"   Assistant Model: {status['assistant_model']}")
@@ -165,25 +169,28 @@ async def show_status(swarm_type: str = "basic", model_config: dict = None):
 
         print("\n👥 Assistant Details:")
         for aid, assistant_status in status['assistants'].items():
-            print(f"   {aid}: {assistant_status.get('assistant_type', 'unknown')}")
+            print(
+                f"   {aid}: {assistant_status.get('assistant_type', 'unknown')}")
 
     except Exception as e:
         print(f"❌ Error checking status: {e}")
     finally:
         await swarm.stop()
 
+
 def main():
     parser = argparse.ArgumentParser(description="Swarm System Runner")
     parser.add_argument("--task", help="Run single task and exit")
-    parser.add_argument("--status", action="store_true", help="Show status and exit")
+    parser.add_argument("--status", action="store_true",
+                        help="Show status and exit")
     parser.add_argument("--type", choices=["basic", "research", "development"],
-                       default="basic", help="Swarm type")
+                        default="basic", help="Swarm type")
     parser.add_argument("--orchestrator-model", default="llama3.2:3b",
-                       help="Orchestrator model")
+                        help="Orchestrator model")
     parser.add_argument("--assistant-model", default="gemma:270m",
-                       help="Assistant model")
+                        help="Assistant model")
     parser.add_argument("--host", default="localhost:11434",
-                       help="Ollama host")
+                        help="Ollama host")
 
     args = parser.parse_args()
 
@@ -201,6 +208,7 @@ def main():
         asyncio.run(show_status(args.type, model_config))
     else:
         asyncio.run(run_interactive_swarm(args.type, model_config))
+
 
 if __name__ == "__main__":
     main()

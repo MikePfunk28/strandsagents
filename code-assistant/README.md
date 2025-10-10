@@ -13,7 +13,7 @@ A GAN-style coding assistant that uses multiple AI agents to iteratively improve
 - **MCP integration**: External system coordination
 - **Zero cost**: Completely local with Ollama
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Core Agents
 - **Generator**: Creates initial code solutions
@@ -29,7 +29,7 @@ A GAN-style coding assistant that uses multiple AI agents to iteratively improve
 - **Quality**: Larger models for best results
 - **Custom**: Select individual models for each agent
 
-## 🚀 Quick Setup (Windows PowerShell)
+##  Quick Setup (Windows PowerShell)
 
 ### 1. Prerequisites
 ```powershell

@@ -9,8 +9,9 @@ import time
 from typing import List, Dict, Any
 from datetime import datetime
 
-print("🔍 Real Agentic Search System")
+print(" Real Agentic Search System")
 print("=" * 60)
+
 
 class AgenticSearchAgent:
     """AI agent that performs intelligent, multi-step searches"""
@@ -42,7 +43,7 @@ class AgenticSearchAgent:
 
     async def think_step_by_step(self, user_query: str) -> str:
         """Think through the search process step by step"""
-        print(f"\n🤔 Agent thinking: '{user_query}'")
+        print(f"\n Agent thinking: '{user_query}'")
 
         # Step 1: Analyze the query
         print("   Step 1: Analyzing user query...")
@@ -192,14 +193,14 @@ class AgenticSearchAgent:
     def _generate_response(self, synthesis: Dict[str, Any], analysis: Dict[str, Any]) -> str:
         """Generate final response"""
         response = f"""
-# 🤖 Agent Architecture Plan
+#  Agent Architecture Plan
 
 **Query:** {analysis['original_query']}
 **Intent:** {analysis['intent']}
 **Platform:** {analysis['platform']}
 **Confidence:** {synthesis['overall_confidence']:.1%}
 
-## 🏗️ Recommended Architecture
+##  Recommended Architecture
 
 ### Core Components
 """
@@ -222,7 +223,7 @@ class AgenticSearchAgent:
             response += f"- {security}\n"
 
         response += "
-## 🚀 Implementation Steps
+##  Implementation Steps
 1. Set up AWS Bedrock agent configuration
 2. Create Lambda function for processing
 3. Configure API Gateway for access
@@ -230,7 +231,7 @@ class AgenticSearchAgent:
 5. Implement monitoring and logging
 6. Deploy and test the solution
 
-## ✅ Confidence Assessment
+##  Confidence Assessment
 - Architecture feasibility: High
 - Cost predictability: High
 - Security compliance: High
@@ -276,12 +277,12 @@ async def main():
     print(f"\n{'='*60}")
     print("🎉 Agentic Search System Demo Complete!")
     print("💡 Key Benefits:")
-    print("   ✅ Visible reasoning at each step")
-    print("   ✅ Controlled search process")
-    print("   ✅ Multi-step analysis")
-    print("   ✅ Confidence scoring")
-    print("   ✅ Comprehensive results")
-    print("   ✅ No runaway processes")
+    print("    Visible reasoning at each step")
+    print("    Controlled search process")
+    print("    Multi-step analysis")
+    print("    Confidence scoring")
+    print("    Comprehensive results")
+    print("    No runaway processes")
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -4,6 +4,10 @@ Demo Agent Creation - Demonstrates @agent decorator system
 Shows how to create, build, and deploy agents using the deterministic approach
 """
 
+from strandsagents.agent_decorator import (
+    agent, system_prompt, tool, function,
+    mcp, aws_service, environment_variable, deployment_config
+)
 import asyncio
 import sys
 import os
@@ -12,16 +16,13 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import the @agent decorator system
-from strandsagents.agent_decorator import (
-    agent, system_prompt, tool, function,
-    mcp, aws_service, environment_variable, deployment_config
-)
 
-print("🤖 Agent Builder Platform - @agent Decorator System Demo")
+print(" Agent Builder Platform - @agent Decorator System Demo")
 print("=" * 70)
 
 # Example 1: Simple Chatbot Agent
 print("\n📦 Creating Customer Support Chatbot...")
+
 
 @agent(
     name="customer_support_bot",
@@ -72,8 +73,10 @@ class CustomerSupportBot:
 
         return "I don't have that specific information in our FAQ. Let me escalate this to a human agent."
 
+
 # Example 2: API Agent
 print("\n📦 Creating Product API Agent...")
+
 
 @agent(
     name="product_api_agent",
@@ -115,8 +118,10 @@ class ProductAPIAgent:
             {"id": "2", "name": "Product 2", "price": 29.99}
         ]
 
+
 # Example 3: Data Processing Agent
 print("\n📦 Creating Data Processing Agent...")
+
 
 @agent(
     name="data_processor_agent",
@@ -154,8 +159,10 @@ class DataProcessorAgent:
         """Generate analysis report"""
         return f"Data analysis complete. Processed {data_summary.get('rows_processed', 0)} rows with {data_summary.get('data_quality_score', 0):.0%} quality score."
 
+
 # Example 4: Custom Agent with All Features
 print("\n📦 Creating Enterprise Assistant...")
+
 
 @agent(
     name="enterprise_assistant",
@@ -215,6 +222,7 @@ class EnterpriseAssistant:
         """Deploy the solution to AWS"""
         return "Solution deployed successfully with monitoring and alerting configured"
 
+
 async def main():
     """Demonstrate the @agent decorator system"""
     print("\n🎯 Demo: Creating and Building Agents")
@@ -227,7 +235,7 @@ async def main():
         builder = AgentBuilder()
 
         # Build the customer support bot
-        print("\n🏗️ Building Customer Support Bot...")
+        print("\n Building Customer Support Bot...")
         output_dir = await builder.build_agent(
             agent_type="chatbot",
             name="customer_support_bot",
@@ -237,10 +245,10 @@ async def main():
             aws_services=["bedrock", "dynamodb", "cloudwatch"]
         )
 
-        print(f"✅ Customer Support Bot built in: {output_dir}")
+        print(f" Customer Support Bot built in: {output_dir}")
 
         # Build the product API agent
-        print("\n🏗️ Building Product API Agent...")
+        print("\n Building Product API Agent...")
         output_dir2 = await builder.build_agent(
             agent_type="api",
             name="product_api_agent",
@@ -249,10 +257,10 @@ async def main():
             aws_services=["dynamodb", "s3", "api_gateway"]
         )
 
-        print(f"✅ Product API Agent built in: {output_dir2}")
+        print(f" Product API Agent built in: {output_dir2}")
 
         # Build the data processor agent
-        print("\n🏗️ Building Data Processor Agent...")
+        print("\n Building Data Processor Agent...")
         output_dir3 = await builder.build_agent(
             agent_type="data_processing",
             name="data_processor_agent",
@@ -261,7 +269,7 @@ async def main():
             aws_services=["s3", "dynamodb", "lambda", "glue", "athena"]
         )
 
-        print(f"✅ Data Processor Agent built in: {output_dir3}")
+        print(f" Data Processor Agent built in: {output_dir3}")
 
         print("\n🎉 All agents built successfully!")
 
@@ -276,7 +284,7 @@ async def main():
             except:
                 print("   📄 Generated agent files")
 
-        print("\n🚀 Next Steps:")
+        print("\n Next Steps:")
         print("   1. Review the generated agent files")
         print("   2. Customize the agent code if needed")
         print("   3. Deploy to AWS using: ./scripts/deploy.sh")
@@ -292,13 +300,13 @@ async def main():
         print("   ./scripts/deploy.sh prod us-east-1")
 
         print("\n🎯 Key Benefits of @agent Decorator System:")
-        print("   ✅ Deterministic: Same inputs = same outputs")
-        print("   ✅ Scriptable: Can be automated and batched")
-        print("   ✅ Customizable: Easy to modify and extend")
-        print("   ✅ Fast: No consultation delays")
-        print("   ✅ Powerful: Clean API with decorators")
-        print("   ✅ Production-Ready: Built for AWS deployment")
-        print("   ✅ Cost-Effective: Optimized for hackathon budgets")
+        print("    Deterministic: Same inputs = same outputs")
+        print("    Scriptable: Can be automated and batched")
+        print("    Customizable: Easy to modify and extend")
+        print("    Fast: No consultation delays")
+        print("    Powerful: Clean API with decorators")
+        print("    Production-Ready: Built for AWS deployment")
+        print("    Cost-Effective: Optimized for hackathon budgets")
 
     except Exception as e:
         print(f"❌ Demo failed: {e}")

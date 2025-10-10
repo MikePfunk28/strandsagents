@@ -306,7 +306,7 @@ def use_aws(tool: ToolUse, **kwargs: Any) -> ToolResult:
         details_table.add_row("Parameters:", "None")
 
     console.print(Panel(
-        details_table, title=f"[bold blue]🚀 {label}[/bold blue]", border_style="blue", expand=False))
+        details_table, title=f"[bold blue] {label}[/bold blue]", border_style="blue", expand=False))
 
     logger.debug(
         "Invoking: service_name = %s, operation_name = %s, parameters = %s" % (

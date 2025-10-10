@@ -427,7 +427,7 @@ function App() {
                   <InputLabel sx={{ color: '#b0b0b0' }}>Agent Type</InputLabel>
                   <Select
                     value={agentForm.type}
-                    onChange={(e) => setAgentForm({...agentForm, type: e.target.value})}
+                    onChange={(e) => setAgentForm({ ...agentForm, type: e.target.value })}
                     sx={{
                       color: 'white',
                       '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 255, 136, 0.3)' },
@@ -450,7 +450,7 @@ function App() {
                   fullWidth
                   label="Agent Name (Optional)"
                   value={agentForm.name}
-                  onChange={(e) => setAgentForm({...agentForm, name: e.target.value})}
+                  onChange={(e) => setAgentForm({ ...agentForm, name: e.target.value })}
                   sx={{
                     '& .MuiInputBase-input': { color: 'white' },
                     '& .MuiInputLabel-root': { color: '#b0b0b0' },
@@ -548,7 +548,7 @@ function App() {
               <Card sx={{ mb: 4 }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ color: '#00ff88', mb: 2 }}>
-                    🤖 AI Consultant Response
+                    AI Consultant Response
                   </Typography>
                   <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 3 }}>
                     {agentResponse}
@@ -616,7 +616,7 @@ function App() {
               <Card sx={{ mb: 4 }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ color: '#00ff88', mb: 2 }}>
-                    📊 Consultation Progress
+                    Consultation Progress
                   </Typography>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="body2" sx={{ mb: 1 }}>
@@ -661,7 +661,7 @@ function App() {
                   fontSize: '1.1rem'
                 }}
               >
-                🚀 Generate Agent
+                Generate Agent
               </Button>
             </Grid>
           </Grid>

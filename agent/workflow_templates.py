@@ -19,6 +19,7 @@ from datetime import datetime
 
 logger = logging.getLogger("workflow_templates")
 
+
 @dataclass
 class WorkflowStep:
     """Represents a single step in a workflow"""
@@ -35,6 +36,7 @@ class WorkflowStep:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
 
 @dataclass
 class WorkflowTemplate:
@@ -56,6 +58,7 @@ class WorkflowTemplate:
         data['created_at'] = self.created_at.isoformat()
         data['updated_at'] = self.updated_at.isoformat()
         return data
+
 
 class WorkflowTemplateManager:
     """Manages workflow templates and their execution"""
@@ -389,7 +392,7 @@ class WorkflowTemplateManager:
             return False
 
     def execute_workflow(self, template_id: str, goal: str, context: str = "",
-                        agent_registry: Optional[Dict[str, Any]] = None) -> str:
+                         agent_registry: Optional[Dict[str, Any]] = None) -> str:
         """
         Execute a workflow template using available agents
 
@@ -439,8 +442,8 @@ class WorkflowTemplateManager:
             return f"Workflow execution failed: {str(e)}"
 
     def _execute_workflow_steps(self, template: WorkflowTemplate, goal: str,
-                              context: str, agent_registry: Dict[str, Any],
-                              workflow_state: Dict[str, Any]) -> str:
+                                context: str, agent_registry: Dict[str, Any],
+                                workflow_state: Dict[str, Any]) -> str:
         """Execute individual workflow steps"""
 
         # Get execution order (topological sort based on dependencies)
@@ -457,7 +460,8 @@ class WorkflowTemplateManager:
             # Check if all required input steps are completed
             if not self._can_execute_step(step, step_results):
                 if step.required:
-                    raise Exception(f"Cannot execute required step {step_id}: missing dependencies")
+                    raise Exception(
+                        f"Cannot execute required step {step_id}: missing dependencies")
                 else:
                     logger.warning(f"🔧 Skipping optional step {step_id}")
                     continue
@@ -533,7 +537,7 @@ class WorkflowTemplateManager:
         return "\\n\\n".join(inputs) if inputs else ""
 
     def _execute_step(self, step: WorkflowStep, goal: str, context: str,
-                     input_data: str, agent_registry: Dict[str, Any]) -> str:
+                      input_data: str, agent_registry: Dict[str, Any]) -> str:
         """Execute a single workflow step"""
 
         # Format the prompt template
@@ -545,10 +549,12 @@ class WorkflowTemplateManager:
         )
 
         # Find appropriate agent for this step type
-        agent_function = self._find_agent_for_step(step.agent_type, agent_registry)
+        agent_function = self._find_agent_for_step(
+            step.agent_type, agent_registry)
 
         if not agent_function:
-            logger.warning(f"🔧 No agent found for type {step.agent_type}, using generic agent")
+            logger.warning(
+                f"🔧 No agent found for type {step.agent_type}, using generic agent")
             # Fallback to a generic agent
             return f"Step {step.name} completed (no specific agent available)"
 
@@ -579,26 +585,32 @@ class WorkflowTemplateManager:
 
         return None
 
+
 # Global template manager instance
 template_manager = WorkflowTemplateManager()
 
 # Convenience functions
+
+
 def get_workflow_template(template_id: str) -> Optional[WorkflowTemplate]:
     """Get a workflow template by ID"""
     return template_manager.get_template(template_id)
+
 
 def list_workflow_templates() -> List[Dict[str, Any]]:
     """List all available workflow templates"""
     return template_manager.list_templates()
 
+
 def execute_workflow(template_id: str, goal: str, context: str = "",
-                    agent_registry: Optional[Dict[str, Any]] = None) -> str:
+                     agent_registry: Optional[Dict[str, Any]] = None) -> str:
     """Execute a workflow template"""
     return template_manager.execute_workflow(template_id, goal, context, agent_registry or {})
 
+
 if __name__ == "__main__":
     # Demo the workflow template system
-    print("🚀 Workflow Templates Demo")
+    print(" Workflow Templates Demo")
     print("=" * 50)
 
     templates = list_workflow_templates()

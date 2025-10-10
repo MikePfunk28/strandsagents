@@ -37,7 +37,7 @@ def letter_counter(text: str, letter: str) -> int:
 agent = Agent(tools=[letter_counter])
 ```
 
-## 🏗️ AMAZON BEDROCK AGENTCORE
+##  AMAZON BEDROCK AGENTCORE
 
 **Enterprise-grade agent deployment platform**
 
@@ -165,7 +165,7 @@ with code_session("us-west-2") as client:
     result = client.invoke("print('Hello from AgentCore!')")
 ```
 
-## 📊 OBSERVABILITY & MONITORING
+##  OBSERVABILITY & MONITORING
 
 ### Strands Telemetry:
 ```python
@@ -185,7 +185,7 @@ response = agent("Analyze this data")  # Automatically traced
 - Performance metrics
 - Error tracking
 
-## 🚀 DEPLOYMENT OPTIONS
+##  DEPLOYMENT OPTIONS
 
 ### Local Development:
 ```bash

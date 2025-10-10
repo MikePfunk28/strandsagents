@@ -14,18 +14,18 @@ if ($env:VIRTUAL_ENV) {
 Write-Host "`n🗑️  Removing MSYS2-based .venv folder..." -ForegroundColor Yellow
 if (Test-Path ".venv") {
     Remove-Item -Recurse -Force .venv
-    Write-Host "✅ Removed corrupted .venv" -ForegroundColor Green
+    Write-Host " Removed corrupted .venv" -ForegroundColor Green
 }
 
 # Step 3: Find Windows Python (not MSYS2)
-Write-Host "`n🔍 Finding Windows Python..." -ForegroundColor Cyan
+Write-Host "`n Finding Windows Python..." -ForegroundColor Cyan
 $pythons = Get-Command python -ErrorAction SilentlyContinue | Where-Object {
     $_.Source -notlike "*msys64*" -and $_.Source -notlike "*mingw*"
 }
 
 if ($pythons) {
     $pythonPath = $pythons[0].Source
-    Write-Host "✅ Found Windows Python: $pythonPath" -ForegroundColor Green
+    Write-Host " Found Windows Python: $pythonPath" -ForegroundColor Green
 } else {
     Write-Host "❌ No Windows Python found! Install Python from python.org" -ForegroundColor Red
     exit 1
@@ -36,7 +36,7 @@ Write-Host "`n🔨 Creating new Windows virtual environment..." -ForegroundColor
 & $pythonPath -m venv .venv
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Created new .venv successfully" -ForegroundColor Green
+    Write-Host " Created new .venv successfully" -ForegroundColor Green
 } else {
     Write-Host "❌ Failed to create venv" -ForegroundColor Red
     exit 1
@@ -58,14 +58,14 @@ if (Test-Path "requirements.txt") {
     python -m pip install -r requirements.txt
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Packages installed" -ForegroundColor Green
+        Write-Host " Packages installed" -ForegroundColor Green
     } else {
         Write-Host "⚠️  Some packages may have failed" -ForegroundColor Yellow
     }
 }
 
 # Step 7: Install Playwright
-Write-Host "`n🌐 Installing Playwright browsers..." -ForegroundColor Cyan
+Write-Host "`n Installing Playwright browsers..." -ForegroundColor Cyan
 playwright install chromium
 
 Write-Host "`n" + ("=" * 60)

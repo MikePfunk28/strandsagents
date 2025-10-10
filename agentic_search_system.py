@@ -16,8 +16,10 @@ from enum import Enum
 import uuid
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 class SearchPhase(Enum):
     """Phases of agentic search"""
@@ -31,6 +33,7 @@ class SearchPhase(Enum):
     ITERATION = "iteration"
     FINALIZATION = "finalization"
 
+
 class PlatformType(Enum):
     """Supported platforms"""
     AWS_BEDROCK = "aws_bedrock"
@@ -38,6 +41,7 @@ class PlatformType(Enum):
     AZURE_OPENAI = "azure_openai"
     GENERIC_AI = "generic_ai"
     STRANDS_AGENTS = "strands_agents"
+
 
 @dataclass
 class SearchContext:
@@ -51,6 +55,7 @@ class SearchContext:
     start_time: datetime
     last_updated: datetime
     metadata: Dict[str, Any]
+
 
 @dataclass
 class ArchitecturePlan:
@@ -67,6 +72,7 @@ class ArchitecturePlan:
     confidence_score: float
     created_at: str
 
+
 @dataclass
 class AgenticSearchResult:
     """Complete result from agentic search"""
@@ -79,6 +85,7 @@ class AgenticSearchResult:
     requires_user_feedback: bool
     next_steps: List[str]
     metadata: Dict[str, Any]
+
 
 class QueryAnalyzer:
     """Analyzes user queries to understand intent and requirements"""
@@ -96,7 +103,8 @@ class QueryAnalyzer:
             PlatformType.AWS_BEDROCK: ['aws', 'bedrock', 'lambda', 'dynamodb', 'api gateway', 'cloudformation'],
             PlatformType.GOOGLE_CLOUD: ['google cloud', 'vertex ai', 'gcp', 'cloud run', 'firestore'],
             PlatformType.AZURE_OPENAI: ['azure', 'openai', 'cognitive services', 'function app'],
-            PlatformType.STRANDS_AGENTS: ['strands', 'strands agents', 'agent builder platform']
+            PlatformType.STRANDS_AGENTS: [
+                'strands', 'strands agents', 'agent builder platform']
         }
 
     async def analyze_query(self, query: str) -> Dict[str, Any]:
@@ -110,7 +118,8 @@ class QueryAnalyzer:
             if score > 0:
                 intent_scores[intent] = score
 
-        primary_intent = max(intent_scores, key=intent_scores.get) if intent_scores else 'build_agent'
+        primary_intent = max(
+            intent_scores, key=intent_scores.get) if intent_scores else 'build_agent'
 
         # Detect target platform
         platform_scores = {}
@@ -119,7 +128,8 @@ class QueryAnalyzer:
             if score > 0:
                 platform_scores[platform] = score
 
-        detected_platform = max(platform_scores, key=platform_scores.get) if platform_scores else PlatformType.AWS_BEDROCK
+        detected_platform = max(
+            platform_scores, key=platform_scores.get) if platform_scores else PlatformType.AWS_BEDROCK
 
         # Extract key requirements
         requirements = self._extract_requirements(query)
@@ -163,6 +173,7 @@ class QueryAnalyzer:
         }
 
         return sum(complexity_factors.values()) / 3
+
 
 class PlatformResearcher:
     """Researches platform-specific architecture patterns"""
@@ -229,7 +240,8 @@ class PlatformResearcher:
         selected = []
 
         if 'real_time_processing' in requirements:
-            selected.extend([opt for opt in options if 'function' in opt.lower() or 'lambda' in opt.lower()])
+            selected.extend(
+                [opt for opt in options if 'function' in opt.lower() or 'lambda' in opt.lower()])
         else:
             selected.append(options[0])  # Default to first option
 
@@ -240,7 +252,8 @@ class PlatformResearcher:
         selected = []
 
         if 'high_scalability' in requirements:
-            selected.extend([opt for opt in options if 'dynamo' in opt.lower() or 'cosmos' in opt.lower() or 'firestore' in opt.lower()])
+            selected.extend([opt for opt in options if 'dynamo' in opt.lower(
+            ) or 'cosmos' in opt.lower() or 'firestore' in opt.lower()])
         else:
             selected.append(options[0])
 
@@ -287,6 +300,7 @@ class PlatformResearcher:
                 'Basic monitoring and logging'
             ]
         }
+
 
 class PlanGenerator:
     """Generates comprehensive architecture plans"""
@@ -380,11 +394,11 @@ class PlanGenerator:
     def _generate_mermaid_diagram(self, plan: ArchitecturePlan) -> str:
         """Generate Mermaid diagram for architecture"""
         diagram = f'''graph TB
-    User[👤 User] --> API[🌐 API Gateway]
-    API --> Lambda[⚡ AWS Lambda]
-    Lambda --> Bedrock[🤖 Amazon Bedrock]
-    Lambda --> DynamoDB[💾 DynamoDB]
-    Lambda --> CloudWatch[📊 CloudWatch]
+    User[ User] --> API[ API Gateway]
+    API --> Lambda[ AWS Lambda]
+    Lambda --> Bedrock[ Amazon Bedrock]
+    Lambda --> DynamoDB[ DynamoDB]
+    Lambda --> CloudWatch[ CloudWatch]
 
     subgraph "AWS Services"
         Bedrock
@@ -400,6 +414,7 @@ class PlanGenerator:
 '''
 
         return diagram
+
 
 class VerificationAgent:
     """Verifies plans against multiple sources"""
@@ -423,7 +438,8 @@ class VerificationAgent:
             verification_results[component['name']] = component_verification
 
         # Overall verification score
-        overall_score = sum(result['score'] for result in verification_results.values()) / len(verification_results)
+        overall_score = sum(result['score'] for result in verification_results.values(
+        )) / len(verification_results)
 
         return {
             'overall_verification_score': overall_score,
@@ -501,6 +517,7 @@ class VerificationAgent:
             ]
         }
 
+
 class PresentationAgent:
     """Presents plans with diagrams and explanations"""
 
@@ -515,12 +532,12 @@ class PresentationAgent:
     async def present_plan(self, plan: ArchitecturePlan, verification_results: Dict[str, Any]) -> str:
         """Present complete plan with all details"""
         presentation = f"""
-# 🤖 Agent Architecture Plan: {plan.architecture_name}
+#  Agent Architecture Plan: {plan.architecture_name}
 
 **Platform:** {plan.platform.value}
 **Confidence:** {plan.confidence_score:.1%} | **Verification:** {verification_results['overall_verification_score']:.1%}
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 {plan.description}
 
@@ -558,12 +575,12 @@ class PresentationAgent:
 """
 
         for consideration in plan.security_considerations:
-            presentation += f"- ✅ {consideration}\n"
+            presentation += f"-  {consideration}\n"
 
         # Add deployment steps
         presentation += f"""
 
-## 🚀 Deployment Steps
+##  Deployment Steps
 
 """
 
@@ -573,7 +590,7 @@ class PresentationAgent:
         # Add verification summary
         presentation += f"""
 
-## ✅ Verification Results
+##  Verification Results
 
 **Overall Score:** {verification_results['overall_verification_score']:.1%}
 
@@ -593,6 +610,7 @@ class PresentationAgent:
 """
 
         return presentation
+
 
 class AgenticSearchSystem:
     """Main agentic search system orchestrator"""
@@ -614,7 +632,7 @@ class AgenticSearchSystem:
         search_id = str(uuid.uuid4())
         start_time = time.time()
 
-        logger.info(f"🚀 Starting agentic search: {user_query}")
+        logger.info(f" Starting agentic search: {user_query}")
 
         # Initialize search context
         context = SearchContext(
@@ -633,7 +651,7 @@ class AgenticSearchSystem:
 
         try:
             # Phase 1: Query Analysis
-            logger.info("🤔 Phase 1: Analyzing user query...")
+            logger.info(" Phase 1: Analyzing user query...")
             context.current_phase = SearchPhase.QUERY_ANALYSIS
             context.progress_percentage = 10
 
@@ -643,7 +661,7 @@ class AgenticSearchSystem:
             context.metadata['query_analysis'] = query_analysis
 
             # Phase 2: Platform Detection
-            logger.info("🔍 Phase 2: Researching target platform...")
+            logger.info(" Phase 2: Researching target platform...")
             context.current_phase = SearchPhase.PLATFORM_DETECTION
             context.progress_percentage = 25
 
@@ -654,7 +672,7 @@ class AgenticSearchSystem:
             context.metadata['platform_research'] = platform_research
 
             # Phase 3: Architecture Research
-            logger.info("🏗️ Phase 3: Researching architecture patterns...")
+            logger.info(" Phase 3: Researching architecture patterns...")
             context.current_phase = SearchPhase.ARCHITECTURE_RESEARCH
             context.progress_percentage = 40
 
@@ -670,7 +688,7 @@ class AgenticSearchSystem:
             )
 
             # Phase 5: Verification
-            logger.info("✅ Phase 5: Verifying plan...")
+            logger.info(" Phase 5: Verifying plan...")
             context.current_phase = SearchPhase.VERIFICATION
             context.progress_percentage = 80
 
@@ -681,11 +699,12 @@ class AgenticSearchSystem:
 
             # Update plan confidence with verification
             architecture_plan.confidence_score = (
-                architecture_plan.confidence_score + verification_results['overall_verification_score']
+                architecture_plan.confidence_score +
+                verification_results['overall_verification_score']
             ) / 2
 
             # Phase 6: Presentation
-            logger.info("📊 Phase 6: Preparing presentation...")
+            logger.info(" Phase 6: Preparing presentation...")
             context.current_phase = SearchPhase.PRESENTATION
             context.progress_percentage = 100
 
@@ -731,7 +750,8 @@ class AgenticSearchSystem:
             # Store in history
             self.search_history.append(result)
 
-            logger.info(f"🎉 Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
+            logger.info(
+                f"🎉 Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
 
             return result
 
@@ -752,7 +772,8 @@ class AgenticSearchSystem:
 
         # Analyze feedback and update plan
         # For now, return the existing result with feedback noted
-        original_result = next((r for r in self.search_history if r.search_id == search_id), None)
+        original_result = next(
+            (r for r in self.search_history if r.search_id == search_id), None)
 
         if original_result:
             original_result.metadata['user_feedback'] = user_feedback
@@ -792,27 +813,35 @@ class AgenticSearchSystem:
             for result in self.search_history
         ]
 
+
 # Global instance
 agentic_search = AgenticSearchSystem()
 
 # Convenience functions
+
+
 async def search_for_agent_architecture(user_query: str) -> AgenticSearchResult:
     """Search for agent architecture using agentic search"""
     return await agentic_search.process_query(user_query)
+
 
 async def process_search_feedback(search_id: str, user_feedback: str) -> AgenticSearchResult:
     """Process feedback for existing search"""
     return await agentic_search.process_user_feedback(search_id, user_feedback)
 
+
 def get_search_status(search_id: str) -> Optional[Dict[str, Any]]:
     """Get search status"""
     return agentic_search.get_search_status(search_id)
+
 
 def get_search_history() -> List[Dict[str, Any]]:
     """Get search history"""
     return agentic_search.get_search_history()
 
 # Demo function
+
+
 async def demo_agentic_search():
     """Demonstrate the agentic search system"""
     print("🎯 Agentic Search System Demo")
@@ -821,19 +850,19 @@ async def demo_agentic_search():
     # Test query
     test_query = "Build me a customer support chatbot using AWS Bedrock with DynamoDB"
 
-    print(f"🔍 Query: {test_query}")
+    print(f" Query: {test_query}")
     print()
 
     try:
         # Perform agentic search
         result = await search_for_agent_architecture(test_query)
 
-        print("✅ Search completed successfully!")
+        print(" Search completed successfully!")
         print(f"🎯 Confidence: {result.confidence_score:.1%}")
         print(f"⏱️ Duration: {result.search_duration_seconds:.1f} seconds")
         print(f"📋 Phases completed: {len(result.phases_completed)}")
 
-        print("\n🏗️ Architecture Plan:")
+        print("\n Architecture Plan:")
         print(f"   Name: {result.final_plan.architecture_name}")
         print(f"   Platform: {result.final_plan.platform.value}")
         print(f"   Components: {len(result.final_plan.components)}")
@@ -846,7 +875,7 @@ async def demo_agentic_search():
         for consideration in result.final_plan.security_considerations[:3]:
             print(f"   • {consideration}")
 
-        print("\n📊 Next Steps:")
+        print("\n Next Steps:")
         for step in result.next_steps:
             print(f"   {step}")
 

@@ -34,6 +34,7 @@ except Exception:  # pragma: no cover - docker optional
     _DockerSandboxExecutor = None  # type: ignore
     DOCKER_SANDBOX_AVAILABLE = False
 
+
 @dataclass
 class ExecutionResult:
     """Structured result from code execution"""
@@ -49,6 +50,7 @@ class ExecutionResult:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
 
 class SandboxExecutor:
     """
@@ -93,10 +95,11 @@ class SandboxExecutor:
         self._docker_executor: Optional[_DockerSandboxExecutor] = None
 
         logger.info(f"🔒 Enhanced Sandbox created at: {self.temp_dir}")
-        logger.info(f"🔒 Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
+        logger.info(
+            f"🔒 Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
 
     def execute_code(self, code: str, language: str = "python",
-                    session_id: Optional[str] = None) -> ExecutionResult:
+                     session_id: Optional[str] = None) -> ExecutionResult:
         """
         Execute code in sandbox environment with enhanced features.
 
@@ -168,7 +171,8 @@ class SandboxExecutor:
             session["last_execution"] = execution_result.to_dict()
             session["execution_count"] += 1
 
-            logger.info(f"🔒 {language} execution completed in {execution_time:.2f}s")
+            logger.info(
+                f"🔒 {language} execution completed in {execution_time:.2f}s")
             return execution_result
 
         except Exception as e:
@@ -181,7 +185,8 @@ class SandboxExecutor:
             )
 
     def _should_use_docker(self, language: str) -> bool:
-        interpreter = self.SUPPORTED_LANGUAGES.get(language, {}).get('interpreter')
+        interpreter = self.SUPPORTED_LANGUAGES.get(
+            language, {}).get('interpreter')
         if not interpreter:
             return False
 
@@ -195,13 +200,16 @@ class SandboxExecutor:
 
     def _ensure_docker_executor(self) -> None:
         if not DOCKER_SANDBOX_AVAILABLE:
-            raise RuntimeError('Docker sandbox is not available on this system.')
+            raise RuntimeError(
+                'Docker sandbox is not available on this system.')
         if self._docker_executor is None:
-            self._docker_executor = _DockerSandboxExecutor(timeout=self.timeout, max_memory=self.max_memory)
+            self._docker_executor = _DockerSandboxExecutor(
+                timeout=self.timeout, max_memory=self.max_memory)
 
     def _execute_via_docker(self, code: str, language: str, session_id: Optional[str]) -> Dict[str, Any]:
         self._ensure_docker_executor()
-        docker_result = self._docker_executor.execute_code(code, language, session_id=session_id)
+        docker_result = self._docker_executor.execute_code(
+            code, language, session_id=session_id)
         return docker_result.to_dict()
 
     def _execute_python(self, code: str) -> Dict[str, Any]:
@@ -222,10 +230,12 @@ class SandboxExecutor:
                 timeout=self.timeout,
                 cwd=self.temp_dir,
                 # Security: no shell, limited environment
-                env={"PYTHONPATH": str(self.temp_dir), "TEMP": str(self.temp_dir)}
+                env={"PYTHONPATH": str(self.temp_dir),
+                     "TEMP": str(self.temp_dir)}
             )
 
-            logger.info(f"🔒 Python execution completed with return code: {result.returncode}")
+            logger.info(
+                f"🔒 Python execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -236,7 +246,8 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"🔒 Python code execution timed out after {self.timeout}s")
+            logger.warning(
+                f"🔒 Python code execution timed out after {self.timeout}s")
             return {
                 "error": f"Code execution timed out after {self.timeout} seconds",
                 "success": False,
@@ -276,7 +287,8 @@ class SandboxExecutor:
                 env={"TEMP": str(self.temp_dir), "TMPDIR": str(self.temp_dir)}
             )
 
-            logger.info(f"🔒 Bash execution completed with return code: {result.returncode}")
+            logger.info(
+                f"🔒 Bash execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -516,7 +528,8 @@ class SandboxExecutor:
                 logger.info(f"🔒 Cleaned up session {session_id}")
                 return True
             except Exception as e:
-                logger.error(f"🔒 Failed to cleanup session {session_id}: {str(e)}")
+                logger.error(
+                    f"🔒 Failed to cleanup session {session_id}: {str(e)}")
                 return False
         return False
 
@@ -552,12 +565,13 @@ print("=" * 50)
         logger.info(f"🔒 Created REPL session {session_id} for {language}")
         return session_id
 
+
 # Example usage
 if __name__ == "__main__":
     # Test the enhanced sandbox
     sandbox = SandboxExecutor(timeout=10)
 
-    print("🚀 Testing Enhanced Sandbox Executor")
+    print(" Testing Enhanced Sandbox Executor")
     print("=" * 50)
 
     # Test Python code with session

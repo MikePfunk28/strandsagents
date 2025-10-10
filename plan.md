@@ -3,23 +3,23 @@
 ## 🎯 Vision
 Create a sophisticated agentic search system that uses AI agents to perform intelligent, multi-step searches for building agents on different platforms (AWS, Google Cloud, etc.).
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 ```mermaid
 graph TB
     User[User Query] --> AgenticSearch[Agentic Search Agent]
-    AgenticSearch --> Think1[🤔 Think: Analyze Query]
-    Think1 --> PlatformLookup[🔍 Look up Platform]
-    PlatformLookup --> Think2[🤔 Think: Build Strategy]
+    AgenticSearch --> Think1[ Think: Analyze Query]
+    Think1 --> PlatformLookup[ Look up Platform]
+    PlatformLookup --> Think2[ Think: Build Strategy]
     Think2 --> CreatePlan[📋 Create Plan]
-    CreatePlan --> SearchVerify[🔍 Search to Verify]
-    SearchVerify --> Think3[🤔 Think: Validate Plan]
-    Think3 --> PresentPlan[📊 Present Plan + Diagram]
+    CreatePlan --> SearchVerify[ Search to Verify]
+    SearchVerify --> Think3[ Think: Validate Plan]
+    Think3 --> PresentPlan[ Present Plan + Diagram]
     PresentPlan --> WaitResponse[⏳ Wait for User Response]
     WaitResponse --> ProcessFeedback[🔄 Process User Feedback]
-    ProcessFeedback --> FinalizePlan[✅ Finalize Plan]
-    FinalizePlan --> GenerateScript[⚡ Generate Platform Script]
-    GenerateScript --> DeployAgent[🚀 Deploy Agent]
+    ProcessFeedback --> FinalizePlan[ Finalize Plan]
+    FinalizePlan --> GenerateScript[ Generate Platform Script]
+    GenerateScript --> DeployAgent[ Deploy Agent]
 ```
 
 ## 📋 Detailed Implementation Plan
@@ -44,7 +44,7 @@ graph TB
 - [ ] **Performance Benchmarking** - Compare performance characteristics
 - [ ] **Security Compliance** - Ensure compliance across different platforms
 
-## 🤖 Agentic Search Workflow
+##  Agentic Search Workflow
 
 ### Step 1: Query Analysis
 ```
@@ -92,20 +92,20 @@ User: "I want to build a customer support chatbot using AWS Bedrock"
 
 ### 2. Agentic Thinking Process
 ```
-🤔 Agent: "Analyzing request for chatbot development on AWS Bedrock"
+ Agent: "Analyzing request for chatbot development on AWS Bedrock"
 
-🔍 Agent: "Researching AWS Bedrock agent capabilities and requirements"
+ Agent: "Researching AWS Bedrock agent capabilities and requirements"
 
 📋 Agent: "Creating implementation plan with architecture diagram"
 
-🔍 Agent: "Verifying plan against AWS best practices and security requirements"
+ Agent: "Verifying plan against AWS best practices and security requirements"
 
-✅ Agent: "Plan ready - presenting to user with confidence score"
+ Agent: "Plan ready - presenting to user with confidence score"
 ```
 
 ### 3. Plan Presentation
 ```
-📊 Agent: "Here's my recommended plan for your AWS Bedrock chatbot:
+ Agent: "Here's my recommended plan for your AWS Bedrock chatbot:
 
 ## Architecture Overview
 [Interactive Mermaid diagram showing Lambda, API Gateway, Bedrock, DynamoDB]
@@ -131,13 +131,13 @@ Does this plan meet your requirements? Any modifications needed?"
 ```
 User: "Looks good, but I need it to integrate with my existing CRM system"
 
-🤔 Agent: "User needs CRM integration. Re-evaluating plan..."
+ Agent: "User needs CRM integration. Re-evaluating plan..."
 
-🔍 Agent: "Researching CRM integration patterns for AWS Bedrock agents"
+ Agent: "Researching CRM integration patterns for AWS Bedrock agents"
 
 📋 Agent: "Updating plan with CRM integration approach"
 
-✅ Agent: "Updated plan ready with CRM integration strategy"
+ Agent: "Updated plan ready with CRM integration strategy"
 ```
 
 ## 🛠️ Technical Implementation
@@ -161,7 +161,7 @@ User: "Looks good, but I need it to integrate with my existing CRM system"
 - **Azure OpenAI** - Secondary support
 - **Generic Platforms** - Template-based approach
 
-## 📊 Success Metrics
+##  Success Metrics
 
 ### Performance Metrics
 - **Response Time**: < 30 seconds for complete plan
@@ -175,7 +175,7 @@ User: "Looks good, but I need it to integrate with my existing CRM system"
 - **Implementation Success**: > 85% successful deployments
 - **Error Rate**: < 5% plan generation failures
 
-## 🚀 Implementation Priority
+##  Implementation Priority
 
 ### Week 1: Core Agentic Search
 - [ ] Query analysis and intent understanding
@@ -270,7 +270,7 @@ User: "Looks good, but I need it to integrate with my existing CRM system"
 - [ ] Generated scripts deploy successfully
 - [ ] Documentation is comprehensive and accurate
 
-## 🚀 Next Steps
+##  Next Steps
 
 1. **Implement Core Agentic Search** - Start with AWS Bedrock focus
 2. **Add Platform Detection** - Identify target platform from user query

@@ -288,12 +288,12 @@ class AgentBuilder:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(
-            f"🤖 Agent Builder initialized - Output dir: {self.output_dir}")
+            f" Agent Builder initialized - Output dir: {self.output_dir}")
 
     def create_agent_from_spec(self, spec: AgentSpecification) -> Dict[str, Path]:
         """Create a complete agent from specification"""
 
-        logger.info(f"🤖 Creating agent: {spec.name}")
+        logger.info(f" Creating agent: {spec.name}")
 
         # Generate file paths
         agent_file = self.output_dir / f"{spec.name}.py"
@@ -322,7 +322,7 @@ class AgentBuilder:
         test_code = self._generate_test_code(spec)
         test_file.write_text(test_code, encoding='utf-8')
 
-        logger.info(f"🤖 Agent {spec.name} created successfully")
+        logger.info(f" Agent {spec.name} created successfully")
 
         return {
             "agent": agent_file,
@@ -386,7 +386,8 @@ class AgentBuilder:
             f'logger = logging.getLogger("{spec.name}")',
             "",
             "# System prompt",
-            'SYSTEM_PROMPT = """' + spec.system_prompt.replace('"""', '\\"\\"\\"') + '"""',
+            'SYSTEM_PROMPT = """' +
+            spec.system_prompt.replace('"""', '\\"\\"\\"') + '"""',
             "",
             "# Tools configuration",
             f"TOOLS = [{tools_str}]",
@@ -583,7 +584,7 @@ class AgentBuilder:
             '    print("Testing error handling...")',
             "    test_instance.test_error_handling()",
             "",
-            '    print("\\n✅ All tests completed!")'
+            '    print("\\n All tests completed!")'
         ]
 
         return "\n".join(test_code_lines)
@@ -632,7 +633,8 @@ class AgentBuilder:
 
         while True:
             try:
-                type_choice = int(input(f"\\nSelect agent type (1-{len(AGENT_TYPES)}): "))
+                type_choice = int(
+                    input(f"\\nSelect agent type (1-{len(AGENT_TYPES)}): "))
                 if 1 <= type_choice <= len(AGENT_TYPES):
                     agent_type = list(AGENT_TYPES.keys())[type_choice - 1]
                     break
@@ -700,7 +702,7 @@ class AgentBuilder:
         )
 
         # Generate the agent
-        print(f"\\n🤖 Creating agent '{spec.name}'...")
+        print(f"\\n Creating agent '{spec.name}'...")
         return self.create_agent_from_spec(spec)
 
     def create_agent_from_template(self, template_name: str, customization: Dict[str, Any]) -> Dict[str, Path]:
@@ -737,7 +739,7 @@ class AgentBuilder:
     def list_available_types(self) -> None:
         """List all available agent types and their capabilities"""
 
-        print("🤖 Available Agent Types")
+        print(" Available Agent Types")
         print("=" * 50)
 
         for type_key, type_info in AGENT_TYPES.items():
@@ -758,7 +760,7 @@ class AgentBuilder:
     def list_available_models(self) -> None:
         """List all available models and their capabilities"""
 
-        print("🤖 Available Models")
+        print(" Available Models")
         print("=" * 50)
 
         try:
@@ -777,7 +779,8 @@ class AgentBuilder:
                         print(f"   Capabilities: {', '.join(capabilities)}")
                     else:
                         print(f"   Capabilities: {capabilities}")
-                    print(f"   Performance Score: {model.get('performance_score', 'Unknown')}")
+                    print(
+                        f"   Performance Score: {model.get('performance_score', 'Unknown')}")
         except Exception as e:
             print(f"Error retrieving models: {e}")
             print("Using fallback model list:")
@@ -855,7 +858,7 @@ def validate_generated_agent(agent_path: str) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    print("🤖 StrandsAgents Agent Builder")
+    print(" StrandsAgents Agent Builder")
     print("=" * 50)
     print("Create specialized AI agents using the @agent decorator")
     print()
@@ -876,7 +879,7 @@ if __name__ == "__main__":
                 break
             elif choice == '1':
                 paths = create_agent_interactive()
-                print(f"\\n✅ Agent created successfully!")
+                print(f"\\n Agent created successfully!")
                 for name, path in paths.items():
                     print(f"   {name}: {path}")
             elif choice == '2':
@@ -903,7 +906,7 @@ if __name__ == "__main__":
                             "description": description
                         })
 
-                        print(f"\\n✅ Agent created from template!")
+                        print(f"\\n Agent created from template!")
                         for name, path in paths.items():
                             print(f"   {name}: {path}")
                 except ValueError:

@@ -5,7 +5,8 @@ from pathlib import Path
 from agent import agent
 
 # Agent specification
-SPEC = {'name': 'file_inventory', 'description': 'A file inventory, that every time you add a file to a project, it adds it and tracks its status, if you delete it, it is removed from the inventory master list.', 'agent_type': 'research', 'model_id': 'deepseek-coder:6.7b', 'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are file_inventory, a specialized research agent.\n\nA file inventory, that every time you add a file to a project, it adds it and tracks its status, if you delete it, it is removed from the inventory master list.\n\nYour capabilities include:\n- Web research and information gathering\n- Source citation and validation\n- Data analysis and pattern recognition\n- Report generation with confidence levels\n\nGuidelines:\n- Always cite sources for factual claims\n- Distinguish between facts and assumptions\n- Provide balanced, objective analysis\n- Acknowledge uncertainties and limitations\n\nFocus on delivering accurate, well-researched responses.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
+SPEC = {'name': 'file_inventory', 'description': 'A file inventory, that every time you add a file to a project, it adds it and tracks its status, if you delete it, it is removed from the inventory master list.', 'agent_type': 'research', 'model_id': 'deepseek-coder:6.7b',
+        'tools': ['http_request', 'file_read', 'file_write'], 'system_prompt': 'You are file_inventory, a specialized research agent.\n\nA file inventory, that every time you add a file to a project, it adds it and tracks its status, if you delete it, it is removed from the inventory master list.\n\nYour capabilities include:\n- Web research and information gathering\n- Source citation and validation\n- Data analysis and pattern recognition\n- Report generation with confidence levels\n\nGuidelines:\n- Always cite sources for factual claims\n- Distinguish between facts and assumptions\n- Provide balanced, objective analysis\n- Acknowledge uncertainties and limitations\n\nFocus on delivering accurate, well-researched responses.', 'enable_code_execution': True, 'sandbox_timeout': 45, 'workflow_template': None, 'context_documents': []}
 
 # Setup logging
 logger = logging.getLogger("generated_agent")
@@ -31,6 +32,7 @@ Focus on delivering accurate, well-researched responses."""
 
 # Tools configuration
 TOOLS = ['http_request', 'file_read', 'file_write']
+
 
 @agent(
     model_id="deepseek-coder:6.7b",
@@ -61,6 +63,7 @@ def file_inventory(query: str) -> str:
         logger.error(error_msg)
         return error_msg
 
+
 # Metadata
 AGENT_METADATA = {
     "name": "file_inventory",
@@ -74,7 +77,7 @@ AGENT_METADATA = {
 }
 
 if __name__ == "__main__":
-    print("🤖 Generated Agent: file_inventory")
+    print(" Generated Agent: file_inventory")
     print("=" * 50)
     print(f"Type: {SPEC['agent_type']}")
     print(f"Model: {SPEC['model_id']}")
@@ -85,4 +88,4 @@ if __name__ == "__main__":
     test_result = file_inventory("Hello from meta-agent builder!")
     print(f"Test result: {test_result}")
 
-    print("\n✅ Agent generated and tested successfully!")
+    print("\n Agent generated and tested successfully!")

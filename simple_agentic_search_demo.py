@@ -9,8 +9,9 @@ import time
 from typing import List, Dict, Any
 from datetime import datetime
 
-print("🔍 Agentic Search System - Controlled Demo")
+print(" Agentic Search System - Controlled Demo")
 print("=" * 60)
+
 
 class ControlledSearchEngine:
     """Controlled search engine with visible reasoning"""
@@ -36,9 +37,10 @@ class ControlledSearchEngine:
 
     async def search(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
         """Perform controlled search with visible reasoning"""
-        print(f"🤔 THINKING: Searching for '{query}'")
-        print(f"🤔 THINKING: I should look for relevant AWS documentation and best practices")
-        print(f"🤔 THINKING: I'll focus on authoritative sources and technical accuracy")
+        print(f" THINKING: Searching for '{query}'")
+        print(
+            f" THINKING: I should look for relevant AWS documentation and best practices")
+        print(f" THINKING: I'll focus on authoritative sources and technical accuracy")
 
         # Simulate search delay
         await asyncio.sleep(0.5)
@@ -47,8 +49,10 @@ class ControlledSearchEngine:
         query_terms = query.lower().split()
 
         for key, data in self.knowledge_base.items():
-            relevance = sum(1 for term in query_terms if term in key.lower() or term in data['content'].lower())
-            relevance_score = min(relevance / len(query_terms), 1.0) if query_terms else 0.0
+            relevance = sum(1 for term in query_terms if term in key.lower(
+            ) or term in data['content'].lower())
+            relevance_score = min(
+                relevance / len(query_terms), 1.0) if query_terms else 0.0
 
             if relevance_score > 0.3:
                 result = {
@@ -62,12 +66,13 @@ class ControlledSearchEngine:
         results.sort(key=lambda x: x['relevance_score'], reverse=True)
         results = results[:max_results]
 
-        print(f"✅ SEARCH: Found {len(results)} relevant results")
+        print(f" SEARCH: Found {len(results)} relevant results")
         return results
+
 
 async def perform_controlled_search(query: str) -> str:
     """Perform controlled agentic search with visible reasoning"""
-    print(f"\n🔍 Processing Query: {query}")
+    print(f"\n Processing Query: {query}")
     print("-" * 50)
 
     start_time = time.time()
@@ -79,7 +84,7 @@ async def perform_controlled_search(query: str) -> str:
     print(f"   Found {len(broad_results)} broad results")
 
     # Step 2: Specific search
-    print("🔍 Step 2: THINKING - Now searching for specific technical details")
+    print(" Step 2: THINKING - Now searching for specific technical details")
     specific_results = await search_engine.search(f"AWS best practices and technical details for {query}")
     print(f"   Found {len(specific_results)} specific results")
 
@@ -114,21 +119,22 @@ This analysis is based on authoritative AWS documentation and established best p
     end_time = time.time()
     processing_time = (end_time - start_time) * 1000
 
-    print(f"✅ SYNTHESIS: Completed in {processing_time:.0f}ms")
-    print(f"✅ SYNTHESIS: Generated {len(synthesis)} character response")
+    print(f" SYNTHESIS: Completed in {processing_time:.0f}ms")
+    print(f" SYNTHESIS: Generated {len(synthesis)} character response")
 
     return synthesis
+
 
 async def main():
     """Demonstrate controlled agentic search"""
     print("🎯 Agentic Search Demonstration")
     print("This demo shows how agentic search works with:")
-    print("   ✅ Visible reasoning at each step")
-    print("   ✅ Controlled search process")
-    print("   ✅ Multiple search strategies")
-    print("   ✅ Confidence scoring")
-    print("   ✅ Comprehensive synthesis")
-    print("   ✅ No runaway requests")
+    print("    Visible reasoning at each step")
+    print("    Controlled search process")
+    print("    Multiple search strategies")
+    print("    Confidence scoring")
+    print("    Comprehensive synthesis")
+    print("    No runaway requests")
 
     # Test queries
     test_queries = [
@@ -154,12 +160,12 @@ async def main():
     print(f"\n{'='*60}")
     print("🎉 Agentic Search Demo Complete!")
     print("💡 Key Benefits:")
-    print("   ✅ Visible reasoning at each step")
-    print("   ✅ Controlled search process")
-    print("   ✅ Multiple search strategies")
-    print("   ✅ Confidence scoring")
-    print("   ✅ Comprehensive synthesis")
-    print("   ✅ No runaway requests")
+    print("    Visible reasoning at each step")
+    print("    Controlled search process")
+    print("    Multiple search strategies")
+    print("    Confidence scoring")
+    print("    Comprehensive synthesis")
+    print("    No runaway requests")
 
 if __name__ == "__main__":
     asyncio.run(main())

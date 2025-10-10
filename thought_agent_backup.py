@@ -45,7 +45,7 @@ try:
     nest_asyncio.apply()
     browser_instance = LocalChromiumBrowser()
     browser_tool = browser_instance.browser
-    print("✅ Browser tool initialized successfully")
+    print(" Browser tool initialized successfully")
 except (Exception) as e:
     browser_tool = None
     print(
@@ -155,7 +155,6 @@ def similarity_ranker(content: str, query: str) -> str:
     return result
 
 
-
 def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
     """Synthesize all workflow results into final output."""
     logger.info("Synthesizing workflow results")
@@ -203,11 +202,12 @@ def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
 
     # Add final status
     summary_parts.append("## Final Status\n")
-    summary_parts.append("✅ Workflow completed successfully\n")
+    summary_parts.append(" Workflow completed successfully\n")
 
     final_result = "".join(summary_parts)
 
-    logger.info("Synthesizing final results - %d characters", len(final_result))
+    logger.info("Synthesizing final results - %d characters",
+                len(final_result))
     if MEM0_ENABLED:
         try:
             mem = Memory()
@@ -222,12 +222,11 @@ def synthesize_workflow_results(workflow_state: Dict[str, Any]) -> str:
     return final_result
 
 
-
-
 def save_workflow_state(workflow_state: Dict[str, Any]):
     """Save workflow state for analysis and learning."""
     try:
-        timestamp = workflow_state.get("run_id") or datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = workflow_state.get(
+            "run_id") or datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"workflow_state_{timestamp}.json"
 
         with open(filename, 'w', encoding='utf-8') as f:
@@ -255,6 +254,7 @@ def intelligent_workflow_orchestrator(user_query: str, context: str = "", histor
     """
     logger.info(
         "Starting intelligent workflow orchestration for: %s", user_query)
+
 
 # Step 1: Execute structured thinking pipeline
 thinking_results = structured_thinking_pipeline(user_query, context)
@@ -464,7 +464,8 @@ memory_assistant = MemoryAssistant(user_id="thought_agent")
 
 meta_tool_assistant = MetaToolAssistant(
     model=ollama_model,
-    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
+    available_tools={name: meta["description"]
+        for name, meta in AGENT_REGISTRY.items()},
 )
 
 knowledge_extraction_agent = Agent(
@@ -571,7 +572,8 @@ def _build_agent_parameters(
         }
 
     if agent_name == "similarity_ranker":
-        content = current_results.get("researcher_agent") or thinking_summary or user_query
+        content = current_results.get(
+            "researcher_agent") or thinking_summary or user_query
         return {
             "content": content,
             "query": user_query,
@@ -593,7 +595,8 @@ memory_assistant = MemoryAssistant(user_id="thought_agent")
 
 meta_tool_assistant = MetaToolAssistant(
     model=ollama_model,
-    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
+    available_tools={name: meta["description"]
+        for name, meta in AGENT_REGISTRY.items()},
 )
 
 
@@ -612,7 +615,6 @@ knowledge_summary_agent = Agent(
     system_prompt="""You maintain a rolling summary of the conversation context.
 Keep it under 120 words, preserve key facts, and avoid duplication.""",
 )
-
 
 
 AGENT_REGISTRY: Dict[str, Dict[str, str]] = {
@@ -702,7 +704,8 @@ def _build_agent_parameters(
         }
 
     if agent_name == "similarity_ranker":
-        content = current_results.get("researcher_agent") or thinking_summary or user_query
+        content = current_results.get(
+            "researcher_agent") or thinking_summary or user_query
         return {
             "content": content,
             "query": user_query,
@@ -724,7 +727,8 @@ memory_assistant = MemoryAssistant(user_id="thought_agent")
 
 meta_tool_assistant = MetaToolAssistant(
     model=ollama_model,
-    available_tools={name: meta["description"] for name, meta in AGENT_REGISTRY.items()},
+    available_tools={name: meta["description"]
+        for name, meta in AGENT_REGISTRY.items()},
 )
 
 knowledge_extraction_agent = Agent(
@@ -742,7 +746,6 @@ knowledge_summary_agent = Agent(
     system_prompt="""You maintain a rolling summary of the conversation context.
 Keep it under 120 words, preserve key facts, and avoid duplication.""",
 )
-
 
 
 AGENT_REGISTRY: Dict[str, Dict[str, str]] = {
@@ -1071,7 +1074,7 @@ if __name__ == "__main__":
             is_repeat = any(entry['query'].lower() == user_input.lower()
                             for entry in research_history)
 
-            print(f"\n🔍 Starting thinking-first workflow for: '{user_input}'")
+            print(f"\n Starting thinking-first workflow for: '{user_input}'")
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
             print(

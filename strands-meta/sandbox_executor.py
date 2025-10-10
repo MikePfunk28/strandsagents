@@ -28,28 +28,31 @@ from datetime import datetime
 logger = logging.getLogger("enhanced_sandbox")
 
 # Remove emoji characters that cause encoding issues on Windows
+
+
 def safe_print(text):
     """Print text with emoji characters replaced for Windows compatibility"""
     emoji_replacements = {
         '🔒': '[SECURE]',
-        '🚀': '[LAUNCH]',
+        '': '[LAUNCH]',
         '🐍': '[PYTHON]',
         '🔧': '[TOOL]',
-        '🔍': '[SEARCH]',
+        '': '[SEARCH]',
         '⚠️': '[WARNING]',
-        '✅': '[OK]',
+        '': '[OK]',
         '❌': '[ERROR]',
         '💡': '[IDEA]',
         '🔗': '[LINK]',
         '🔄': '[SYNC]',
         '📦': '[PACKAGE]',
-        '🔍': '[FIND]'
+        '': '[FIND]'
     }
 
     for emoji, replacement in emoji_replacements.items():
         text = text.replace(emoji, replacement)
 
     print(text)
+
 
 # Add parent directory to path for imports
 try:
@@ -60,6 +63,7 @@ except:
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if parent_dir not in sys.path:
         sys.path.insert(0, parent_dir)
+
 
 @dataclass
 class ExecutionResult:
@@ -76,6 +80,7 @@ class ExecutionResult:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
 
 class SandboxExecutor:
     """
@@ -119,10 +124,11 @@ class SandboxExecutor:
         self.session_counter = 0
 
         logger.info(f"[SECURE] Enhanced Sandbox created at: {self.temp_dir}")
-        logger.info(f"[SECURE] Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
+        logger.info(
+            f"[SECURE] Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
 
     def execute_code(self, code: str, language: str = "python",
-                    session_id: Optional[str] = None) -> ExecutionResult:
+                     session_id: Optional[str] = None) -> ExecutionResult:
         """
         Execute code in sandbox environment with enhanced features.
 
@@ -192,7 +198,8 @@ class SandboxExecutor:
             session["last_execution"] = execution_result.to_dict()
             session["execution_count"] += 1
 
-            logger.info(f"[SECURE] {language} execution completed in {execution_time:.2f}s")
+            logger.info(
+                f"[SECURE] {language} execution completed in {execution_time:.2f}s")
             return execution_result
 
         except Exception as e:
@@ -222,10 +229,12 @@ class SandboxExecutor:
                 timeout=self.timeout,
                 cwd=self.temp_dir,
                 # Security: no shell, limited environment
-                env={"PYTHONPATH": str(self.temp_dir), "TEMP": str(self.temp_dir)}
+                env={"PYTHONPATH": str(self.temp_dir),
+                     "TEMP": str(self.temp_dir)}
             )
 
-            logger.info(f"[SECURE] Python execution completed with return code: {result.returncode}")
+            logger.info(
+                f"[SECURE] Python execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -236,7 +245,8 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"[SECURE] Python code execution timed out after {self.timeout}s")
+            logger.warning(
+                f"[SECURE] Python code execution timed out after {self.timeout}s")
             return {
                 "error": f"Code execution timed out after {self.timeout} seconds",
                 "success": False,
@@ -276,7 +286,8 @@ class SandboxExecutor:
                 env={"TEMP": str(self.temp_dir), "TMPDIR": str(self.temp_dir)}
             )
 
-            logger.info(f"[SECURE] Bash execution completed with return code: {result.returncode}")
+            logger.info(
+                f"[SECURE] Bash execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -287,7 +298,8 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"[SECURE] Bash script timed out after {self.timeout}s")
+            logger.warning(
+                f"[SECURE] Bash script timed out after {self.timeout}s")
             return {
                 "error": f"Script execution timed out after {self.timeout} seconds",
                 "success": False,
@@ -516,7 +528,8 @@ class SandboxExecutor:
                 logger.info(f"[SECURE] Cleaned up session {session_id}")
                 return True
             except Exception as e:
-                logger.error(f"[SECURE] Failed to cleanup session {session_id}: {str(e)}")
+                logger.error(
+                    f"[SECURE] Failed to cleanup session {session_id}: {str(e)}")
                 return False
         return False
 
@@ -530,7 +543,8 @@ class SandboxExecutor:
         try:
             import shutil
             shutil.rmtree(self.temp_dir)
-            logger.info(f"[SECURE] Cleaned up sandbox directory: {self.temp_dir}")
+            logger.info(
+                f"[SECURE] Cleaned up sandbox directory: {self.temp_dir}")
         except Exception as e:
             logger.warning(f"[SECURE] Failed to cleanup sandbox: {str(e)}")
 
@@ -549,15 +563,17 @@ print("=" * 50)
 '''
             self._execute_python_enhanced(init_code, session)
 
-        logger.info(f"[SECURE] Created REPL session {session_id} for {language}")
+        logger.info(
+            f"[SECURE] Created REPL session {session_id} for {language}")
         return session_id
+
 
 # Example usage
 if __name__ == "__main__":
     # Test the enhanced sandbox
     sandbox = SandboxExecutor(timeout=10)
 
-    print("🚀 Testing Enhanced Sandbox Executor")
+    print(" Testing Enhanced Sandbox Executor")
     print("=" * 50)
 
     # Test Python code with session

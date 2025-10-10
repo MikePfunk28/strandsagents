@@ -18,9 +18,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 async def demo_adversarial_coding():
     """Demonstrate the adversarial coding system."""
-    print("🤖 Adversarial Coding System Demo")
+    print(" Adversarial Coding System Demo")
     print("=" * 50)
 
     # Initialize coordinator
@@ -31,7 +32,7 @@ async def demo_adversarial_coding():
 
     # Show available model configurations
     model_config = ModelConfiguration()
-    print("\n📊 Available Model Strategies:")
+    print("\n Available Model Strategies:")
     for strategy in ["speed", "balanced", "quality"]:
         config = model_config.get_multi_model_config(strategy)
         print(f"\n{strategy.upper()} Strategy:")
@@ -39,7 +40,7 @@ async def demo_adversarial_coding():
             print(f"  {role}: {model}")
 
     # Initialize agents with balanced strategy
-    print("\n🚀 Initializing agents with balanced strategy...")
+    print("\n Initializing agents with balanced strategy...")
     await coordinator.initialize_agents(strategy="balanced")
 
     # Create code generation request
@@ -47,7 +48,8 @@ async def demo_adversarial_coding():
         requirements="Create a Python function that calculates the factorial of a number with proper error handling",
         language=LanguageType.PYTHON,
         context="This function will be used in a math library",
-        constraints=["Must handle negative numbers", "Must include docstring", "Must be efficient"]
+        constraints=["Must handle negative numbers",
+                     "Must include docstring", "Must be efficient"]
     )
 
     print(f"\n📝 Generating code for: {request.requirements}")
@@ -56,7 +58,7 @@ async def demo_adversarial_coding():
     # Generate code using adversarial process
     result = await coordinator.generate_code_adversarially(request, max_iterations=2)
 
-    print(f"\n✅ Code Generation Complete!")
+    print(f"\n Code Generation Complete!")
     print(f"Iterations: {result['iterations']}")
     print(f"Final Score: {result['final_score']:.1f}/10")
 
@@ -65,11 +67,13 @@ async def demo_adversarial_coding():
     print(result['final_code'])
     print("-" * 40)
 
-    print(f"\n📊 Review Summary:")
+    print(f"\n Review Summary:")
     for i, review in enumerate(result['review_history']):
-        print(f"Review {i+1}: Score {review.score:.1f}/10, Approved: {review.approved}")
+        print(
+            f"Review {i+1}: Score {review.score:.1f}/10, Approved: {review.approved}")
         if review.issues:
             print(f"  Issues: {review.issues[:2]}")  # Show first 2 issues
+
 
 def select_models_interactive():
     """Interactive model selection."""
@@ -102,12 +106,14 @@ def select_models_interactive():
         print("Invalid choice, using balanced strategy")
         return "balanced"
 
+
 def custom_model_selection(model_config: ModelConfiguration) -> str:
     """Allow custom model selection for each agent."""
     print("\n🔧 Custom Model Configuration")
     print("Select model for each agent:")
 
-    agents = ["generator", "discriminator", "optimizer", "security", "tester", "reviewer"]
+    agents = ["generator", "discriminator",
+              "optimizer", "security", "tester", "reviewer"]
     custom_config = {}
 
     for agent in agents:
@@ -117,9 +123,11 @@ def custom_model_selection(model_config: ModelConfiguration) -> str:
 
         while True:
             try:
-                choice = int(input(f"Select model for {agent} (1-{len(model_config.available_models)}): "))
+                choice = int(
+                    input(f"Select model for {agent} (1-{len(model_config.available_models)}): "))
                 if 1 <= choice <= len(model_config.available_models):
-                    selected_model = list(model_config.available_models.keys())[choice - 1]
+                    selected_model = list(model_config.available_models.keys())[
+                        choice - 1]
                     custom_config[agent] = selected_model
                     print(f"✓ Selected {selected_model} for {agent}")
                     break
@@ -135,6 +143,7 @@ def custom_model_selection(model_config: ModelConfiguration) -> str:
 
     return "balanced"  # For now, return balanced since we don't implement custom config storage
 
+
 async def main():
     """Main function."""
     print("🎯 Adversarial Coding System")
@@ -143,7 +152,8 @@ async def main():
 
     try:
         # Check if user wants interactive mode
-        mode = input("Select mode:\n1. Demo (automatic)\n2. Interactive\nChoice (1-2): ").strip()
+        mode = input(
+            "Select mode:\n1. Demo (automatic)\n2. Interactive\nChoice (1-2): ").strip()
 
         if mode == "2":
             strategy = select_models_interactive()
@@ -176,7 +186,7 @@ async def main():
 
             result = await coordinator.generate_code_adversarially(request)
 
-            print(f"\n✅ Code Generation Complete!")
+            print(f"\n Code Generation Complete!")
             print(result['final_code'])
 
         else:

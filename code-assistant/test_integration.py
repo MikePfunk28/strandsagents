@@ -151,11 +151,13 @@ class TestCodingAssistant:
         assistant = CodingAssistant(db_dir=temp_db_dir)
 
         # Test coding classification
-        classification = assistant._classify_query("How do I write a Python function?")
+        classification = assistant._classify_query(
+            "How do I write a Python function?")
         assert classification["primary_category"] in assistant.context_categories
 
         # Test documentation classification
-        classification = assistant._classify_query("Explain this code documentation")
+        classification = assistant._classify_query(
+            "Explain this code documentation")
         assert isinstance(classification["scores"], dict)
 
     def test_cache_key_generation(self, temp_db_dir):
@@ -323,7 +325,7 @@ def run_manual_tests():
     try:
         agent = create_simple_coding_agent()
         stats = agent.get_stats()
-        print(f"✅ Agent created successfully")
+        print(f" Agent created successfully")
         print(f"   Model: {stats['model_info']['name']}")
         print(f"   Server healthy: {stats['model_info']['server_healthy']}")
         print(f"   Tools available: {stats['tools_available']}")
@@ -334,7 +336,7 @@ def run_manual_tests():
     print("\n2. Testing simple chat...")
     try:
         response = agent.chat("What is Python?")
-        print(f"✅ Chat response received: {response[:100]}...")
+        print(f" Chat response received: {response[:100]}...")
     except Exception as e:
         print(f"❌ Chat failed: {e}")
 
@@ -347,14 +349,14 @@ def run_manual_tests():
             memory_type="test",
             importance=0.8
         )
-        print(f"✅ Memory added: {memory_id}")
+        print(f" Memory added: {memory_id}")
 
         memories = agent.assistant.memory_manager.retrieve_memory(
             query="Python programming",
             session_id=agent.assistant.session_id,
             limit=5
         )
-        print(f"✅ Memory retrieved: {len(memories)} results")
+        print(f" Memory retrieved: {len(memories)} results")
     except Exception as e:
         print(f"❌ Memory system failed: {e}")
 
@@ -369,14 +371,14 @@ def run_manual_tests():
             return result
 
         result = asyncio.run(test_workflow())
-        print(f"✅ Workflow executed: {result.get('success', False)}")
+        print(f" Workflow executed: {result.get('success', False)}")
     except Exception as e:
         print(f"❌ Workflow execution failed: {e}")
 
     # Cleanup
     try:
         agent.cleanup()
-        print("\n✅ Cleanup completed")
+        print("\n Cleanup completed")
     except Exception as e:
         print(f"❌ Cleanup failed: {e}")
 

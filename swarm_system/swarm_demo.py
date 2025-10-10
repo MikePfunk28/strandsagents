@@ -64,6 +64,7 @@ orchestrator_agent = Agent(
     system_prompt=""
 )
 
+
 class SwarmDemo:
     """Demonstration of the swarm system capabilities."""
 
@@ -129,9 +130,11 @@ class SwarmDemo:
         cached_data = db_manager.get_cache("demo_key")
         knowledge_results = db_manager.search_knowledge("swarm")
 
-        self.demo_results.append("✅ Database system operational")
-        self.demo_results.append(f"   - Knowledge entries: {len(knowledge_results)}")
-        self.demo_results.append(f"   - Cache working: {cached_data is not None}")
+        self.demo_results.append(" Database system operational")
+        self.demo_results.append(
+            f"   - Knowledge entries: {len(knowledge_results)}")
+        self.demo_results.append(
+            f"   - Cache working: {cached_data is not None}")
         self.demo_results.append(f"   - Memory storage: ID {memory_id}")
 
     async def demo_assistant_registration(self):
@@ -176,11 +179,15 @@ class SwarmDemo:
         text_result = "Demo text processing result"
         calc_result = "Demo calculator result"
 
-        self.demo_results.append("✅ Assistant system operational")
-        self.demo_results.append(f"   - Registered types: {global_registry.list_available_types()}")
-        self.demo_results.append(f"   - Active instances: {len(global_registry.list_instances())}")
-        self.demo_results.append(f"   - Text processor result: {type(text_result)}")
-        self.demo_results.append(f"   - Calculator result: {type(calc_result)}")
+        self.demo_results.append(" Assistant system operational")
+        self.demo_results.append(
+            f"   - Registered types: {global_registry.list_available_types()}")
+        self.demo_results.append(
+            f"   - Active instances: {len(global_registry.list_instances())}")
+        self.demo_results.append(
+            f"   - Text processor result: {type(text_result)}")
+        self.demo_results.append(
+            f"   - Calculator result: {type(calc_result)}")
 
     async def demo_meta_tooling(self):
         """Demonstrate meta-tooling capabilities."""
@@ -208,9 +215,11 @@ class SwarmDemo:
             confidence=0.9
         )
 
-        self.demo_results.append("✅ Meta-tooling operational")
-        self.demo_results.append(f"   - Dynamic tool creation: {len(tool_result)} chars")
-        self.demo_results.append(f"   - Learning storage: {len(learning_result)} chars")
+        self.demo_results.append(" Meta-tooling operational")
+        self.demo_results.append(
+            f"   - Dynamic tool creation: {len(tool_result)} chars")
+        self.demo_results.append(
+            f"   - Learning storage: {len(learning_result)} chars")
 
     async def demo_swarm_communication(self):
         """Demonstrate swarm communication capabilities."""
@@ -221,23 +230,29 @@ class SwarmDemo:
 
         # Demonstrate knowledge retrieval
         if "No knowledge found" not in kb_result:
-            self.demo_results.append("✅ Swarm communication operational")
-            self.demo_results.append(f"   - Knowledge retrieval: {len(kb_result)} chars")
-            self.demo_results.append("   - Cross-component communication: Working")
+            self.demo_results.append(" Swarm communication operational")
+            self.demo_results.append(
+                f"   - Knowledge retrieval: {len(kb_result)} chars")
+            self.demo_results.append(
+                "   - Cross-component communication: Working")
         else:
-            self.demo_results.append("⚠️  Knowledge base query returned no results")
+            self.demo_results.append(
+                "⚠️  Knowledge base query returned no results")
+
     async def demo_system_status(self):
         """Display overall system status."""
         logger.info("=== SYSTEM STATUS DEMO ===")
 
         status = get_swarm_status()
-        self.demo_results.append("✅ System status retrieved")
+        self.demo_results.append(" System status retrieved")
         self.demo_results.append(f"   - Status length: {len(status)} chars")
 
         # Get database statistics
         db_stats = db_manager.get_stats()
-        total_records = sum(stats.get('records', 0) for stats in db_stats.values() if stats.get('exists', False))
-        self.demo_results.append(f"   - Total database records: {total_records}")
+        total_records = sum(stats.get('records', 0)
+                            for stats in db_stats.values() if stats.get('exists', False))
+        self.demo_results.append(
+            f"   - Total database records: {total_records}")
 
     def generate_summary_report(self):
         """Generate a comprehensive summary report."""
@@ -254,19 +269,21 @@ class SwarmDemo:
 
         report.append("")
         report.append("SYSTEM CAPABILITIES DEMONSTRATED:")
-        report.append("✅ Database layer (cache.db, memory.db, knowledge.db, coderl.db)")
-        report.append("✅ Assistant registration and management")
-        report.append("✅ Meta-tooling and dynamic tool creation")
-        report.append("✅ Assistant-as-tool functionality")
-        report.append("✅ Knowledge base operations")
-        report.append("✅ Swarm communication protocols")
-        report.append("✅ System monitoring and status")
+        report.append(
+            " Database layer (cache.db, memory.db, knowledge.db, coderl.db)")
+        report.append(" Assistant registration and management")
+        report.append(" Meta-tooling and dynamic tool creation")
+        report.append(" Assistant-as-tool functionality")
+        report.append(" Knowledge base operations")
+        report.append(" Swarm communication protocols")
+        report.append(" System monitoring and status")
 
         report.append("")
         report.append("ARCHITECTURE COMPONENTS:")
         report.append("• Assistant Layer: Base building blocks")
         report.append("• Agent Layer: Composed assistants (in development)")
-        report.append("• Swarm Layer: Lightweight agent coordination (in development)")
+        report.append(
+            "• Swarm Layer: Lightweight agent coordination (in development)")
         report.append("• Meta-Tooling: Dynamic creation capabilities")
         report.append("• Database Layer: Multi-database management")
         report.append("• Communication Layer: Inter-component communication")
@@ -276,7 +293,8 @@ class SwarmDemo:
         with open("swarm_system/swarm_demo_report.txt", 'w', encoding='utf-8') as f:
             f.write(report_content)
 
-        logger.info("Summary report saved to: swarm_system/swarm_demo_report.txt")
+        logger.info(
+            "Summary report saved to: swarm_system/swarm_demo_report.txt")
         print("\n" + report_content)
 
 
