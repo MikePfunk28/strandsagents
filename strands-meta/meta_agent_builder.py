@@ -21,11 +21,70 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 
-from agent import agent, SandboxExecutor
-from agent.model_selector import get_best_model_for_task, list_available_models
-from agent.workflow_templates import get_workflow_template, list_workflow_templates
+try:
+    # Try relative imports first (when run as part of larger package)
+    from ..agent.agent_decorator import agent
+    from ..agent.sandbox_executor import SandboxExecutor
+    from ..agent.model_selector import get_best_model_for_task, list_available_models
+    from ..agent.workflow_templates import get_workflow_template, list_workflow_templates
+except ImportError:
+    try:
+        # Try absolute imports from agent directory (when run as script from strands-meta)
+        import sys
+        import os
+        # Add the parent directory to Python path
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if parent_dir not in sys.path:
+            sys.path.insert(0, parent_dir)
+
+        from agent.agent_decorator import agent
+        from agent.sandbox_executor import SandboxExecutor
+        from agent.model_selector import get_best_model_for_task, list_available_models
+        from agent.workflow_templates import get_workflow_template, list_workflow_templates
+    except ImportError:
+        # Final fallback - try importing directly (for development/testing)
+        try:
+            from agent_decorator import agent
+            from sandbox_executor import SandboxExecutor
+            from model_selector import get_best_model_for_task, list_available_models
+            from workflow_templates import get_workflow_template, list_workflow_templates
+        except ImportError as e:
+            print(f"❌ Could not import required modules: {e}")
+            print("💡 Make sure you're running from the correct directory or have the agent module installed")
+            raise
 
 logger = logging.getLogger("meta_agent_builder")
+
+# Remove emoji characters that cause encoding issues on Windows
+def safe_print(text):
+    """Print text with emoji characters replaced for Windows compatibility"""
+    emoji_replacements = {
+        '🤖': '[AGENT]',
+        '🔧': '[TOOL]',
+        '🔒': '[SECURE]',
+        '🔍': '[SEARCH]',
+        '📝': '[DOC]',
+        '📋': '[LIST]',
+        '📁': '[FILE]',
+        '🎯': '[TARGET]',
+        '🛠️': '[TOOLS]',
+        '⚡': '[POWER]',
+        '🔗': '[LINK]',
+        '✅': '[OK]',
+        '❌': '[ERROR]',
+        '⚠️': '[WARNING]',
+        '💡': '[IDEA]',
+        '🚀': '[LAUNCH]',
+        '🧪': '[TEST]',
+        '🔄': '[SYNC]',
+        '📦': '[PACKAGE]',
+        '🔍': '[FIND]'
+    }
+
+    for emoji, replacement in emoji_replacements.items():
+        text = text.replace(emoji, replacement)
+
+    print(text)
 
 
 @dataclass
@@ -89,6 +148,11 @@ class MetaAgentBuilder:
             "workflow": {
                 "description": "Multi-agent workflow orchestration specialist",
                 "default_tools": ["http_request", "file_read", "file_write"],
+                "template": None
+            },
+            "meta": {
+                "description": "Agent creation and management specialist",
+                "default_tools": ["file_write", "python_repl", "http_request"],
                 "template": None
             }
         }
@@ -197,7 +261,7 @@ TOOLS = {spec.tools}
     model_id="{spec.model_id}",
     system_prompt=SYSTEM_PROMPT,
     tools=TOOLS,
-    enable_code_execution={str(spec.enable_code_execution).lower()},
+    enable_code_execution={str(spec.enable_code_execution)},
     sandbox_timeout={spec.sandbox_timeout}
 )
 def {spec.name}(query: str) -> str:
@@ -474,40 +538,7 @@ The generated agent will include:
    → Automatically generates a complete, working coding agent!
 """
 
-# Create the meta-agent using the @agent decorator
-
-
-@agent(
-    model_id="qwen3:8b",
-    tools=["file_write", "python_repl"],
-    system_prompt="""You are a Meta-Agent Builder, an AI agent that creates other specialized AI agents.
-
-Your mission is to analyze requirements and create complete, production-ready AI agents using the @agent decorator system.
-
-When a user requests an agent:
-1. Analyze their requirements to determine the best agent type
-2. Select optimal models and tools for the task
-3. Generate complete agent code with proper structure
-4. Create supporting files (tests, metadata, documentation)
-5. Ensure the generated agent is immediately usable
-
-You have access to:
-- Multiple AI models for different tasks
-- Sandbox execution for safe code generation
-- Workflow templates for complex scenarios
-- Comprehensive tool libraries
-- File system operations for agent creation
-
-Always create agents that are:
-- Well-documented and maintainable
-- Properly tested and validated
-- Optimized for their specific use case
-- Ready for immediate deployment
-
-Your goal is to make AI agent creation as simple as describing what you need!""",
-    enable_code_execution=True,
-    sandbox_timeout=60
-)
+# Create the meta-agent function (without @agent decorator to avoid import issues)
 def meta_agent_builder(query: str) -> str:
     """
     Meta-Agent Builder: Creates specialized AI agents using the @agent decorator.

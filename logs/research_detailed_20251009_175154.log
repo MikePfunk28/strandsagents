@@ -1,0 +1,71 @@
+2025-10-09 17:51:54 - advanced_research - INFO - [<module>:67] - 🚀 Advanced Research System Starting Up
+2025-10-09 17:51:54 - advanced_research - INFO - [<module>:68] - 📊 Model: qwen3:1.7b
+2025-10-09 17:51:54 - advanced_research - INFO - [<module>:69] - 🌐 Host: http://localhost:11434
+2025-10-09 17:51:54 - advanced_research - INFO - [<module>:70] - ================================================================================
+2025-10-09 17:51:54 - advanced_research - INFO - [run_research_workflow:279] - 🚀 [Workflow #f61552a3] RESEARCH_WORKFLOW - Starting research workflow
+2025-10-09 17:51:54 - advanced_research - INFO - [run_research_workflow:280] - 🚀 [Workflow #f61552a3] User input: AWS Lambda best practices for production applications
+2025-10-09 17:51:54 - advanced_research - INFO - [run_research_workflow:281] - 🚀 [Workflow #f61552a3] Input length: 53 characters
+2025-10-09 17:51:54 - advanced_research - INFO - [run_research_workflow:285] - 🚀 [Workflow #f61552a3] STEP 1 - Query Decomposition starting...
+2025-10-09 17:51:54 - advanced_research - INFO - [query_decomposer:76] - 🔍 [Tool #11957bae] QUERY_DECOMPOSER - Starting query decomposition
+2025-10-09 17:51:54 - advanced_research - INFO - [query_decomposer:77] - 🔍 [Tool #11957bae] Input query: AWS Lambda best practices for production applications
+2025-10-09 17:51:54 - advanced_research - INFO - [query_decomposer:78] - 🔍 [Tool #11957bae] Query length: 53 characters
+2025-10-09 17:51:54 - advanced_research - DEBUG - [query_decomposer:82] - 🔍 [Tool #11957bae] Creating decomposer agent...
+2025-10-09 17:51:54 - advanced_research - DEBUG - [query_decomposer:94] - 🔍 [Tool #11957bae] Agent created, processing query...
+2025-10-09 17:51:54 - advanced_research - DEBUG - [query_decomposer:96] - 🔍 [Tool #11957bae] Full prompt: Decompose this query: AWS Lambda best practices for production applications
+2025-10-09 17:52:12 - advanced_research - INFO - [query_decomposer:103] - 🔍 [Tool #11957bae] QUERY_DECOMPOSER - Completed successfully
+2025-10-09 17:52:12 - advanced_research - INFO - [query_decomposer:104] - 🔍 [Tool #11957bae] Processing time: 18.57
+2025-10-09 17:52:12 - advanced_research - INFO - [query_decomposer:105] - 🔍 [Tool #11957bae] Output length: 3011 characters
+2025-10-09 17:52:12 - advanced_research - DEBUG - [query_decomposer:106] - 🔍 [Tool #11957bae] Decomposition result: <think>
+Okay, let's tackle this query decomposition. The user wants to know the best practices for AWS Lambda in production applications. 
+
+First, I need to identify the core concepts here. The main terms would be AWS Lambda, best practices, production applications, and maybe specific technologies or services related to Lambda. So core concepts could be AWS Lambda, best practices, production application, scalability, cost management, error handling, and deployment.
+
+Next, specific questions to a...
+2025-10-09 17:52:12 - advanced_research - INFO - [run_research_workflow:292] - 🚀 [Workflow #f61552a3] STEP 1 - Query Decomposition completed in 18.57s
+2025-10-09 17:52:12 - advanced_research - INFO - [run_research_workflow:293] - 🚀 [Workflow #f61552a3] STEP 1 - Decomposition length: 3011 characters
+2025-10-09 17:52:12 - advanced_research - INFO - [run_research_workflow:296] - 🚀 [Workflow #f61552a3] STEP 2 - Multi-Strategy Search starting...
+2025-10-09 17:52:12 - advanced_research - INFO - [multi_search:125] - 🌐 [Tool #fefe7901] MULTI_SEARCH - Starting multi-strategy search
+2025-10-09 17:52:12 - advanced_research - INFO - [multi_search:126] - 🌐 [Tool #fefe7901] Search terms length: 3011 characters
+2025-10-09 17:52:13 - advanced_research - DEBUG - [multi_search:127] - 🌐 [Tool #fefe7901] Search terms: <think>
+Okay, let's tackle this query decomposition. The user wants to know the best practices for AWS Lambda in production applications. 
+
+First, I need to identify the core concepts here. The main t...
+2025-10-09 17:52:13 - advanced_research - DEBUG - [multi_search:131] - 🌐 [Tool #fefe7901] Creating searcher agent with http_request tool...
+2025-10-09 17:52:13 - advanced_research - DEBUG - [multi_search:144] - 🌐 [Tool #fefe7901] Agent created, executing search...
+2025-10-09 17:52:13 - advanced_research - DEBUG - [multi_search:146] - 🌐 [Tool #fefe7901] Full prompt: Execute comprehensive search for: <think>
+Okay, let's tackle this query decomposition. The user wants to know the best practices for AWS Lambda in production applications. 
+
+First, I need to identify the core concepts here. The main terms would be AWS Lambda, best practices, production applications, and maybe specific technologies or services related to Lambda. So core concepts could be AWS Lambda, best practices, production application, scalability, cost management, error handling, and deployment.
+
+Next, specific questions to answer. The user is asking for best practices, so the questions should cover different aspects. Maybe how to handle scaling, cost optimization, error handling, deployment strategies, and security. Also, maybe how to monitor and troubleshoot.
+
+Search strategies: The user is looking for general best practices, so the search should be broad. But they might need specific strategies for production, so maybe a mix of broad and specific. They might need resources like AWS documentation, blogs, or community guides.
+
+Information gaps: The user might not know the exact best practices, or they need examples. There could be gaps in understanding specific aspects like cold starts, memory management, or using layers. Also, maybe the latest best practices or tools for monitoring.
+
+I need to make sure each part is covered. Core concepts are clear, specific questions are comprehensive, search strategies are balanced, and information gaps are addressed with possible areas needing more detail.
+</think>
+
+1. **Core concepts**  
+   - **AWS Lambda** (serverless computing)  
+   - **Best practices** (guidelines for optimal performance)  
+   - **Production applications** (real-world deployment scenarios)  
+   - **Scalability** (handling traffic and demand)  
+   - **Cost management** (resource optimization)  
+
+2. **Specific questions to answer**  
+   - How to implement efficient memory management and cold start optimization for AWS Lambda?  
+   - What are the best practices for error handling and logging in production Lambda functions?  
+   - How to optimize costs by leveraging AWS Lambda's pricing model (e.g., reserved instances, spot instances)?  
+   - What strategies ensure high availability and fault tolerance for Lambda-based applications?  
+   - How to securely deploy and monitor Lambda functions in a production environment?  
+
+3. **Search strategies**  
+   - **Broad**: Search for "AWS Lambda best practices" and "production application guidelines."  
+   - **Specific**: Target detailed sections on scalability, cost optimization, error handling, and security in AWS documentation or community resources.  
+
+4. **Information gaps to fill**  
+   - Lack of specific examples for handling high-traffic scenarios (e.g., using queues or databases).  
+   - Missing guidance on integrating Lambda with other AWS services (e.g., S3, DynamoDB, API Gateway) for production readiness.  
+   - Need clarification on best practices for resource allocation (e.g., memory, timeout settings) for different use cases.
+

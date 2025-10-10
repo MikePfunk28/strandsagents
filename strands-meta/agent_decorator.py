@@ -6,47 +6,39 @@ Eliminates boilerplate model/agent creation while providing powerful features.
 
 import logging
 import re
+import sys
+import os
 from typing import List, Dict, Any, Optional
 
+# Add parent directory to path for imports
 try:
-    from strands.models.ollama import OllamaModel  # type: ignore
-    from strands import Agent  # type: ignore
-    _USING_STRANDS = True
-except ImportError:  # pragma: no cover - fallback for standalone usage
-    _USING_STRANDS = False
+    # When run as module
+    from strands.models.ollama import OllamaModel
+    from strands import Agent
+except ImportError:
+    # When run as script, add parent directory to path
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
 
-    class OllamaModel:  # type: ignore[no-redef]
-        """Lightweight fallback for environments without the Strands SDK."""
-
-        def __init__(self, host: str, model_id: Optional[str] = None, **_: Any) -> None:
-            self.host = host
-            self.model_id = model_id or "unknown-model"
-
-        def __repr__(self) -> str:
-            return f"OllamaModel(host={self.host!r}, model_id={self.model_id!r})"
-
-    class Agent:  # type: ignore[no-redef]
-        """Minimal Agent stub that simply echoes calls for local testing."""
-
-        def __init__(self, model: OllamaModel, system_prompt: str = "", tools: Optional[List[Any]] = None, **_: Any) -> None:
-            self.model = model
-            self.system_prompt = system_prompt
-            self.tools = tools or []
-
-        def __call__(self, query: str) -> str:
-            return f"[StubAgent:{self.model.model_id}] {query}"
+    try:
+        from strands.models.ollama import OllamaModel
+        from strands import Agent
+    except ImportError:
+        # Fallback for when strands is not available
+        print("⚠️  Strands library not found, using mock implementations")
+        class OllamaModel:
+            def __init__(self, **kwargs):
+                pass
+        class Agent:
+            def __init__(self, **kwargs):
+                pass
 
 # Global agent registry for runtime discovery
 AGENT_REGISTRY = {}
 
 # Setup logging
 logger = logging.getLogger("agent_decorator")
-
-if not _USING_STRANDS:
-    logger.warning(
-        "Strands SDK not available; using stub Agent/OllamaModel implementations. "
-        "Install 'strands-agents' for full functionality."
-    )
 
 # Import sandbox executor for code execution
 try:

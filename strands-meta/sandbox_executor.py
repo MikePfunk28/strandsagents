@@ -19,7 +19,7 @@ import os
 import logging
 import json
 import uuid
-import shutil
+import sys
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
@@ -27,12 +27,39 @@ from datetime import datetime
 
 logger = logging.getLogger("enhanced_sandbox")
 
+# Remove emoji characters that cause encoding issues on Windows
+def safe_print(text):
+    """Print text with emoji characters replaced for Windows compatibility"""
+    emoji_replacements = {
+        '🔒': '[SECURE]',
+        '🚀': '[LAUNCH]',
+        '🐍': '[PYTHON]',
+        '🔧': '[TOOL]',
+        '🔍': '[SEARCH]',
+        '⚠️': '[WARNING]',
+        '✅': '[OK]',
+        '❌': '[ERROR]',
+        '💡': '[IDEA]',
+        '🔗': '[LINK]',
+        '🔄': '[SYNC]',
+        '📦': '[PACKAGE]',
+        '🔍': '[FIND]'
+    }
+
+    for emoji, replacement in emoji_replacements.items():
+        text = text.replace(emoji, replacement)
+
+    print(text)
+
+# Add parent directory to path for imports
 try:
-    from .docker_sandbox import DockerSandboxExecutor as _DockerSandboxExecutor  # type: ignore
-    DOCKER_SANDBOX_AVAILABLE = True
-except Exception:  # pragma: no cover - docker optional
-    _DockerSandboxExecutor = None  # type: ignore
-    DOCKER_SANDBOX_AVAILABLE = False
+    # When run as module
+    pass
+except:
+    # When run as script, add parent directory to path
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
 
 @dataclass
 class ExecutionResult:
@@ -90,10 +117,9 @@ class SandboxExecutor:
         self.temp_dir = Path(tempfile.mkdtemp())
         self.sessions: Dict[str, Dict[str, Any]] = {}
         self.session_counter = 0
-        self._docker_executor: Optional[_DockerSandboxExecutor] = None
 
-        logger.info(f"🔒 Enhanced Sandbox created at: {self.temp_dir}")
-        logger.info(f"🔒 Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
+        logger.info(f"[SECURE] Enhanced Sandbox created at: {self.temp_dir}")
+        logger.info(f"[SECURE] Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
 
     def execute_code(self, code: str, language: str = "python",
                     session_id: Optional[str] = None) -> ExecutionResult:
@@ -108,7 +134,7 @@ class SandboxExecutor:
         Returns:
             ExecutionResult with comprehensive execution details
         """
-        logger.info(f"🔒 Executing {language} code in sandbox")
+        logger.info(f"[SECURE] Executing {language} code in sandbox")
 
         # Validate language support
         if language not in self.SUPPORTED_LANGUAGES:
@@ -131,9 +157,7 @@ class SandboxExecutor:
         start_time = datetime.now()
 
         try:
-            if self._should_use_docker(language) and DOCKER_SANDBOX_AVAILABLE:
-                result = self._execute_via_docker(code, language, session_id)
-            elif language == "python":
+            if language == "python":
                 result = self._execute_python_enhanced(code, session)
             elif language == "javascript":
                 result = self._execute_javascript(code, session)
@@ -168,41 +192,17 @@ class SandboxExecutor:
             session["last_execution"] = execution_result.to_dict()
             session["execution_count"] += 1
 
-            logger.info(f"🔒 {language} execution completed in {execution_time:.2f}s")
+            logger.info(f"[SECURE] {language} execution completed in {execution_time:.2f}s")
             return execution_result
 
         except Exception as e:
-            logger.error(f"🔒 Execution error: {str(e)}")
+            logger.error(f"[SECURE] Execution error: {str(e)}")
             return ExecutionResult(
                 success=False,
                 error=str(e),
                 language=language,
                 session_id=session_id
             )
-
-    def _should_use_docker(self, language: str) -> bool:
-        interpreter = self.SUPPORTED_LANGUAGES.get(language, {}).get('interpreter')
-        if not interpreter:
-            return False
-
-        if shutil.which(interpreter):
-            return False
-
-        if os.name == 'nt' and language in {'bash', 'python', 'javascript'}:
-            return DOCKER_SANDBOX_AVAILABLE
-
-        return False
-
-    def _ensure_docker_executor(self) -> None:
-        if not DOCKER_SANDBOX_AVAILABLE:
-            raise RuntimeError('Docker sandbox is not available on this system.')
-        if self._docker_executor is None:
-            self._docker_executor = _DockerSandboxExecutor(timeout=self.timeout, max_memory=self.max_memory)
-
-    def _execute_via_docker(self, code: str, language: str, session_id: Optional[str]) -> Dict[str, Any]:
-        self._ensure_docker_executor()
-        docker_result = self._docker_executor.execute_code(code, language, session_id=session_id)
-        return docker_result.to_dict()
 
     def _execute_python(self, code: str) -> Dict[str, Any]:
         """Execute Python code in isolated environment"""
@@ -212,7 +212,7 @@ class SandboxExecutor:
             with open(code_file, 'w', encoding='utf-8') as f:
                 f.write(code)
 
-            logger.debug(f"🔒 Wrote {len(code)} chars to {code_file}")
+            logger.debug(f"[SECURE] Wrote {len(code)} chars to {code_file}")
 
             # Execute with timeout and resource limits
             result = subprocess.run(
@@ -225,7 +225,7 @@ class SandboxExecutor:
                 env={"PYTHONPATH": str(self.temp_dir), "TEMP": str(self.temp_dir)}
             )
 
-            logger.info(f"🔒 Python execution completed with return code: {result.returncode}")
+            logger.info(f"[SECURE] Python execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -236,14 +236,14 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"🔒 Python code execution timed out after {self.timeout}s")
+            logger.warning(f"[SECURE] Python code execution timed out after {self.timeout}s")
             return {
                 "error": f"Code execution timed out after {self.timeout} seconds",
                 "success": False,
                 "language": "python"
             }
         except Exception as e:
-            logger.error(f"🔒 Python execution error: {str(e)}")
+            logger.error(f"[SECURE] Python execution error: {str(e)}")
             return {
                 "error": str(e),
                 "success": False,
@@ -263,7 +263,7 @@ class SandboxExecutor:
             # Make executable
             script_file.chmod(0o755)
 
-            logger.debug(f"🔒 Wrote bash script to {script_file}")
+            logger.debug(f"[SECURE] Wrote bash script to {script_file}")
 
             # Execute with timeout
             result = subprocess.run(
@@ -276,7 +276,7 @@ class SandboxExecutor:
                 env={"TEMP": str(self.temp_dir), "TMPDIR": str(self.temp_dir)}
             )
 
-            logger.info(f"🔒 Bash execution completed with return code: {result.returncode}")
+            logger.info(f"[SECURE] Bash execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -287,14 +287,14 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"🔒 Bash script timed out after {self.timeout}s")
+            logger.warning(f"[SECURE] Bash script timed out after {self.timeout}s")
             return {
                 "error": f"Script execution timed out after {self.timeout} seconds",
                 "success": False,
                 "language": "bash"
             }
         except Exception as e:
-            logger.error(f"🔒 Bash execution error: {str(e)}")
+            logger.error(f"[SECURE] Bash execution error: {str(e)}")
             return {
                 "error": str(e),
                 "success": False,
@@ -320,7 +320,7 @@ class SandboxExecutor:
         # Create session directory
         session["working_directory"].mkdir(exist_ok=True)
 
-        logger.info(f"🔒 Created session {session_id} for {language}")
+        logger.info(f"[SECURE] Created session {session_id} for {language}")
         return session
 
     def _create_new_session(self, language: str) -> str:
@@ -513,10 +513,10 @@ class SandboxExecutor:
                 import shutil
                 shutil.rmtree(session["working_directory"])
                 del self.sessions[session_id]
-                logger.info(f"🔒 Cleaned up session {session_id}")
+                logger.info(f"[SECURE] Cleaned up session {session_id}")
                 return True
             except Exception as e:
-                logger.error(f"🔒 Failed to cleanup session {session_id}: {str(e)}")
+                logger.error(f"[SECURE] Failed to cleanup session {session_id}: {str(e)}")
                 return False
         return False
 
@@ -530,9 +530,9 @@ class SandboxExecutor:
         try:
             import shutil
             shutil.rmtree(self.temp_dir)
-            logger.info(f"🔒 Cleaned up sandbox directory: {self.temp_dir}")
+            logger.info(f"[SECURE] Cleaned up sandbox directory: {self.temp_dir}")
         except Exception as e:
-            logger.warning(f"🔒 Failed to cleanup sandbox: {str(e)}")
+            logger.warning(f"[SECURE] Failed to cleanup sandbox: {str(e)}")
 
     def create_repl_session(self, language: str = "python") -> str:
         """Create an interactive REPL session"""
@@ -549,7 +549,7 @@ print("=" * 50)
 '''
             self._execute_python_enhanced(init_code, session)
 
-        logger.info(f"🔒 Created REPL session {session_id} for {language}")
+        logger.info(f"[SECURE] Created REPL session {session_id} for {language}")
         return session_id
 
 # Example usage

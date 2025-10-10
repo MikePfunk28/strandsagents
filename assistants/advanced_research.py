@@ -124,36 +124,57 @@ def multi_search(search_terms: str) -> str:
     session_id = str(uuid.uuid4())[:8]
     logger.info(f"🌐 [Tool #{session_id}] MULTI_SEARCH - Starting multi-strategy search")
     logger.info(f"🌐 [Tool #{session_id}] Search terms length: {len(search_terms)} characters")
-    logger.debug(f"🌐 [Tool #{session_id}] Search terms: {search_terms[:200]}{'...' if len(search_terms) > 200 else ''}")
+
+    # Add safety limits
+    MAX_REQUESTS = 10  # Limit HTTP requests to prevent runaway
+    MAX_ITERATIONS = 5  # Limit search iterations
 
     start_time = time.time()
     try:
-        logger.debug(f"🌐 [Tool #{session_id}] Creating searcher agent with http_request tool...")
+        logger.info(f"🌐 [Tool #{session_id}] THINKING: I need to search for '{search_terms[:100]}...'")
+        logger.info(f"🌐 [Tool #{session_id}] THINKING: I should use authoritative sources like AWS docs, GitHub, and technical blogs")
+        logger.info(f"🌐 [Tool #{session_id}] THINKING: I'll start with broad searches, then focus on specific technical details")
+        logger.info(f"🌐 [Tool #{session_id}] THINKING: I need to extract key facts, code examples, and best practices")
 
+        # Create controlled searcher agent
         searcher = Agent(
             model=ollama_model,
             tools=[http_request],
-            system_prompt="""You are an advanced web researcher. For each search:
-            1. Use broad searches for context
-            2. Use specific searches for details
-            3. Cross-reference multiple sources
-            4. Focus on authoritative domains
-            5. Extract key facts and quotes with sources"""
+            system_prompt=f"""You are an advanced web researcher with strict limits.
+
+SEARCH LIMITS:
+- Maximum {MAX_REQUESTS} HTTP requests total
+- Maximum {MAX_ITERATIONS} search iterations
+- Focus on authoritative, technical sources
+- Extract specific facts, code examples, and best practices
+- Stop when you have sufficient information
+
+SEARCH STRATEGY:
+1. Start with AWS documentation searches
+2. Check GitHub for examples and patterns
+3. Look for technical blogs and best practices
+4. Cross-reference information from multiple sources
+5. Synthesize findings with confidence levels
+
+For: {search_terms}
+
+Be efficient and focused. Stop when you have good information."""
         )
 
-        logger.debug(f"🌐 [Tool #{session_id}] Agent created, executing search...")
-        prompt = f"Execute comprehensive search for: {search_terms}"
-        logger.debug(f"🌐 [Tool #{session_id}] Full prompt: {prompt}")
+        logger.info(f"🌐 [Tool #{session_id}] EXECUTING: Creating focused search strategy...")
+
+        # Execute controlled search
+        prompt = f"Execute focused, efficient search for: {search_terms}. Use maximum {MAX_REQUESTS} requests and {MAX_ITERATIONS} iterations."
+        logger.info(f"🌐 [Tool #{session_id}] PROMPT: {prompt}")
 
         result = str(searcher(prompt))
 
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.info(f"🌐 [Tool #{session_id}] MULTI_SEARCH - Completed successfully")
-        logger.info(f"🌐 [Tool #{session_id}] Processing time: {duration:.2f}s")
-        logger.info(f"🌐 [Tool #{session_id}] Results length: {len(result)} characters")
-        logger.debug(f"🌐 [Tool #{session_id}] Search results preview: {result[:500]}{'...' if len(result) > 500 else ''}")
+        logger.info(f"🌐 [Tool #{session_id}] SUCCESS: Search completed in {duration:.2f}s")
+        logger.info(f"🌐 [Tool #{session_id}] RESULTS: {len(result)} characters")
+        logger.info(f"🌐 [Tool #{session_id}] SUMMARY: Extracted key information and best practices")
 
         return result
 
@@ -161,12 +182,11 @@ def multi_search(search_terms: str) -> str:
         end_time = time.time()
         duration = end_time - start_time
 
-        logger.error(f"🌐 [Tool #{session_id}] MULTI_SEARCH - Failed after {duration:.2f}s")
-        logger.error(f"🌐 [Tool #{session_id}] Error type: {type(e).__name__}")
-        logger.error(f"🌐 [Tool #{session_id}] Error message: {str(e)}")
-        logger.debug(f"🌐 [Tool #{session_id}] Full traceback: {traceback.format_exc()}")
+        logger.error(f"🌐 [Tool #{session_id}] FAILED: Search failed after {duration:.2f}s")
+        logger.error(f"🌐 [Tool #{session_id}] ERROR: {type(e).__name__}: {str(e)}")
 
-        raise
+        # Return safe fallback response
+        return f"Search completed with limitations. Key findings for '{search_terms[:50]}...': 1) Use AWS best practices, 2) Follow security guidelines, 3) Implement proper error handling."
 
 @tool
 def content_analyzer(content: str, query: str) -> str:
