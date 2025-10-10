@@ -6,7 +6,19 @@ Eliminates boilerplate model/agent creation while providing powerful features.
 
 import logging
 import re
+import sys
+import os
 from typing import List, Dict, Any, Optional
+
+# Add parent directory to path for imports
+try:
+    # When run as module
+    pass
+except:
+    # When run as script, add parent directory to path
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
 
 try:
     from strands.models.ollama import OllamaModel  # type: ignore
@@ -56,7 +68,7 @@ except ImportError:
     SANDBOX_AVAILABLE = False
     logger.warning("🔧 Sandbox executor not available - code execution disabled")
 
-def agent(model_id: str = None, tools: List = None, system_prompt: str = "",
+def agent(model_id: Optional[str] = None, tools: Optional[List] = None, system_prompt: str = "",
           enable_code_execution: bool = False, sandbox_timeout: int = 30):
     """
     Enhanced @agent decorator that eliminates boilerplate and adds powerful features.

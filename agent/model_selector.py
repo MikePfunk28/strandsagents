@@ -230,6 +230,61 @@ class ModelSelector:
             performance_score=80,
             recommended_for=["general_tasks", "coding", "analysis"]
         ),
+        # AWS Bedrock models
+        "anthropic.claude-3-sonnet-20240229-v1:0": ModelInfo(
+            name="anthropic.claude-3-sonnet-20240229-v1:0",
+            size="70B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=95,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"],
+            provider="bedrock"
+        ),
+        "anthropic.claude-3-haiku-20240307-v1:0": ModelInfo(
+            name="anthropic.claude-3-haiku-20240307-v1:0",
+            size="15B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative"],
+            performance_score=88,
+            recommended_for=["general_tasks", "coding", "analysis", "creative_tasks"],
+            provider="bedrock"
+        ),
+        "anthropic.claude-3-5-sonnet-20241022-v2:0": ModelInfo(
+            name="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            size="70B",
+            family="claude",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=96,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"],
+            provider="bedrock"
+        ),
+        "meta.llama3-1-8b-instruct-v1:0": ModelInfo(
+            name="meta.llama3-1-8b-instruct-v1:0",
+            size="8B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis"],
+            performance_score=75,
+            recommended_for=["coding", "analysis", "general_tasks"],
+            provider="bedrock"
+        ),
+        "meta.llama3-1-70b-instruct-v1:0": ModelInfo(
+            name="meta.llama3-1-70b-instruct-v1:0",
+            size="70B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=90,
+            recommended_for=["enterprise_tasks", "complex_analysis", "research", "creative_tasks", "coding"],
+            provider="bedrock"
+        ),
+        "meta.llama3-1-405b-instruct-v1:0": ModelInfo(
+            name="meta.llama3-1-405b-instruct-v1:0",
+            size="405B",
+            family="llama",
+            capabilities=["reasoning", "coding", "analysis", "creative", "research"],
+            performance_score=98,
+            recommended_for=["maximum_performance", "enterprise_tasks", "complex_analysis", "research", "creative_tasks"],
+            provider="bedrock"
+        ),
         "llama3.2:1b": ModelInfo(
             name="llama3.2:1b",
             size="1B",

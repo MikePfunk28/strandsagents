@@ -1,0 +1,14 @@
+{
+  "name": "grammar_agent",
+  "description": "it will check your grammar and spelling in anything you type, you run the model, and give it a path to a document, and it will fix the grammar and spelling",
+  "agent_type": "research",
+  "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "tools": [
+    "http_request",
+    "file_read",
+    "file_write"
+  ],
+  "created_by": "MetaAgentBuilder",
+  "created_at": "2025-10-10T17:53:41.566116",
+  "file_path": "assistants\\generated\\grammar_agent.py"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "test_agent",
+  "display_name": "Test Agent",
+  "description": "A test research agent",
+  "agent_type": "research",
+  "model_id": "qwen3:8b",
+  "tools": [
+    "http_request",
+    "file_read",
+    "file_write"
+  ],
+  "enable_code_execution": true,
+  "sandbox_timeout": 45,
+  "version": "1.0.0",
+  "author": "StrandsAgents Agent Builder",
+  "tags": [
+    "research",
+    "generated",
+    "ai-agent"
+  ],
+  "created_at": "2025-10-10T17:38:55.494634",
+  "system_prompt": "You are a Research Specialist AI agent.\n        Your role is to gather, analyze, and synthesize information from multiple sources.\n\n        Capabilities:\n        - Web research and information gathering\n        - Source citation and validation\n        - Data analysis and pattern recognition\n        - Report generation with confidence levels\n\n        Guidelines:\n        - Always cite sources for factual claims\n        - Distinguish between facts and assumptions\n        - Provide balanced, objective analysis\n        - Acknowledge uncertainties and limitations\n\n        When researching: Handle research tasks effectively\n        Context: Specialized in A test research agent",
+  "examples": [],
+  "context_documents": [],
+  "workflow_template": null,
+  "can_chain_agents": true,
+  "performance_metrics": {
+    "expected_response_time": "2-5 seconds",
+    "max_query_length": "4000 tokens",
+    "supported_languages": [
+      "english"
+    ],
+    "specialization_level": "high"
+  }
+}

@@ -18,28 +18,6 @@ from dataclasses import dataclass
 
 logger = logging.getLogger("model_selector")
 
-# Remove emoji characters that cause encoding issues on Windows
-def safe_print(text):
-    """Print text with emoji characters replaced for Windows compatibility"""
-    emoji_replacements = {
-        '🔍': '[SEARCH]',
-        '🔧': '[TOOL]',
-        '🎯': '[TARGET]',
-        '✅': '[OK]',
-        '❌': '[ERROR]',
-        '⚠️': '[WARNING]',
-        '💡': '[IDEA]',
-        '🚀': '[LAUNCH]',
-        '🔄': '[SYNC]',
-        '📦': '[PACKAGE]',
-        '🔍': '[FIND]'
-    }
-
-    for emoji, replacement in emoji_replacements.items():
-        text = text.replace(emoji, replacement)
-
-    print(text)
-
 # Add parent directory to path for imports
 try:
     # When run as module
@@ -568,7 +546,7 @@ class ModelSelector:
                         model_name = line.split()[0]
                         if model_name in self.MODEL_CAPABILITIES:
                             self.available_models.append(model_name)
-                            logger.info(f"[SEARCH] Found available model: {model_name}")
+                            logger.info(f"[SEARCH] Found available model: %s", model_name)
 
                 if not self.available_models:
                     logger.warning("No recognized models found in Ollama")
