@@ -25,6 +25,7 @@ from .agent_decorator import (
 
 from .sandbox_executor import SandboxExecutor, ExecutionResult
 from .sandbox_tool import sandbox_test_code
+from .agentic_search import AgenticSearchEngine
 from .scaffolder import (
     AgentConfig,
     ScaffoldingResult,

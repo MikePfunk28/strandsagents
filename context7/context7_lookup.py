@@ -1,13 +1,18 @@
 import requests
 import json
 import base64
+import binascii
 
 # get agentcore and strandsagents documentation
+
+
 def get_agentcore_docs():
     return get_repo_info('https://api.github.com/repos/agentcore/agentcore')
 
+
 def get_strandsagents_docs():
     return get_repo_info('https://api.github.com/repos/strandsagents/sdk-python')
+
 
 def get_repo_info(repo_url):
     """Get repository information with error handling"""
@@ -19,6 +24,7 @@ def get_repo_info(repo_url):
         print(f"Error fetching {repo_url}: {e}")
         return None
 
+
 def get_readme_content(readme_url):
     """Get README content with error handling"""
     try:
@@ -29,19 +35,20 @@ def get_readme_content(readme_url):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching README from {readme_url}: {e}")
         return None
-    except (KeyError, base64.binascii.Error) as e:
+    except (KeyError, binascii.Error) as e:
         print(f"Error decoding README: {e}")
         return None
 
+
 # search for user input repo
-repo_name = input("What repo would you like to search?")
+user_repo_name = input("What AWS repo would you like to search?")
 
 # Repository URLs to check
 repos = [
     ('strands-agents/sdk-python', 'StrandsAgents SDK'),
     ('strands-agents/samples', 'Strandsagents Samples'),
     ('aws/bedrock-agentcore-sdk-python', 'AgentCore'),
-    ('aws/{repo_name}','AWS')
+    (f'aws/{user_repo_name}', 'AWS')
 ]
 
 for repo_path, repo_name in repos:
@@ -57,9 +64,10 @@ for repo_path, repo_name in repos:
         print(f'Language: {repo_data.get("language", "N/A")}')
 
         # Get README
-        readme_content = get_readme_content(f'https://api.github.com/repos/{repo_path}/readme')
+        readme_content = get_readme_content(
+            f'https://api.github.com/repos/{repo_path}/readme')
         if readme_content:
-            print(f'README Preview:')
+            print('README Preview:')
             print(readme_content[:500] + '...')
     else:
         print(f'Repository {repo_path} not found or inaccessible')

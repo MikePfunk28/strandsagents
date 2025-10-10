@@ -15,6 +15,11 @@ import os
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
+try:
+    import boto3
+except ImportError:
+    boto3 = None
+
 logger = logging.getLogger("model_selector")
 
 
@@ -543,7 +548,55 @@ class ModelSelector:
 
         self.available_models = unique
 
-        logger.info(f"🔍 Available models: {self.available_models}")
+        logger.info("🔍 Available models: %s", self.available_models)
+
+    def _detect_ollama_models(self) -> List[str]:
+        """Detect available Ollama models"""
+        try:
+            result = subprocess.run(
+                ["ollama", "list"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode == 0:
+                models = []
+                lines = result.stdout.strip().split('\n')[1:]  # Skip header
+                for line in lines:
+                    if line.strip():
+                        parts = line.split()
+                        if parts:
+                            model_name = parts[0]
+                            models.append(model_name)
+                return models
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+            pass
+        return []
+
+    def _bedrock_models(self) -> List[str]:
+        """Detect available AWS Bedrock models"""
+        if boto3 is None:
+            return []
+
+        try:
+            bedrock = boto3.client('bedrock', region_name='us-east-1')
+            response = bedrock.list_foundation_models()
+
+            models = []
+            for model in response.get('modelSummaries', []):
+                model_id = model.get('modelId', '')
+                if model_id:
+                    models.append(model_id)
+
+            return models
+        except Exception:
+            return []
+
+    def _llamacpp_models(self) -> List[str]:
+        """Detect available llamacpp models"""
+        # For now, return empty list as llamacpp detection is complex
+        return []
 
     def select_best_model(self, task_type: str = "general",
                           require_code_execution: bool = False,
@@ -599,7 +652,7 @@ class ModelSelector:
         best_model = max(model_scores, key=lambda x: x[1])[0]
 
         logger.info(
-            f"🔍 Selected model '{best_model}' for task type '{task_type}'")
+            "🔍 Selected model %s for task type %s", best_model, task_type)
         return best_model
 
     def get_model_recommendations(self) -> Dict[str, str]:
