@@ -1,0 +1,75 @@
+services:
+  # Ollama service for model inference
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    command: serve
+
+  # Strands-Meta app service
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - STRANDS_MODELS_YAML=/app/config/models.yaml
+    volumes:
+      - ./logs:/app/logs
+      - ./generated:/app/generated
+      - ./assistants:/app/assistants
+    command: python app/main.py
+
+  # Optional: Web interface
+  web-interface:
+    image: python:3.11-slim
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: >
+      bash -c "
+        pip install fastapi uvicorn requests &&
+        python -c '
+        from fastapi import FastAPI
+        import requests
+        import json
+
+        app = FastAPI(title=\"Strands-Meta Agent Builder\")
+
+        @app.get(\"/\")
+        async def root():
+            return {\"message\": \"Strands-Meta Agent Builder API\", \"version\": \"2.0.0\"}
+
+        @app.get(\"/models\")
+        async def list_models():
+            try:
+                response = requests.get(\"http://ollama:11434/api/tags\", timeout=5)
+                return response.json()
+            except:
+                return {\"models\": [], \"error\": \"Ollama not available\"}
+
+        @app.post(\"/build-agent\")
+        async def build_agent(description: str, agent_type: str = \"auto\"):
+            return {\"message\": \"Agent building not implemented in web interface yet\"}
+
+        import uvicorn
+        uvicorn.run(app, host=\"0.0.0.0\", port=8080)
+        '"
+
+volumes:
+  ollama_data:

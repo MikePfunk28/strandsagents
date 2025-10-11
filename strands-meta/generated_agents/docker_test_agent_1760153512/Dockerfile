@@ -16,6 +16,9 @@ COPY test_agent.py .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install FastAPI and web dependencies
+RUN pip install --no-cache-dir fastapi uvicorn pydantic
+
 # Install Ollama
 RUN curl -fsSL https://ollama.ai/install.sh | sh
 

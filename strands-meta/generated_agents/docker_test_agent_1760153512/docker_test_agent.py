@@ -109,16 +109,18 @@ def docker_test_agent(query: str) -> str:
         Response from the agent
     """
     try:
-        logger.info(f"{name.title()} processing query: {query[:100]}...")
+        agent_name = AGENT_METADATA.get("name", "docker_test_agent")
+        logger.info(f"{agent_name.title()} processing query: {query[:100]}...")
 
         # Add agent-specific logic here
         response = agent_instance(query)
 
-        logger.info(f"{name.title()} completed successfully")
+        logger.info(f"{agent_name.title()} completed successfully")
         return response
 
     except Exception as e:
-        error_msg = f"Error in {name}: {str(e)}"
+        agent_name = AGENT_METADATA.get("name", "docker_test_agent")
+        error_msg = f"Error in {agent_name}: {str(e)}"
         logger.error(error_msg)
         return error_msg
 
