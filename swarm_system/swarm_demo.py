@@ -305,7 +305,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("🧠 SWARM SYSTEM DEMONSTRATION")
+    print(" SWARM SYSTEM DEMONSTRATION")
     print("Demonstrating hierarchical assistant → agent → swarm architecture")
     print()
 

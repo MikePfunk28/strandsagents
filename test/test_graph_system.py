@@ -663,7 +663,7 @@ if __name__ == "__main__":
             run_embedding_integration_demo()
             run_enhanced_memory_demo()
 
-            print("\n🎉 All tests and demos completed successfully!")
+            print("\n All tests and demos completed successfully!")
         except Exception as e:
             print(f"\n⚠️  Demos completed with some issues: {e}")
     else:

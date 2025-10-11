@@ -30,7 +30,7 @@ async def example_code_analysis():
         })
 
         print(f" Analysis completed for: {result['file_path']}")
-        print(f"📋 Graph type: {result['graph_type']}")
+        print(f" Graph type: {result['graph_type']}")
         print(f" Result summary: {str(result['result'])[:200]}...")
 
         # Check graph status
@@ -75,7 +75,7 @@ class DatabaseManager:
         })
 
         print(f" Data structure analysis completed")
-        print(f"📋 Graph type: {result['graph_type']}")
+        print(f" Graph type: {result['graph_type']}")
         print(f" Analysis: {str(result['result'])[:200]}...")
 
     except Exception as e:

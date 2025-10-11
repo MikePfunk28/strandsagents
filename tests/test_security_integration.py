@@ -219,7 +219,7 @@ async def run_all_tests():
         await test_orchestrator_security_integration()
         await test_security_incident_reporting()
 
-        print("\n🎉 All security tests passed successfully!")
+        print("\n All security tests passed successfully!")
         print("\n Security Layer Features Verified:")
         print("  ✓ Agent authentication and authorization")
         print("  ✓ Message integrity verification")

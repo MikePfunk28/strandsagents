@@ -629,7 +629,7 @@ if __name__ == "__main__":
     print(f"Available templates: {len(templates)}")
 
     for template in templates:
-        print(f"\\n📋 {template['name']} ({template['id']})")
+        print(f"\\n {template['name']} ({template['id']})")
         print(f"   Description: {template['description']}")
         print(f"   Tags: {', '.join(template['tags'])}")
         print(f"   Steps: {template['step_count']}")

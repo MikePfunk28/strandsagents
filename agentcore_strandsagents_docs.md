@@ -206,7 +206,7 @@ agentcore launch
 agentcore import-agent --agent-id ABCD1234
 ```
 
-## 💡 BEST PRACTICES
+##  BEST PRACTICES
 
 1. **Start with Strands** for rapid prototyping
 2. **Use AgentCore** for production deployment

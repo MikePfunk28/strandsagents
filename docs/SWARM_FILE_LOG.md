@@ -158,7 +158,7 @@ The code-assistant directory has import issues that need fixing:
 - Database systems implementation
 - Code-assistant import fixes
 
-### 📋 TODO
+###  TODO
 - Orchestrator agent with llama3.2:3b
 - Workflow orchestration system
 - Database schema and implementation

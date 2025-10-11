@@ -677,7 +677,7 @@ class AgenticSearchSystem:
             context.progress_percentage = 40
 
             # Phase 4: Plan Generation
-            logger.info("📋 Phase 4: Generating architecture plan...")
+            logger.info(" Phase 4: Generating architecture plan...")
             context.current_phase = SearchPhase.PLAN_GENERATION
             context.progress_percentage = 60
 
@@ -751,7 +751,7 @@ class AgenticSearchSystem:
             self.search_history.append(result)
 
             logger.info(
-                f"🎉 Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
+                f" Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
 
             return result
 
@@ -860,7 +860,7 @@ async def demo_agentic_search():
         print(" Search completed successfully!")
         print(f"🎯 Confidence: {result.confidence_score:.1%}")
         print(f"⏱️ Duration: {result.search_duration_seconds:.1f} seconds")
-        print(f"📋 Phases completed: {len(result.phases_completed)}")
+        print(f" Phases completed: {len(result.phases_completed)}")
 
         print("\n Architecture Plan:")
         print(f"   Name: {result.final_plan.architecture_name}")
@@ -879,7 +879,7 @@ async def demo_agentic_search():
         for step in result.next_steps:
             print(f"   {step}")
 
-        print("\n🎉 Agentic search demo completed successfully!")
+        print("\n Agentic search demo completed successfully!")
 
     except Exception as e:
         print(f"❌ Demo failed: {e}")

@@ -43,7 +43,7 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # Step 5: Verify configuration
-Write-Host "`n📋 New venv configuration:" -ForegroundColor Cyan
+Write-Host "`n New venv configuration:" -ForegroundColor Cyan
 Get-Content .venv\pyvenv.cfg | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
 
 # Step 6: Activate and install packages
@@ -69,6 +69,6 @@ Write-Host "`n Installing Playwright browsers..." -ForegroundColor Cyan
 playwright install chromium
 
 Write-Host "`n" + ("=" * 60)
-Write-Host "🎉 Virtual environment fixed!" -ForegroundColor Green
+Write-Host " Virtual environment fixed!" -ForegroundColor Green
 Write-Host "`nNow test with:" -ForegroundColor Cyan
 Write-Host "  python agent.py" -ForegroundColor White

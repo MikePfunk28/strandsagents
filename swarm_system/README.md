@@ -1,4 +1,4 @@
-# 🧠 Swarm System - Hierarchical Assistant → Agent → Swarm Architecture
+#  Swarm System - Hierarchical Assistant → Agent → Swarm Architecture
 
 A sophisticated multi-layered AI system that implements the vision of simple, focused assistants composing into complex agents, orchestrated as intelligent swarms.
 
@@ -128,7 +128,7 @@ The system uses **4 specialized SQLite databases** as requested:
 - **Learning storage** and retrieval
 - **System status monitoring**
 
-## 💡 **Usage Examples**
+##  **Usage Examples**
 
 ### **Basic Assistant Usage**
 ```python
@@ -267,12 +267,12 @@ print(global_registry.list_available_types())
 - Advanced workflow orchestration
 - Agent-to-agent communication
 
-### **Phase 3: Swarm Intelligence** 📋 *Planned*
+### **Phase 3: Swarm Intelligence**  *Planned*
 - Lightweight agent swarm (20+ agents)
 - Advanced orchestration with llama3.2
 - Meta-learning and optimization
 
-### **Phase 4: Advanced Features** 📋 *Planned*
+### **Phase 4: Advanced Features**  *Planned*
 - Human-in-the-loop feedback integration
 - Advanced embeddings and similarity search
 - Performance analytics and optimization

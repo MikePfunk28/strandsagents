@@ -131,7 +131,7 @@ if __name__ == "__main__":
             response = f"""
  Agent Created Successfully!
 
-📋 Agent Details:
+ Agent Details:
    • Name: {agent_name}
    • Type: {agent_type}
    • Generated from: {query[:100]}...
@@ -167,7 +167,7 @@ The @agent decorator system makes agent creation incredibly simple:
 
 I can create specialized AI agents using the @agent decorator system.
 
-💡 Try these requests:
+ Try these requests:
    • "Create a research agent for market analysis"
    • "Build a coding agent for Python development"
    • "Generate a data analysis agent for statistics"

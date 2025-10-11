@@ -423,7 +423,7 @@ if __name__ == "__main__":
 
     def run_interactive_swarm(self):
         """Run an interactive swarm system"""
-        print("🧠 Interactive Swarm System")
+        print(" Interactive Swarm System")
         print("=" * 50)
         print("Available assistants:")
         for name, spec in ASSISTANTS.items():
@@ -534,7 +534,7 @@ def main():
 
 def run_intelligent_orchestration(self):
     """Run intelligent orchestration using AI-powered routing"""
-    print("🧠 Intelligent Orchestration Mode")
+    print(" Intelligent Orchestration Mode")
     print("=" * 50)
     print("AI-powered assistant routing with meta-tooling capabilities")
     print()

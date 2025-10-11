@@ -37,7 +37,7 @@ print("   • AWS deployment automation")
 print("   • Usage: python build_agent.py --type chatbot --name myagent")
 
 # Test 3: Show the memory system
-print("\n🧠 Test 3: Memory Systems")
+print("\n Test 3: Memory Systems")
 print("-" * 50)
 
 print(" Memory system created with:")
@@ -121,7 +121,7 @@ print("   • Production-ready deployment automation")
 print("   • Cost-optimized for hackathon budgets ($16-30/month)")
 
 # Test 10: Show usage examples
-print("\n💡 Test 10: Usage Examples")
+print("\n Test 10: Usage Examples")
 print("-" * 50)
 
 print(" Simple agent creation:")
@@ -139,7 +139,7 @@ print(" Docker development:")
 print("   docker-compose up -d  # Start all services")
 print("   docker-compose --profile testing run testing  # Run tests")
 
-print("\n🎉 All Systems Built and Tested Successfully!")
+print("\n All Systems Built and Tested Successfully!")
 print("=" * 80)
 
 print("\n Final System Summary:")

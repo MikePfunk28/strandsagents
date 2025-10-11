@@ -510,7 +510,7 @@ if __name__ == "__main__":
                     f" MAIN - Final report length: {len(final_report)} characters")
 
                 print("\n" + "="*60)
-                print("📋 RESEARCH REPORT")
+                print(" RESEARCH REPORT")
                 print("="*60)
                 print(final_report)
 

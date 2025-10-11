@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from enum import Enum
 
 class PlatformType(Enum):
+    OLLAMA_MODEL = "ollama_model"
     AWS_BEDROCK = "aws_bedrock"
     GOOGLE_CLOUD = "google_cloud"
     AZURE_OPENAI = "azure_openai"

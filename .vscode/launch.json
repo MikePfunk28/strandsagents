@@ -1,0 +1,43 @@
+{
+    "configurations": [
+        {
+            "name": "Launch and Debug Standalone Blazor WebAssembly App",
+            "type": "blazorwasm",
+            "request": "launch",
+            "cwd": "${workspaceFolder}"
+        },
+        {"name":"Python Debugger: Current File","type":"debugpy","request":"launch","program":"${file}","console":"integratedTerminal"},
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Invoke Lambda with API Gateway",
+            "invokeTarget": {
+                "target": "api",
+                "templatePath": "Template Location",
+                "logicalId": "Function Logical ID"
+            },
+            "api": {
+                "path": "/agent${cwd}",
+                "httpMethod": "get",
+                "payload": {
+                    "json": {}
+                }
+            }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "strandsagents:agent/model_selector.list_available_models (python3.13)",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/",
+                "lambdaHandler": "agent/model_selector.list_available_models"
+            },
+            "lambda": {
+                "runtime": "python3.13",
+                "payload": {},
+                "environmentVariables": {}
+            }
+        }
+    ]
+}

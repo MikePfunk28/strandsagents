@@ -677,7 +677,7 @@ class AgenticSearchSystem:
             context.progress_percentage = 40
 
             # Phase 4: Plan Generation
-            logger.info("📋 Phase 4: Generating architecture plan...")
+            logger.info(" Phase 4: Generating architecture plan...")
             context.current_phase = SearchPhase.PLAN_GENERATION
             context.progress_percentage = 60
 
@@ -751,7 +751,7 @@ class AgenticSearchSystem:
             self.search_history.append(result)
 
             logger.info(
-                f"🎉 Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
+                f" Agentic search completed in {search_duration:.1f}s with {result.confidence_score:.1%} confidence")
 
             return result
 
@@ -913,7 +913,7 @@ class ProductionInterface:
 
         # Next steps
         print("
-📋 NEXT STEPS"        for i, step in enumerate(result.next_steps, 1):
+ NEXT STEPS"        for i, step in enumerate(result.next_steps, 1):
             print(f"   {i}. {step}")
 
         print("\n" + "=" * 60)

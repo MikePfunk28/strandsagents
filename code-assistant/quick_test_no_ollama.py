@@ -6,6 +6,7 @@ from adversarial_coding_system import (
 )
 from language_engine import LanguageEngine
 
+
 def test_component_initialization():
     """Test that all components can be initialized."""
     print("Testing Component Initialization")
@@ -34,6 +35,7 @@ def test_component_initialization():
     except Exception as e:
         print(f"✗ Initialization failed: {e}")
         return False
+
 
 def test_language_analysis():
     """Test language detection and analysis capabilities."""
@@ -138,6 +140,7 @@ impl Calculator {
 
     return results
 
+
 def test_adversarial_concept():
     """Test the adversarial concept with mock data."""
     print("\n\nTesting Adversarial Concept")
@@ -168,6 +171,7 @@ def test_adversarial_concept():
 
     return overall_score >= 8.0
 
+
 def main():
     """Run all quick tests."""
     print("Quick Adversarial Coding System Test")
@@ -185,12 +189,14 @@ def main():
 
         print("\n\n" + "=" * 60)
         print("Test Results Summary:")
-        print(f"Component Initialization: {'✓ PASS' if init_success else '✗ FAIL'}")
+        print(
+            f"Component Initialization: {'✓ PASS' if init_success else '✗ FAIL'}")
 
         for lang, success in analysis_results.items():
             print(f"{lang} Analysis: {'✓ PASS' if success else '✗ FAIL'}")
 
-        print(f"Adversarial Concept: {'✓ PASS' if concept_success else '✗ FAIL'}")
+        print(
+            f"Adversarial Concept: {'✓ PASS' if concept_success else '✗ FAIL'}")
 
         all_passed = (
             init_success and
@@ -199,7 +205,7 @@ def main():
         )
 
         if all_passed:
-            print("\n🎉 All quick tests passed!")
+            print("\n All quick tests passed!")
             print("The system is ready for:")
             print("- Multi-language code analysis")
             print("- Adversarial quality improvement")
@@ -215,6 +221,7 @@ def main():
         import traceback
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     main()

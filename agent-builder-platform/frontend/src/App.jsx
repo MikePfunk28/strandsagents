@@ -751,7 +751,7 @@ function App() {
           </motion.div>
 
           <Typography variant="h1" gutterBottom>
-            🎉 Agent Built Successfully!
+            Agent Built Successfully!
           </Typography>
 
           <Typography variant="h3" sx={{ mb: 6, color: '#b0b0b0' }}>

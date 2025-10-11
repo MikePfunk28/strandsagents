@@ -1,0 +1,8 @@
+{
+  "name": "docker_test_agent",
+  "description": "An agent for testing Docker deployment",
+  "model": "llama3.2",
+  "runtime": "ollama",
+  "created_at": "2025-10-10T23:31:55.787298",
+  "agent_file": "generated_agents\\docker_test_agent_1760153515\\docker_test_agent.py"
+}

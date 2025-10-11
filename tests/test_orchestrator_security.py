@@ -702,7 +702,7 @@ async def run_all_tests():
             await test_suite.test_performance_metrics(orchestrator)
 
             logger.info("=" * 60)
-            logger.info("🎉 ALL TESTS PASSED - SECURITY INTEGRATION VERIFIED")
+            logger.info(" ALL TESTS PASSED - SECURITY INTEGRATION VERIFIED")
             logger.info(
                 " SwarmOrchestrator security layer is working properly")
             logger.info(" Swarm system is now secure against rogue agents")

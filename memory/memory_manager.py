@@ -1059,7 +1059,7 @@ async def test_memory_system():
         stats = await memory_manager.get_memory_stats()
         print(f" Memory stats: {stats}")
 
-        print("🎉 Memory System test completed successfully!")
+        print(" Memory System test completed successfully!")
         return True
 
     except Exception as e:

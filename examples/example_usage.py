@@ -50,7 +50,7 @@ async def example_basic_usage():
             }
         )
 
-        print(f"📋 Task status: {task_result.get('status', 'unknown')}")
+        print(f" Task status: {task_result.get('status', 'unknown')}")
         if task_result.get('result'):
             print(f"📝 Task result: {task_result['result'][:200]}...")
 
@@ -64,7 +64,7 @@ async def example_basic_usage():
             "Summarize the key benefits of model switching in AI systems"
         )
 
-        print(f"📋 Second task status: {task_result2.get('status', 'unknown')}")
+        print(f" Second task status: {task_result2.get('status', 'unknown')}")
 
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -96,7 +96,7 @@ async def example_specialized_swarm():
         ]
 
         for i, task in enumerate(tasks, 1):
-            print(f"\n📚 Processing research task {i}...")
+            print(f"\n Processing research task {i}...")
             result = await research_swarm.process_task(task)
             print(f" Task {i} completed: {result.get('status', 'unknown')}")
 

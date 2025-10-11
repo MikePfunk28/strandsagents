@@ -374,7 +374,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("🧠 WORKING SWARM SYSTEM DEMONSTRATION")
+    print(" WORKING SWARM SYSTEM DEMONSTRATION")
     print("Demonstrating hierarchical assistant → agent → swarm architecture")
     print("This version works around Windows compatibility issues")
     print()

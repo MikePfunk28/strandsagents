@@ -137,7 +137,7 @@ def custom_model_selection(model_config: ModelConfiguration) -> str:
                 print("Please enter a number")
 
     # Save custom configuration (simplified - in real app would persist this)
-    print("\n📋 Custom Configuration:")
+    print("\n Custom Configuration:")
     for agent, model in custom_config.items():
         print(f"  {agent}: {model}")
 

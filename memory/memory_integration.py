@@ -300,7 +300,7 @@ async def test_memory_integration():
         embedding_info = await integration.get_embedding_info()
         print(f" Available models: {len(embedding_info['available_models'])}")
 
-        print("🎉 Memory Integration test completed successfully!")
+        print(" Memory Integration test completed successfully!")
         return True
 
     except Exception as e:

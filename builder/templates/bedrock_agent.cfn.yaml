@@ -1,0 +1,89 @@
+# builder/templates/bedrock_agent.cfn.yaml
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Strands-generated Bedrock Agent (agent + IAM + optional guardrail + KB)"
+Parameters:
+  AgentName:
+    Type: String
+  Instruction:
+    Type: String
+    MinLength: 40
+  FoundationModel:
+    Type: String
+    Description: "Model ID or ARN (e.g., anthropic.claude-*)"
+  RoleName:
+    Type: String
+    Default: "AmazonBedrockExecutionRoleForAgents_strands"
+  GuardrailArn:
+    Type: String
+    Default: ""
+  KnowledgeBaseIds:
+    Type: CommaDelimitedList
+    Default: ""
+  LambdaActionArn:
+    Type: String
+    Default: ""
+
+Resources:
+  AgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: "bedrock.amazonaws.com" }
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "BedrockAgentBasic"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "bedrock:InvokeModel*"
+                  - "bedrock:Retrieve"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: !If [HasLambda, !Ref LambdaActionArn, !Ref "AWS::NoValue" ]
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+  BedrockAgent:
+    Type: AWS::Bedrock::Agent
+    Properties:
+      AgentName: !Ref AgentName
+      Instruction: !Ref Instruction
+      FoundationModel: !Ref FoundationModel
+      AgentResourceRoleArn: !GetAtt AgentRole.Arn
+      AutoPrepare: true
+      GuardrailConfiguration: !If
+        - HasGuardrail
+        - { GuardrailIdentifier: !Ref GuardrailArn }
+        - !Ref "AWS::NoValue"
+      KnowledgeBases: !If
+        - HasKBs
+        - [ { KnowledgeBaseId: !Select [0, !Ref KnowledgeBaseIds] } ] # minimal; expand programmatically
+        - !Ref "AWS::NoValue"
+      ActionGroups: !If
+        - HasLambda
+        - [ { ActionGroupName: "lambda-tools",
+              ActionGroupExecutor: { Lambda: { LambdaArn: !Ref LambdaActionArn } } } ]
+        - !Ref "AWS::NoValue"
+
+Conditions:
+  HasGuardrail: !Not [ !Equals [ !Ref GuardrailArn, "" ] ]
+  HasKBs: !Not [ !Equals [ !Select [0, !Ref KnowledgeBaseIds], "" ] ]
+  HasLambda: !Not [ !Equals [ !Ref LambdaActionArn, "" ] ]
+
+Outputs:
+  AgentId:
+    Value: !GetAtt BedrockAgent.AgentId
+  AgentArn:
+    Value: !GetAtt BedrockAgent.AgentArn

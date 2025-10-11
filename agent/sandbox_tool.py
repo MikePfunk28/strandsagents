@@ -11,7 +11,18 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from strands import tool
+try:  # pragma: no cover - depends on external package
+    from strands import tool
+    STRANDS_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    STRANDS_AVAILABLE = False
+
+    def tool(func):  # type: ignore
+        """Fallback decorator that leaves the function unchanged."""
+        logger.warning(
+            "Strands SDK not available; sandbox tool will behave as a plain function."
+        )
+        return func
 
 from .sandbox_executor import SandboxExecutor, ExecutionResult
 

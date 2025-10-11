@@ -1,5 +1,6 @@
 """Test script to verify the adversarial coding system setup."""
 
+
 def test_imports():
     """Test that all required packages can be imported."""
     print("Testing imports...")
@@ -35,6 +36,7 @@ def test_imports():
 
     return True
 
+
 def test_local_modules():
     """Test that local modules can be imported."""
     print("\nTesting local modules...")
@@ -66,6 +68,7 @@ def test_local_modules():
 
     return True
 
+
 def test_model_config():
     """Test model configuration."""
     print("\nTesting model configuration...")
@@ -79,12 +82,14 @@ def test_model_config():
         # Test different strategies
         for strategy in ["speed", "balanced", "quality"]:
             strategy_config = config.get_multi_model_config(strategy)
-            print(f"✓ {strategy} strategy: {len(strategy_config)} agents configured")
+            print(
+                f"✓ {strategy} strategy: {len(strategy_config)} agents configured")
 
         return True
     except Exception as e:
         print(f"✗ Model configuration test failed: {e}")
         return False
+
 
 def test_ollama_connection():
     """Test Ollama connection (if available)."""
@@ -106,16 +111,19 @@ def test_ollama_connection():
                 if found:
                     print(f"✓ Found model matching '{req}'")
                 else:
-                    print(f"⚠ No model found matching '{req}' - consider: ollama pull {req}")
+                    print(
+                        f"⚠ No model found matching '{req}' - consider: ollama pull {req}")
 
             return True
         else:
-            print(f"⚠ Ollama server responded with status {response.status_code}")
+            print(
+                f"⚠ Ollama server responded with status {response.status_code}")
             return False
     except Exception as e:
         print(f"⚠ Ollama connection failed: {e}")
         print("  Make sure Ollama is running: ollama serve")
         return False
+
 
 def main():
     """Run all tests."""
@@ -147,7 +155,7 @@ def main():
     print(f"Passed: {passed}/{total}")
 
     if passed == total:
-        print("🎉 All tests passed! The system is ready to use.")
+        print(" All tests passed! The system is ready to use.")
         print("\nNext steps:")
         print("1. Make sure Ollama is running: ollama serve")
         print("2. Pull required models: ollama pull llama3.2:3b")
@@ -158,6 +166,7 @@ def main():
         print("1. Install missing packages: pip install -r requirements.txt")
         print("2. Install StrandsAgents: pip install strands-agents")
         print("3. Start Ollama: ollama serve")
+
 
 if __name__ == "__main__":
     main()

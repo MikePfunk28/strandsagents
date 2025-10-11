@@ -11,7 +11,7 @@ graph TB
     AgenticSearch --> Think1[ Think: Analyze Query]
     Think1 --> PlatformLookup[ Look up Platform]
     PlatformLookup --> Think2[ Think: Build Strategy]
-    Think2 --> CreatePlan[📋 Create Plan]
+    Think2 --> CreatePlan[ Create Plan]
     CreatePlan --> SearchVerify[ Search to Verify]
     SearchVerify --> Think3[ Think: Validate Plan]
     Think3 --> PresentPlan[ Present Plan + Diagram]
@@ -22,7 +22,7 @@ graph TB
     GenerateScript --> DeployAgent[ Deploy Agent]
 ```
 
-## 📋 Detailed Implementation Plan
+##  Detailed Implementation Plan
 
 ### Phase 1: Core Agentic Search System
 - [ ] **Query Analysis Agent** - Analyze user query and determine intent
@@ -96,7 +96,7 @@ User: "I want to build a customer support chatbot using AWS Bedrock"
 
  Agent: "Researching AWS Bedrock agent capabilities and requirements"
 
-📋 Agent: "Creating implementation plan with architecture diagram"
+ Agent: "Creating implementation plan with architecture diagram"
 
  Agent: "Verifying plan against AWS best practices and security requirements"
 
@@ -135,7 +135,7 @@ User: "Looks good, but I need it to integrate with my existing CRM system"
 
  Agent: "Researching CRM integration patterns for AWS Bedrock agents"
 
-📋 Agent: "Updating plan with CRM integration approach"
+ Agent: "Updating plan with CRM integration approach"
 
  Agent: "Updated plan ready with CRM integration strategy"
 ```

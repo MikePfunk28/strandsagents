@@ -52,7 +52,7 @@ except ImportError:
         except ImportError as e:
             print(f"❌ Could not import required modules: {e}")
             print(
-                "💡 Make sure you're running from the correct directory or have the agent module installed")
+                " Make sure you're running from the correct directory or have the agent module installed")
             raise
 
 logger = logging.getLogger("meta_agent_builder")
@@ -68,7 +68,7 @@ def safe_print(text):
         '🔒': '[SECURE]',
         '': '[SEARCH]',
         '📝': '[DOC]',
-        '📋': '[LIST]',
+        '': '[LIST]',
         '📁': '[FILE]',
         '🎯': '[TARGET]',
         '🛠️': '[TOOLS]',
@@ -77,7 +77,7 @@ def safe_print(text):
         '': '[OK]',
         '❌': '[ERROR]',
         '⚠️': '[WARNING]',
-        '💡': '[IDEA]',
+        '': '[IDEA]',
         '': '[LAUNCH]',
         '🧪': '[TEST]',
         '🔄': '[SYNC]',
@@ -523,7 +523,7 @@ I can create specialized AI agents using the @agent decorator system:
    • Comprehensive testing and validation
    • Production-ready agent generation
 
-📋 USAGE:
+ USAGE:
    To create an agent, provide:
    1. Agent name (function name)
    2. Description of purpose and capabilities
@@ -589,7 +589,7 @@ def meta_agent_builder(query: str) -> str:
             response = f"""
  Agent Created Successfully!
 
-📋 Agent Details:
+ Agent Details:
    • Name: {name}
    • Type: Auto-detected based on requirements
    • Files Generated: {len(result)}
@@ -637,7 +637,7 @@ The @agent decorator system makes this process incredibly simple! "
 
 I can help you create specialized AI agents using the @agent decorator system.
 
-💡 Try these requests:
+ Try these requests:
    • "Create a research agent for market analysis"
    • "Build a coding agent for Python development"
    • "Generate a data analysis agent for statistics"

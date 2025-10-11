@@ -992,7 +992,7 @@ def execute_thinking_driven_workflow(user_query: str, context: str = "", history
 
 
 if __name__ == "__main__":
-    print("\n🧠 Advanced Thinking-First Reasoning Agent")
+    print("\n Advanced Thinking-First Reasoning Agent")
     print("=" * 60)
     print("Multi-agent reasoning workflow with:")
     print("• Structured thinking pipeline")
@@ -1021,13 +1021,13 @@ if __name__ == "__main__":
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
             print(
-                "📋 Workflow: Think → Plan → Research → Analyze → Rank → Synthesize → Report")
+                " Workflow: Think → Plan → Research → Analyze → Rank → Synthesize → Report")
 
             # Execute thinking-driven workflow
             result = execute_thinking_driven_workflow(user_input)
 
             print("\n" + "="*70)
-            print("🧠 ADVANCED THINKING-FIRST REASONING REPORT")
+            print(" ADVANCED THINKING-FIRST REASONING REPORT")
             print("="*70)
             print(result)
             print("\n" + "="*70)

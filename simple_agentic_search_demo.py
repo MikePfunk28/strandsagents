@@ -79,7 +79,7 @@ async def perform_controlled_search(query: str) -> str:
     search_engine = ControlledSearchEngine()
 
     # Step 1: Broad search
-    print("📚 Step 1: THINKING - Starting with broad search to understand context")
+    print(" Step 1: THINKING - Starting with broad search to understand context")
     broad_results = await search_engine.search(f"AWS overview and general information about {query}")
     print(f"   Found {len(broad_results)} broad results")
 
@@ -89,7 +89,7 @@ async def perform_controlled_search(query: str) -> str:
     print(f"   Found {len(specific_results)} specific results")
 
     # Step 3: Synthesize results
-    print("🧠 Step 3: THINKING - Synthesizing findings into comprehensive answer")
+    print(" Step 3: THINKING - Synthesizing findings into comprehensive answer")
 
     all_results = broad_results + specific_results
     synthesis = f"""# Agentic Search Results: {query}
@@ -150,7 +150,7 @@ async def main():
 
         try:
             result = await perform_controlled_search(query)
-            print("\n📋 Final Result:")
+            print("\n Final Result:")
             print("-" * 30)
             print(result[:500] + "..." if len(result) > 500 else result)
 
@@ -158,8 +158,8 @@ async def main():
             print(f"❌ Search failed: {e}")
 
     print(f"\n{'='*60}")
-    print("🎉 Agentic Search Demo Complete!")
-    print("💡 Key Benefits:")
+    print(" Agentic Search Demo Complete!")
+    print(" Key Benefits:")
     print("    Visible reasoning at each step")
     print("    Controlled search process")
     print("    Multiple search strategies")

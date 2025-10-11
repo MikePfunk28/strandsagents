@@ -41,7 +41,7 @@ def safe_print(text):
         '⚠️': '[WARNING]',
         '': '[OK]',
         '❌': '[ERROR]',
-        '💡': '[IDEA]',
+        '': '[IDEA]',
         '🔗': '[LINK]',
         '🔄': '[SYNC]',
         '📦': '[PACKAGE]',

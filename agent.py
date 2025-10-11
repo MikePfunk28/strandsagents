@@ -336,7 +336,7 @@ def save_research_output(query: str, result):
 
 
 if __name__ == "__main__":
-    print("\n🧠 Advanced Reasoning Research Agent")
+    print("\n Advanced Reasoning Research Agent")
     print("Multi-agent reasoning workflow with query decomposition, similarity ranking, and provenance tracking.")
 
     # Store results for comparison
@@ -364,13 +364,13 @@ if __name__ == "__main__":
                 f"\n Starting advanced reasoning workflow for: '{user_input}'")
             if is_repeat:
                 print("🔄 Repeat query detected - will compare with previous results")
-            print("📋 Workflow: Plan → Research → Analyze → Rank → Synthesize → Report")
+            print(" Workflow: Plan → Research → Analyze → Rank → Synthesize → Report")
 
             result = reasoning_agent(
                 f"Execute comprehensive reasoning research workflow for: {user_input}")
 
             print("\n" + "="*70)
-            print("🧠 ADVANCED REASONING RESEARCH REPORT")
+            print(" ADVANCED REASONING RESEARCH REPORT")
             print("="*70)
             print(result)
             print("\n" + "="*70)

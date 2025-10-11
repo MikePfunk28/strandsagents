@@ -271,7 +271,7 @@ async def main():
 
         print(f" Data Processor Agent built in: {output_dir3}")
 
-        print("\n🎉 All agents built successfully!")
+        print("\n All agents built successfully!")
 
         # Show what was created
         print("\n📁 Generated Files Structure:")
@@ -291,7 +291,7 @@ async def main():
         print("   4. Test your agents with the API endpoints")
         print("   5. Monitor costs and performance in AWS Console")
 
-        print("\n💡 Example Usage:")
+        print("\n Example Usage:")
         print("   # Test the chatbot")
         print("   python -c \"from generated_agents/customer_support_bot/agent import CustomerSupportBotAgent; import asyncio; asyncio.run(CustomerSupportBotAgent().process_message('Hello'))\"")
 

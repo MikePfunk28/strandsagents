@@ -211,7 +211,7 @@ Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
   Write "database/schema.sql"
 ```
 
-## 📋 Agent Coordination Protocol
+##  Agent Coordination Protocol
 
 ### Every Agent Spawned via Task Tool MUST:
 
@@ -317,7 +317,7 @@ Message 4: Write "file.js"
 
 -  Automatic Topology Selection
 -  Parallel Execution (2.8-4.4x speed)
-- 🧠 Neural Training
+-  Neural Training
 -  Bottleneck Analysis
 -  Smart Auto-Spawning
 - 🛡️ Self-Healing Workflows

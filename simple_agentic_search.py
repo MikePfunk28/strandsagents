@@ -267,7 +267,7 @@ async def main():
             # Perform agentic search with visible thinking
             result = await search_agent.think_step_by_step(query)
 
-            print("\n📋 Final Result:")
+            print("\n Final Result:")
             print("-" * 30)
             print(result)
 
@@ -275,8 +275,8 @@ async def main():
             print(f"❌ Search failed: {e}")
 
     print(f"\n{'='*60}")
-    print("🎉 Agentic Search System Demo Complete!")
-    print("💡 Key Benefits:")
+    print(" Agentic Search System Demo Complete!")
+    print(" Key Benefits:")
     print("    Visible reasoning at each step")
     print("    Controlled search process")
     print("    Multi-step analysis")

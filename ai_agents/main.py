@@ -195,7 +195,7 @@ async def interactive_mode():
                 elif user_input:
                     print("\n Processing...")
                     result = await system.process_user_request(user_input)
-                    print(f"\n🎉 Result:\n{result}")
+                    print(f"\n Result:\n{result}")
                 else:
                     print("Please enter a request or command")
 
@@ -231,7 +231,7 @@ async def demo_mode():
             print(" Processing...")
 
             result = await system.process_user_request(request)
-            print(f"🎉 Result:\n{result}\n")
+            print(f" Result:\n{result}\n")
             print("-" * 80)
 
         # Show final status

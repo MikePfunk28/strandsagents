@@ -248,13 +248,13 @@ class AgenticSearchEngine:
 
         self.search_history.append(result)
         logger.info(
-            f"🎉 Agentic search completed in {total_time:.0f}ms with {overall_confidence:.1%} confidence")
+            f" Agentic search completed in {total_time:.0f}ms with {overall_confidence:.1%} confidence")
 
         return result
 
     async def _synthesize_results(self, original_query: str, steps: List[SearchStep]) -> str:
         """Synthesize all search results into final answer"""
-        logger.info("🧠 Synthesizing search results...")
+        logger.info(" Synthesizing search results...")
 
         # Collect all unique content
         all_content = []
@@ -296,7 +296,7 @@ This analysis is based on authoritative AWS documentation and established best p
     def _generate_recommendations(self, steps: List[SearchStep]) -> List[str]:
         """Generate recommendations based on search results"""
         recommendations = [
-            "📚 Review AWS Lambda documentation for detailed implementation guidance",
+            " Review AWS Lambda documentation for detailed implementation guidance",
             "🔧 Implement proper error handling and retry logic",
             " Set up CloudWatch monitoring for performance tracking",
             "💰 Optimize memory allocation for cost efficiency",
@@ -336,7 +336,7 @@ async def main():
 
             # Show step-by-step reasoning
             print("
-📋 Step-by-Step Reasoning:"            for j, step in enumerate(result.steps, 1):
+ Step-by-Step Reasoning:"            for j, step in enumerate(result.steps, 1):
                 print(f"   Step {j}: {step.strategy.value} - {step.confidence:.1%} confidence")
                 print(f"           Query: {step.query[:60]}...")
                 print(f"           Results: {len(step.results)} found")
@@ -346,7 +346,7 @@ async def main():
 🎯 Final Synthesis:"            print(f"   {result.final_synthesis[:300]}...")
 
             print("
-💡 Recommendations:"            for rec in result.recommendations:
+ Recommendations:"            for rec in result.recommendations:
                 print(f"   {rec}")
 
         except Exception as e:
@@ -361,8 +361,8 @@ async def main():
     print(f"   Average processing time: {sum(r.processing_time_ms for r in search_engine.search_engine.search_history) / len(search_engine.search_history):.0f}ms")
 
     print("
-🎉 Agentic Search Demonstration Complete!"    print("
-💡 Key Benefits:"    print("    Visible reasoning at each step"    print("    Controlled search process"    print("    Multiple search strategies"    print("    Confidence scoring"    print("    Comprehensive synthesis"    print("    No runaway requests"
+ Agentic Search Demonstration Complete!"    print("
+ Key Benefits:"    print("    Visible reasoning at each step"    print("    Controlled search process"    print("    Multiple search strategies"    print("    Confidence scoring"    print("    Comprehensive synthesis"    print("    No runaway requests"
 
 if __name__ == "__main__":
     asyncio.run(main())

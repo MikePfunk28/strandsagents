@@ -382,7 +382,7 @@ def run_manual_tests():
     except Exception as e:
         print(f"❌ Cleanup failed: {e}")
 
-    print("\n🎉 Manual tests completed!")
+    print("\n Manual tests completed!")
 
 
 if __name__ == "__main__":
