@@ -147,7 +147,7 @@ result = await bridge.enhanced_code_generation(
 - **JavaScript detection**:  PASS (31% confidence)
 - **Rust detection**:  PASS (44% confidence)
 - **Go detection**:  PASS (42% confidence)
-- **Java detection**: ⚠️ Needs improvement
+- **Java detection**:  Needs improvement
 
 ### Adversarial System Tests
 - **Component initialization**:  PASS

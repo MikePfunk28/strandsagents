@@ -216,7 +216,7 @@ User: "Looks good, but I need it to integrate with my existing CRM system"
 - **API Gateway**: $5-10/month (requests)
 - **Total**: $40-100/month
 
-## 🔒 Security Considerations
+##  Security Considerations
 
 ### Input Validation
 - Query sanitization and validation

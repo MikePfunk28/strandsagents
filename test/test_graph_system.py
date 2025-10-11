@@ -665,6 +665,6 @@ if __name__ == "__main__":
 
             print("\n All tests and demos completed successfully!")
         except Exception as e:
-            print(f"\n⚠️  Demos completed with some issues: {e}")
+            print(f"\n  Demos completed with some issues: {e}")
     else:
         print("\n❌ Tests failed. Skipping demos.")

@@ -570,7 +570,7 @@ class PresentationAgent:
 - Storage: On-demand NoSQL database
 - API: Request-based pricing
 
-## 🔒 Security Considerations
+##  Security Considerations
 
 """
 

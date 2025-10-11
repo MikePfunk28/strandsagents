@@ -137,7 +137,7 @@ async def compare_swarm_vs_graph():
 
 async def main():
     """Run all graph examples."""
-    print("🌟 Programming Graph System Examples")
+    print(" Programming Graph System Examples")
     print("=" * 50)
 
     # Run code analysis example
@@ -152,7 +152,7 @@ async def main():
     # Show comparison
     await compare_swarm_vs_graph()
 
-    print("\n✨ All graph examples completed!")
+    print("\n All graph examples completed!")
 
 if __name__ == "__main__":
     asyncio.run(main())

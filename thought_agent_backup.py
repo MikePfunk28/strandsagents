@@ -49,7 +49,7 @@ try:
 except (Exception) as e:
     browser_tool = None
     print(
-        f"⚠️ Browser tool not available ({e}) - using http_request and retrieve only")
+        f" Browser tool not available ({e}) - using http_request and retrieve only")
 
 # Configure logging
 logging.basicConfig(

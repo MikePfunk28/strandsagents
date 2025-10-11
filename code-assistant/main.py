@@ -194,7 +194,7 @@ async def main():
             await demo_adversarial_coding()
 
     except KeyboardInterrupt:
-        print("\n\n⚠️  Interrupted by user")
+        print("\n\n  Interrupted by user")
     except Exception as e:
         logger.error(f"Error: {e}")
         print(f"\n❌ Error: {e}")

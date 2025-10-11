@@ -33,12 +33,12 @@ logger = logging.getLogger("enhanced_sandbox")
 def safe_print(text):
     """Print text with emoji characters replaced for Windows compatibility"""
     emoji_replacements = {
-        '🔒': '[SECURE]',
+        '': '[SECURE]',
         '': '[LAUNCH]',
         '🐍': '[PYTHON]',
         '🔧': '[TOOL]',
         '': '[SEARCH]',
-        '⚠️': '[WARNING]',
+        '': '[WARNING]',
         '': '[OK]',
         '❌': '[ERROR]',
         '': '[IDEA]',

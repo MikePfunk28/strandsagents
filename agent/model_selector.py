@@ -612,8 +612,8 @@ class ModelSelector:
         detected: List[str] = []
 
         detected.extend(self._detect_ollama_models())
-        detected.extend(self._bedrock_models())
-        detected.extend(self._llamacpp_models())
+        detected.extend(self._detect_bedrock_models())
+        detected.extend(self._detect_llamacpp_models())
 
         if not detected:
             detected = ["llama3.2", "qwen3:4b"]
@@ -627,10 +627,11 @@ class ModelSelector:
 
         self.available_models = unique
 
-        logger.info(" Available models: %s", self.available_models)
+        logger.info("[MODEL_SELECTOR] Available models: %s", self.available_models)
 
     def _detect_ollama_models(self) -> List[str]:
-        """Detect available Ollama models"""
+        """Detect available Ollama models."""
+        models: List[str] = []
         try:
             result = subprocess.run(
                 ["ollama", "list"],
@@ -640,42 +641,50 @@ class ModelSelector:
             )
 
             if result.returncode == 0:
-                models = []
                 lines = result.stdout.strip().split('\n')[1:]  # Skip header
                 for line in lines:
                     if line.strip():
                         parts = line.split()
                         if parts:
                             model_name = parts[0]
-                            models.append(model_name)
-                return models
-        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
-            pass
-        return []
+                            info = self.MODEL_CAPABILITIES.get(model_name)
+                            if info and info.provider == "ollama":
+                                models.append(model_name)
+                                logger.info("[MODEL_SELECTOR] Found Ollama model: %s", model_name)
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError) as exc:
+            logger.warning("[MODEL_SELECTOR] Ollama detection failed: %s", exc)
 
-    def _bedrock_models(self) -> List[str]:
-        """Detect available AWS Bedrock models"""
+        if not models:
+            models = [name for name, info in self.MODEL_CAPABILITIES.items() if info.provider == "ollama"]
+
+        return models
+
+    def _detect_bedrock_models(self) -> List[str]:
+        """Detect available AWS Bedrock models."""
+        models = [name for name, info in self.MODEL_CAPABILITIES.items() if info.provider == "bedrock"]
+        if not models:
+            return []
+
         if boto3 is None:
-            return []
-
-        try:
-            bedrock = boto3.client('bedrock', region_name='us-east-1')
-            response = bedrock.list_foundation_models()
-
-            models = []
-            for model in response.get('modelSummaries', []):
-                model_id = model.get('modelId', '')
-                if model_id:
-                    models.append(model_id)
-
+            logger.info("[MODEL_SELECTOR] boto3 not installed; Bedrock models available for manual selection.")
             return models
-        except Exception:
-            return []
 
-    def _llamacpp_models(self) -> List[str]:
-        """Detect available llamacpp models"""
-        # For now, return empty list as llamacpp detection is complex
-        return []
+        if os.getenv("AWS_REGION") or os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("BEDROCK_ASSUME_ROLE"):
+            logger.info("[MODEL_SELECTOR] Bedrock environment detected.")
+            return models
+
+        logger.info("[MODEL_SELECTOR] Bedrock credentials not found; exposing models for manual selection.")
+        return models
+
+    def _detect_llamacpp_models(self) -> List[str]:
+        """Return llama.cpp models (assumed locally available)."""
+        return [name for name, info in self.MODEL_CAPABILITIES.items() if info.provider == "llama.cpp"]
+
+    def _provider_matches(self, model_name: str) -> bool:
+        if self.provider_filter is None:
+            return True
+        info = self.MODEL_CAPABILITIES.get(model_name)
+        return bool(info and info.provider == self.provider_filter)
 
     def select_best_model(self, task_type: str = "general",
                           require_code_execution: bool = False,
@@ -751,7 +760,7 @@ class ModelSelector:
         models_info = []
 
         for model_name in self.available_models:
-            if model_name in self.MODEL_CAPABILITIES:
+            if model_name in self.MODEL_CAPABILITIES and self._provider_matches(model_name):
                 info = self.MODEL_CAPABILITIES[model_name]
                 models_info.append({
                     "name": info.name,
@@ -759,7 +768,8 @@ class ModelSelector:
                     "family": info.family,
                     "capabilities": info.capabilities,
                     "performance_score": info.performance_score,
-                    "recommended_for": info.recommended_for
+                    "recommended_for": info.recommended_for,
+                    "provider": info.provider,
                 })
 
         return models_info

@@ -212,7 +212,7 @@ def main():
             print("- Component-based architecture")
             print("- GAN-like iterative refinement")
         else:
-            print("\n⚠️  Some tests failed - see details above")
+            print("\n  Some tests failed - see details above")
 
         return all_passed
 

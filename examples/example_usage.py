@@ -109,7 +109,7 @@ async def example_specialized_swarm():
 
 async def main():
     """Run all examples."""
-    print("🌟 Swarm System Examples")
+    print(" Swarm System Examples")
     print("=" * 40)
 
     # Run basic usage example
@@ -118,7 +118,7 @@ async def main():
     # Run specialized swarm example
     await example_specialized_swarm()
 
-    print("\n✨ All examples completed!")
+    print("\n All examples completed!")
 
 if __name__ == "__main__":
     asyncio.run(main())

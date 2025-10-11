@@ -216,7 +216,7 @@ class AgenticSearchAgent:
             response += f"- {cost}\n"
 
         response += "
-## 🔒 Security Considerations
+##  Security Considerations
 "
 
         for security in synthesis['security_considerations']:

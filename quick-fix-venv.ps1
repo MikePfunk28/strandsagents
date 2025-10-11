@@ -6,7 +6,7 @@ Write-Host "=" * 60
 
 # Step 1: Deactivate if active
 if ($env:VIRTUAL_ENV) {
-    Write-Host "`n⚠️  Deactivating current venv..." -ForegroundColor Yellow
+    Write-Host "`n  Deactivating current venv..." -ForegroundColor Yellow
     deactivate
 }
 
@@ -60,7 +60,7 @@ if (Test-Path "requirements.txt") {
     if ($LASTEXITCODE -eq 0) {
         Write-Host " Packages installed" -ForegroundColor Green
     } else {
-        Write-Host "⚠️  Some packages may have failed" -ForegroundColor Yellow
+        Write-Host "  Some packages may have failed" -ForegroundColor Yellow
     }
 }
 

@@ -209,7 +209,7 @@ async def test_security_incident_reporting():
 
 async def run_all_tests():
     """Run all security tests."""
-    print("🔒 Running Security Layer Integration Tests\n")
+    print(" Running Security Layer Integration Tests\n")
 
     try:
         await test_security_manager_initialization()

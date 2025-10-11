@@ -570,7 +570,7 @@ class PresentationAgent:
 - Storage: On-demand NoSQL database
 - API: Request-based pricing
 
-## 🔒 Security Considerations
+##  Security Considerations
 
 """
 
@@ -871,7 +871,7 @@ async def demo_agentic_search():
         cost = result.final_plan.cost_estimate['monthly_cost_usd']
         print(f"   Range: ${cost['low']}-${cost['high']}/month")
 
-        print("\n🔒 Security Considerations:")
+        print("\n Security Considerations:")
         for consideration in result.final_plan.security_considerations[:3]:
             print(f"   • {consideration}")
 

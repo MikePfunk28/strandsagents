@@ -94,9 +94,9 @@ class SandboxExecutor:
         self.session_counter = 0
         self._docker_executor: Optional[_DockerSandboxExecutor] = None
 
-        logger.info(f"🔒 Enhanced Sandbox created at: {self.temp_dir}")
+        logger.info(f" Enhanced Sandbox created at: {self.temp_dir}")
         logger.info(
-            f"🔒 Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
+            f" Supported languages: {list(self.SUPPORTED_LANGUAGES.keys())}")
 
     def execute_code(self, code: str, language: str = "python",
                      session_id: Optional[str] = None) -> ExecutionResult:
@@ -111,7 +111,7 @@ class SandboxExecutor:
         Returns:
             ExecutionResult with comprehensive execution details
         """
-        logger.info(f"🔒 Executing {language} code in sandbox")
+        logger.info(f" Executing {language} code in sandbox")
 
         # Validate language support
         if language not in self.SUPPORTED_LANGUAGES:
@@ -172,11 +172,11 @@ class SandboxExecutor:
             session["execution_count"] += 1
 
             logger.info(
-                f"🔒 {language} execution completed in {execution_time:.2f}s")
+                f" {language} execution completed in {execution_time:.2f}s")
             return execution_result
 
         except Exception as e:
-            logger.error(f"🔒 Execution error: {str(e)}")
+            logger.error(f" Execution error: {str(e)}")
             return ExecutionResult(
                 success=False,
                 error=str(e),
@@ -220,7 +220,7 @@ class SandboxExecutor:
             with open(code_file, 'w', encoding='utf-8') as f:
                 f.write(code)
 
-            logger.debug(f"🔒 Wrote {len(code)} chars to {code_file}")
+            logger.debug(f" Wrote {len(code)} chars to {code_file}")
 
             # Execute with timeout and resource limits
             result = subprocess.run(
@@ -235,7 +235,7 @@ class SandboxExecutor:
             )
 
             logger.info(
-                f"🔒 Python execution completed with return code: {result.returncode}")
+                f" Python execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -247,14 +247,14 @@ class SandboxExecutor:
 
         except subprocess.TimeoutExpired:
             logger.warning(
-                f"🔒 Python code execution timed out after {self.timeout}s")
+                f" Python code execution timed out after {self.timeout}s")
             return {
                 "error": f"Code execution timed out after {self.timeout} seconds",
                 "success": False,
                 "language": "python"
             }
         except Exception as e:
-            logger.error(f"🔒 Python execution error: {str(e)}")
+            logger.error(f" Python execution error: {str(e)}")
             return {
                 "error": str(e),
                 "success": False,
@@ -274,7 +274,7 @@ class SandboxExecutor:
             # Make executable
             script_file.chmod(0o755)
 
-            logger.debug(f"🔒 Wrote bash script to {script_file}")
+            logger.debug(f" Wrote bash script to {script_file}")
 
             # Execute with timeout
             result = subprocess.run(
@@ -288,7 +288,7 @@ class SandboxExecutor:
             )
 
             logger.info(
-                f"🔒 Bash execution completed with return code: {result.returncode}")
+                f" Bash execution completed with return code: {result.returncode}")
 
             return {
                 "stdout": result.stdout.strip(),
@@ -299,14 +299,14 @@ class SandboxExecutor:
             }
 
         except subprocess.TimeoutExpired:
-            logger.warning(f"🔒 Bash script timed out after {self.timeout}s")
+            logger.warning(f" Bash script timed out after {self.timeout}s")
             return {
                 "error": f"Script execution timed out after {self.timeout} seconds",
                 "success": False,
                 "language": "bash"
             }
         except Exception as e:
-            logger.error(f"🔒 Bash execution error: {str(e)}")
+            logger.error(f" Bash execution error: {str(e)}")
             return {
                 "error": str(e),
                 "success": False,
@@ -332,7 +332,7 @@ class SandboxExecutor:
         # Create session directory
         session["working_directory"].mkdir(exist_ok=True)
 
-        logger.info(f"🔒 Created session {session_id} for {language}")
+        logger.info(f" Created session {session_id} for {language}")
         return session
 
     def _create_new_session(self, language: str) -> str:
@@ -525,11 +525,11 @@ class SandboxExecutor:
                 import shutil
                 shutil.rmtree(session["working_directory"])
                 del self.sessions[session_id]
-                logger.info(f"🔒 Cleaned up session {session_id}")
+                logger.info(f" Cleaned up session {session_id}")
                 return True
             except Exception as e:
                 logger.error(
-                    f"🔒 Failed to cleanup session {session_id}: {str(e)}")
+                    f" Failed to cleanup session {session_id}: {str(e)}")
                 return False
         return False
 
@@ -543,9 +543,9 @@ class SandboxExecutor:
         try:
             import shutil
             shutil.rmtree(self.temp_dir)
-            logger.info(f"🔒 Cleaned up sandbox directory: {self.temp_dir}")
+            logger.info(f" Cleaned up sandbox directory: {self.temp_dir}")
         except Exception as e:
-            logger.warning(f"🔒 Failed to cleanup sandbox: {str(e)}")
+            logger.warning(f" Failed to cleanup sandbox: {str(e)}")
 
     def create_repl_session(self, language: str = "python") -> str:
         """Create an interactive REPL session"""
@@ -562,7 +562,7 @@ print("=" * 50)
 '''
             self._execute_python_enhanced(init_code, session)
 
-        logger.info(f"🔒 Created REPL session {session_id} for {language}")
+        logger.info(f" Created REPL session {session_id} for {language}")
         return session_id
 
 

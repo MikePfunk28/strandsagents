@@ -276,7 +276,7 @@ if recommendations["risk_assessment"]["overall_risk"] == "low":
 5. __Pattern Recognition__: Identifying common execution patterns
 6. __Safe Maintenance__: Intelligent file cleanup with safety guarantees
 
-## __🔒 Security & Safety Features:__
+## __ Security & Safety Features:__
 
 - __Input Validation__: All graph operations validate inputs
 - __Access Control__: Metadata-based access restrictions

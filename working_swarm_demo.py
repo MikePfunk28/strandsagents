@@ -311,7 +311,7 @@ def demo_greeter(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
                 "   - Cross-component communication: Working")
         else:
             self.demo_results.append(
-                "⚠️  Knowledge base query returned no results")
+                "  Knowledge base query returned no results")
 
     async def demo_system_status(self):
         """Display overall system status."""

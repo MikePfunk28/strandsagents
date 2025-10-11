@@ -6,7 +6,7 @@ thinking pipelines analyze tasks and intelligently orchestrate agent workflows.
 """
 
 from strands.agent.conversation_manager import SlidingWindowConversationManager
-from strands_tools import http_request, handoff_to_user, retrieve, think, use_llm
+from strands_tools import http_request, handoff_to_user, retrieve, think, use_llm, file_read, file_write, editor
 from strands.models.ollama import OllamaModel
 from strands import Agent, tool
 import logging
@@ -30,7 +30,7 @@ WORKFLOW_RUN_OUTPUT_DIR = "workflow_runs"
 KNOWLEDGE_CONTEXT_OUTPUT_DIR = "knowledge_context"
 KNOWLEDGE_LOG_FILE = "knowledge_base.txt"
 
-LAST_WORKFLOW_ARTIFACTS: Dict[str, str] = {}
+LAST_WORKFLOW_ARTIFACTS: Dict[str, Optional[str]] = {}
 
 # Browser tool setup with proper error handling
 try:
@@ -43,7 +43,7 @@ try:
 except (Exception) as e:
     browser_tool = None
     print(
-        f"⚠️ Browser tool not available ({e}) - using http_request and retrieve only")
+        f" Browser tool not available ({e}) - using http_request and retrieve only")
 
 # Configure logging
 logging.basicConfig(
@@ -431,7 +431,8 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
         4. Limitations and uncertainties acknowledgment
         5. Open issues and areas needing verification
 
-        Format: Executive summary + detailed analysis + sources + confidence assessment"""
+        Format: Executive summary + detailed analysis + sources + confidence assessment""",
+        tools=[file_read, file_write, editor]
     )
 
     result_writer = str(writer(
@@ -959,7 +960,7 @@ def _run_knowledge_pipeline(workflow_state: Dict[str, Any], final_result: str) -
 
 
 @tool
-def execute_thinking_driven_workflow(user_query: str, context: str = "", history: List = None) -> str:
+def execute_thinking_driven_workflow(user_query: str, context: str = "", history: Optional[List] = None) -> str:
     """Execute workflow where thinking determines which agents to call and in what order."""
     logger.info("Starting thinking-driven workflow for: %s", user_query)
 
@@ -967,7 +968,7 @@ def execute_thinking_driven_workflow(user_query: str, context: str = "", history
     workflow_state["context"] = context
 
     orchestration_result = intelligent_workflow_orchestrator(
-        user_query, context, history)
+        user_query, context, history or [])
     workflow_state["thinking_results"] = orchestration_result.get(
         "thinking_results", {})
     workflow_state["meta_decision"] = orchestration_result.get("meta_decision")

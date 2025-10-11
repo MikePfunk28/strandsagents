@@ -65,7 +65,7 @@ def safe_print(text):
     emoji_replacements = {
         '': '[AGENT]',
         '🔧': '[TOOL]',
-        '🔒': '[SECURE]',
+        '': '[SECURE]',
         '': '[SEARCH]',
         '📝': '[DOC]',
         '': '[LIST]',
@@ -76,7 +76,7 @@ def safe_print(text):
         '🔗': '[LINK]',
         '': '[OK]',
         '❌': '[ERROR]',
-        '⚠️': '[WARNING]',
+        '': '[WARNING]',
         '': '[IDEA]',
         '': '[LAUNCH]',
         '🧪': '[TEST]',

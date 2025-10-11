@@ -374,7 +374,7 @@ function App() {
                     borderRadius: '30px'
                   }}
                 >
-                  ✨ Start Building
+                  Start Building
                 </Button>
               </motion.div>
             </Box>
