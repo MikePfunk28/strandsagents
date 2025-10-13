@@ -74,6 +74,30 @@ TOOL_LIBRARY: Dict[str, Dict[str, str]] = {
     }
 }
 
+def register_tool(
+    name: str,
+    import_stmt: str,
+    reference: str,
+    description: str = "",
+) -> None:
+    """
+    Register a tool so that generated agents can import it.
+
+    This lets higher-level builders add project-specific tools before calling
+    ``generate_agent``.  If a tool already exists it will be overwritten with
+    the new definition.
+    """
+    TOOL_LIBRARY[name] = {
+        "import": import_stmt,
+        "reference": reference,
+        "description": description or "Custom tool",
+    }
+
+
+def list_registered_tools() -> Dict[str, Dict[str, str]]:
+    """Return a copy of the tool registry."""
+    return dict(TOOL_LIBRARY)
+
 MEMORY_PROFILE_SETTINGS: Dict[str, Dict[str, Any]] = {
     "none": {
         "chunk_size": None,
@@ -327,9 +351,10 @@ class AgentConfig:
             if item.strip()
         ]
 
+        raw_docs = answers.get("context_documents", "")
         context_docs = [
             item.strip()
-            for item in answers.get("context_documents", "").split(",")
+            for item in re.split(r"[\n,;]+", raw_docs)
             if item.strip()
         ]
 

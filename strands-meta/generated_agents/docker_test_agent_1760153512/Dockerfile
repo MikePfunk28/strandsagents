@@ -28,8 +28,5 @@ RUN mkdir -p /app/logs
 # Expose ports
 EXPOSE 8000 11434
 
-# Pull the required model
-RUN ollama pull llama3.2
-
-# Default command - run both ollama and test the agent
-CMD ollama serve & sleep 10 && python test_agent.py
+# Default command - start ollama and run the agent
+CMD ollama serve & sleep 15 && ollama pull llama3.2 && python -c "from docker_test_agent import docker_test_agent; print('Agent ready:', docker_test_agent('Hello from Docker!'))"

@@ -14,6 +14,7 @@ Usage:
 
 from __future__ import annotations
 
+import glob
 import json
 import os
 import sys
@@ -36,7 +37,7 @@ if __package__ is None or __package__ == "":
         list_available_models as selector_list_available_models,
         model_selector,
     )
-    from agent.scaffolder import generate_agent
+    from agent.scaffolder import generate_agent, register_tool, list_registered_tools
     from agent.sandbox_tool import sandbox_test_code  # noqa: F401  (import side effect)
 else:  # pragma: no cover - handled above when run as module
     from .model_selector import (
@@ -44,7 +45,7 @@ else:  # pragma: no cover - handled above when run as module
         list_available_models as selector_list_available_models,
         model_selector,
     )
-    from .scaffolder import generate_agent
+    from .scaffolder import generate_agent, register_tool, list_registered_tools
     from .sandbox_tool import sandbox_test_code  # noqa: F401
 
 # Optional: use Strands SDK for validation when available
@@ -129,18 +130,34 @@ class AgentBuilderCLI:
         display_name = prompt("Display name", name.replace("_", " ").title())
         description = prompt("Short description", "Custom Strands agent")
 
-        providers = self._list_providers()
+        try:
+            providers = model_selector.list_providers()  # type: ignore[attr-defined]
+        except AttributeError:
+            providers = self._list_providers()
         print("\nAvailable model providers:")
         for provider in providers:
             print(f"  - {provider}")
-        provider_choice = prompt("Preferred provider (press Enter to auto)") or None
-        if provider_choice:
-            model_selector.set_provider(provider_choice)
+        while True:
+            provider_choice = prompt("Preferred provider (press Enter to auto)") or None
+            if not provider_choice:
+                break
+            provider_choice = provider_choice.lower()
+            if provider_choice in providers:
+                try:
+                    model_selector.set_provider(provider_choice)  # type: ignore[attr-defined]
+                except AttributeError:
+                    pass
+                break
+            print(f"Provider '{provider_choice}' not recognised. Options: {', '.join(providers)}")
 
         available_models = selector_list_available_models()
         print("\nAvailable models:")
-        for model in available_models:
-            row = f"  - {model['name']} ({model['family']}) capabilities: {', '.join(model['capabilities'])}"
+        if not available_models:
+            print("  (No models detected; using fallback defaults)")
+        for idx, model in enumerate(available_models, 1):
+            provider = model.get("provider", "unknown")
+            capabilities = ", ".join(model.get("capabilities", []))
+            row = f"  {idx}. {model['name']} ({model['family']}, provider={provider}) capabilities: {capabilities}"
             print(row)
 
         default_model = get_best_model_for_task("general")
@@ -161,13 +178,10 @@ class AgentBuilderCLI:
         enable_code_execution = confirm("Enable sandboxed code execution?", default=True)
         sandbox_timeout = int(prompt("Sandbox timeout (seconds)", "45"))
 
-        default_tools = ["sandbox_test_code"] if enable_code_execution else []
-        tools_raw = prompt("Comma-separated tool names", ",".join(default_tools))
-        tools = sorted({tool.strip() for tool in tools_raw.split(',') if tool.strip()})
+        tools = self._choose_tools(enable_code_execution)
 
         memory_profile = prompt("Memory profile (none/light/full)", "light")
-        docs_raw = prompt("Context documents (comma-separated paths)", "")
-        context_documents = [doc.strip() for doc in docs_raw.split(',') if doc.strip()]
+        context_documents = self._collect_context_documents()
 
         return AgentSpecification(
             name=name,
@@ -199,6 +213,190 @@ class AgentBuilderCLI:
         providers = {info.provider for info in model_selector.MODEL_CAPABILITIES.values()}
         return sorted(providers)
 
+    def _choose_tools(self, enable_code_execution: bool) -> List[str]:
+        catalog = list_registered_tools()
+        if not catalog:
+            return []
+
+        sorted_names = sorted(catalog.keys())
+        default_selection = {"sandbox_test_code"} if enable_code_execution and "sandbox_test_code" in catalog else set()
+        selected = set(default_selection)
+
+        print("\nAvailable tools:")
+        for idx, name in enumerate(sorted_names, 1):
+            info = catalog[name]
+            description = info.get("description", "").strip()
+            provider_note = ""
+            if os.name == "nt" and name in {"shell"}:
+                provider_note = " (unsupported on Windows)"
+            print(f"  {idx}. {name}{provider_note}")
+            if description:
+                print(f"       {description}")
+
+        print("\nInstructions:")
+        print("  - Enter comma-separated numbers to toggle tools (e.g. 1,3).")
+        print("  - Type 'all' to include every tool or 'none' to clear selection.")
+        print("  - Type 'custom' to scaffold a new helper tool.")
+        print("  - Press Enter when you're satisfied.\n")
+
+        while True:
+            if selected:
+                current = ", ".join(sorted(selected))
+                print(f"Current selection: {current}")
+            else:
+                print("Current selection: (none)")
+
+            raw = input("Tool selection: ").strip().lower()
+            if not raw:
+                break
+            if raw == "all":
+                selected = set(sorted_names)
+                break
+            if raw == "none":
+                selected.clear()
+                continue
+            if raw == "custom":
+                custom_tool = self._scaffold_custom_tool()
+                if custom_tool:
+                    selected.add(custom_tool)
+                continue
+
+            indices: List[int] = []
+            try:
+                indices = [int(part.strip()) for part in raw.split(",") if part.strip()]
+            except ValueError:
+                print("Please enter numbers, 'all', 'none', or 'custom'.")
+                continue
+
+            invalid = [idx for idx in indices if idx < 1 or idx > len(sorted_names)]
+            if invalid:
+                print(f"Invalid selections: {invalid}. Please try again.")
+                continue
+
+            for idx in indices:
+                name = sorted_names[idx - 1]
+                if name in selected:
+                    selected.remove(name)
+                else:
+                    selected.add(name)
+
+        return sorted(selected)
+
+    def _scaffold_custom_tool(self) -> Optional[str]:
+        print("\nCustom tool scaffolding")
+        tool_name = prompt("Custom tool name").strip()
+        if not tool_name:
+            print("  - Tool name cannot be empty.")
+            return None
+        while not tool_name.isidentifier():
+            print("  - Tool name must be a valid Python identifier.")
+            tool_name = prompt("Custom tool name").strip()
+            if not tool_name:
+                return None
+
+        description = prompt("Tool description", "Custom helper tool")
+        tool_package = self.OUTPUT_DIR / "tools"
+        tool_package.mkdir(parents=True, exist_ok=True)
+
+        init_file = tool_package / "__init__.py"
+        if not init_file.exists():
+            init_file.write_text("# Auto-generated tools package\n", encoding="utf-8")
+
+        tool_path = tool_package / f"{tool_name}.py"
+        tool_code = dedent(
+            f"""
+            from __future__ import annotations
+
+            from typing import Any, Dict
+
+            try:
+                from strands.types.tools import ToolUse, ToolResult  # type: ignore
+            except ImportError:  # pragma: no cover - fallback definitions
+                ToolUse = Dict[str, Any]  # type: ignore
+                ToolResult = Dict[str, Any]
+
+            TOOL_SPEC = {{
+                "name": "{tool_name}",
+                "description": "{description}",
+                "inputSchema": {{
+                    "json": {{
+                        "type": "object",
+                        "properties": {{
+                            "message": {{
+                                "type": "string",
+                                "description": "Message that the tool should echo back"
+                            }}
+                        }},
+                        "required": ["message"]
+                    }}
+                }}
+            }}
+
+            def {tool_name}(tool_use: ToolUse, **kwargs: Any) -> ToolResult:
+                message = tool_use.get("input", {{}}).get("message", "")
+                response = f"[{tool_name}] {{message}}"
+                return {{
+                    "toolUseId": tool_use["toolUseId"],
+                    "status": "success",
+                    "content": [{{"text": response}}]
+                }}
+            """
+        ).strip()
+        tool_path.write_text(tool_code + "\n", encoding="utf-8")
+        import_stmt = f"from assistants.generated.tools.{tool_name} import {tool_name}"
+        register_tool(tool_name, import_stmt, tool_name, description)
+        print(f"  - Custom tool '{tool_name}' created at {tool_path}")
+        return tool_name
+
+    def _collect_context_documents(self) -> List[str]:
+        documents: List[str] = []
+        if not confirm("Do you want to add context documents for embedding?", default=False):
+            return documents
+
+        while True:
+            raw_path = prompt("Document path (file, directory, or glob pattern)")
+            raw_path = raw_path.strip()
+            if not raw_path:
+                break
+
+            matches = self._expand_path(raw_path)
+            if not matches:
+                print(f"  - No documents matched '{raw_path}'.")
+                if not confirm("Try another path?", default=True):
+                    break
+                continue
+
+            print("  - Added:")
+            for matched in matches:
+                print(f"      {matched}")
+            documents.extend(matches)
+
+            if not confirm("Add another document path?", default=False):
+                break
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_docs = []
+        for doc in documents:
+            if doc not in seen:
+                unique_docs.append(doc)
+                seen.add(doc)
+        return unique_docs
+
+    def _expand_path(self, raw: str) -> List[str]:
+        expanded = Path(raw).expanduser()
+        paths: List[str] = []
+
+        if expanded.is_dir():
+            paths = [str(p.resolve()) for p in expanded.rglob("*") if p.is_file()]
+        else:
+            glob_matches = glob.glob(str(expanded), recursive=True)
+            if not glob_matches and not expanded.is_absolute():
+                glob_matches = glob.glob(raw, recursive=True)
+            paths = [str(Path(match).resolve()) for match in glob_matches if Path(match).is_file()]
+
+        return paths
+
     # ------------------------------------------------------------------
     # Conversion helpers
     # ------------------------------------------------------------------
@@ -216,7 +414,7 @@ class AgentBuilderCLI:
             "tool_selection": ", ".join(spec.tools),
             "memory_profile": spec.memory_profile,
             "embedding_namespace": f"{spec.name}_namespace",
-            "context_documents": ", ".join(spec.context_documents),
+            "context_documents": "\n".join(spec.context_documents),
             "output_dir": str(self.OUTPUT_DIR),
         }
 

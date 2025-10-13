@@ -32,3 +32,8 @@
 [AGENT_BUILDER] 2025-10-11 13:10:56,508 - enhanced_sandbox - INFO -  Enhanced Sandbox created at: C:\Users\mikep\AppData\Local\Temp\tmp05dmuj32
 [AGENT_BUILDER] 2025-10-11 13:10:56,509 - enhanced_sandbox - INFO -  Supported languages: ['python', 'javascript', 'bash', 'powershell']
 [AGENT_BUILDER] 2025-10-11 13:12:14,351 - agent_builder - ERROR - Agent builder error: 'ModelSelector' object has no attribute '_provider_matches'
+[AGENT_BUILDER] 2025-10-12 13:21:18,779 - enhanced_sandbox - INFO -  Enhanced Sandbox created at: C:\Users\mikep\AppData\Local\Temp\tmpcy9uxctu
+[AGENT_BUILDER] 2025-10-12 13:21:18,779 - enhanced_sandbox - INFO -  Supported languages: ['python', 'javascript', 'bash', 'powershell']
+[AGENT_BUILDER] 2025-10-12 13:21:18,780 - enhanced_sandbox - INFO -  Enhanced Sandbox created at: C:\Users\mikep\AppData\Local\Temp\tmp2wi8wjae
+[AGENT_BUILDER] 2025-10-12 13:21:18,780 - enhanced_sandbox - INFO -  Supported languages: ['python', 'javascript', 'bash', 'powershell']
+[AGENT_BUILDER] 2025-10-12 13:22:35,950 - model_selector - INFO -  Selected model meta.llama3-1-405b-instruct-v1:0 for task type research
