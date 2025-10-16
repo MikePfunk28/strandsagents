@@ -17,13 +17,109 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger("agent_scaffolder")
 
 DEFAULT_AGENT_DIR = Path("assistants/generated")
 DEFAULT_PROMPT_DIR = Path("assistants/generated/prompts")
 DEFAULT_METADATA_DIR = Path("assistants/generated/metadata")
+DEFAULT_EMBEDDINGS_DIR = Path("assistants/generated/embeddings")
+
+try:
+    from agent.model_selector import ModelSelector  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    ModelSelector = None
+
+
+# ---------------------------------------------------------------------------
+# Model catalog helpers
+# ---------------------------------------------------------------------------
+
+_SUPPORTED_PROVIDERS = {"ollama", "bedrock"}
+
+
+def _fallback_model_catalog() -> Tuple[Dict[str, str], Dict[str, str]]:
+    chat_models = {
+        "qwen3:8b": "ollama",
+        "qwen3:4b": "ollama",
+        "llama3.2": "ollama",
+        "gemma3:12b": "ollama",
+        "gemma3:4b": "ollama",
+        "gemma3:270m": "ollama",
+        "qwen3:1.7b": "ollama",
+        "gemma3:1b": "ollama",
+        "qwen3-coder:latest": "ollama",
+        "qwen3:0.6b": "ollama",
+        "qwen3:14b": "ollama",
+        "phi4-reasoning:latest": "ollama",
+        "phi4-mini:latest": "ollama",
+        "phi4-mini-reasoning:latest": "ollama",
+        "anthropic.claude-3-sonnet-20240229-v1:0": "bedrock",
+        "anthropic.claude-3-haiku-20240307-v1:0": "bedrock",
+        "anthropic.claude-3-5-sonnet-20241022-v2:0": "bedrock",
+        "meta.llama3-1-8b-instruct-v1:0": "bedrock",
+        "meta.llama3-1-70b-instruct-v1:0": "bedrock",
+    }
+
+    embedding_models = {
+        "qwen3-embedding:8b": "ollama",
+        "qwen3-embedding:4b": "ollama",
+        "qwen3-embedding:0.6b": "ollama",
+        "embeddinggemma:300m": "ollama",
+    }
+
+    return chat_models, embedding_models
+
+
+def _build_model_catalog() -> Tuple[Dict[str, str], Dict[str, str]]:
+    if ModelSelector is None:  # pragma: no cover - fallback path
+        return _fallback_model_catalog()
+
+    chat: Dict[str, str] = {}
+    embedding: Dict[str, str] = {}
+
+    for name, info in ModelSelector.MODEL_CAPABILITIES.items():
+        provider = (info.provider or "ollama").lower()
+        if provider not in _SUPPORTED_PROVIDERS:
+            continue
+
+        capabilities = {cap.lower() for cap in info.capabilities}
+        if "embedding" in capabilities:
+            embedding[name] = provider
+        else:
+            chat[name] = provider
+
+    if not chat:
+        chat, _ = _fallback_model_catalog()
+        chat = {model: provider for model, provider in chat.items() if provider in _SUPPORTED_PROVIDERS}
+
+    if not embedding:
+        _, embedding = _fallback_model_catalog()
+
+    return dict(sorted(chat.items())), dict(sorted(embedding.items()))
+
+
+CHAT_MODEL_PROVIDER_MAP, EMBEDDING_MODEL_PROVIDER_MAP = _build_model_catalog()
+AVAILABLE_MODELS = list(CHAT_MODEL_PROVIDER_MAP.keys())
+AVAILABLE_EMBED_MODELS = list(EMBEDDING_MODEL_PROVIDER_MAP.keys())
+DEFAULT_PROVIDER = "ollama"
+
+
+def _default_model_for_provider(provider: str) -> str:
+    provider = provider.lower()
+    for model, model_provider in CHAT_MODEL_PROVIDER_MAP.items():
+        if model_provider == provider:
+            return model
+    return AVAILABLE_MODELS[0]
+
+
+def _default_embedding_for_provider(provider: str) -> Optional[str]:
+    provider = provider.lower()
+    for model, model_provider in EMBEDDING_MODEL_PROVIDER_MAP.items():
+        if model_provider == provider:
+            return model
+    return None
 
 AVAILABLE_MODELS = [
     "qwen3:8b",

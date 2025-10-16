@@ -1,8 +1,0 @@
-{
-  "name": "test_agent",
-  "description": "A test agent for demonstration",
-  "model": "llama3.2",
-  "runtime": "ollama",
-  "created_at": "2025-10-10T23:27:57.037406",
-  "agent_file": "generated_agents\\test_agent_1760153277\\test_agent.py"
-}

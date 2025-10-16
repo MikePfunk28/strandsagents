@@ -1,0 +1,57 @@
+Query: how to build an agent on aws with strandsagents and agentcore, please follow the structure I have provided using the various agents and create a diagram of it.
+Timestamp: 2025-10-13T11:28:04.166828
+Result Length: 1205 characters
+======================================================================
+
+Here is a diagram of the comprehensive reasoning research workflow for building an agent on AWS with StrandsAgents and AgentCore:
+
+```
+  +---------------+
+  |  Strands    |
+  |  Agents     |
+  +---------------+
+           |
+           | Uses
+           v
+  +---------------+
+  |  AgentCore   |
+  |  (Library)    |
+  +---------------+
+
+          |
+          | Follows
+          v
+  +---------------+
+  |  Planning     |
+  +---------------+
+
+          |
+          | Conducted by
+          v
+  +---------------+
+  |  Research     |
+  +---------------+
+
+          |
+          | Produces
+          v
+  +---------------+
+  |  Analysis     |
+  +---------------+
+
+          |
+          | Transfers
+          v
+  +---------------+
+  |  Writing      |
+  +---------------+
+
+          |
+          | Transfers to
+          v
+  +---------------+
+  |  Handoff      |
+  +---------------+
+```
+
+This diagram illustrates the steps involved in building an agent on AWS with StrandsAgents and AgentCore, including planning, research, analysis, writing, and handoff to the user. The arrows represent the relationships between the different agents and activities, and the boxes represent the various components of the workflow.

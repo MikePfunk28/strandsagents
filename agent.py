@@ -1,6 +1,6 @@
 from strands import Agent, tool
 from strands.models.ollama import OllamaModel
-from strands_tools import http_request, handoff_to_user, retrieve, file_read, file_write, editor
+from strands_tools import diagram, think, http_request, handoff_to_user, retrieve, file_read, file_write, editor
 from strands.agent.conversation_manager import SlidingWindowConversationManager
 import logging
 from dotenv import load_dotenv
@@ -33,7 +33,7 @@ except (ImportError, AttributeError) as e:
 # Create model
 ollama_model = OllamaModel(
     host="http://localhost:11434",
-    model_id="llama3.2"
+    model_id="qwen3:4b"
 )
 
 # Creating Orchestrator Agent
@@ -53,9 +53,10 @@ Always select the most appropriate tool based on the user's query.
 def planner_agent(goal: str, context: str = "") -> str:
     """Creates research brief and step-by-step outline with task board."""
     logger.info(
-        f"Planner Agent invoked with goal %s:  and context length: {len(context)}", goal)
+        "Planner Agent invoked with goal %s:  and context length: %d", goal, len(context))
     planner = Agent(
         model=ollama_model,
+        tools=[think],
         conversation_manager=SlidingWindowConversationManager(window_size=25),
         system_prompt="""You are the Planner Agent. Create a research brief:
         1. BRIEF: Restate user's goal, key constraints, success criteria
@@ -157,6 +158,34 @@ def writer_agent(vetted_reasoning: str, goal: str, sources: str = "") -> str:
     return str(writer(f"Synthesize report for: {goal}\nVetted reasoning: {vetted_reasoning}\nSources: {sources}"))
 
 
+@tool
+def diagram_agent(description: str) -> str:
+    """
+    Create a diagram based on the provided description.
+
+    :param description: The description of the diagram to create.
+    :return: The generated diagram as a string (e.g., URL or file path).
+    """
+    # create a diagram from the results of the research
+    # use the diagram tool to do so, using the research file
+    # research_output_{timestamp}.txt
+    diagram_filename = f"research_output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    logger.info("Creating diagram for description: %s", description)
+    diagram_builder = Agent(
+        model=ollama_model,
+        tools=[diagram],
+        conversation_manager=SlidingWindowConversationManager(window_size=10),
+        system_prompt="""You are the Diagram Creation Agent. Generate diagrams based on Research findings:
+        1. Interpret the description to identify key components and relationships.
+        2. Use the diagram tool to create a visual representation.
+        3. Ensure clarity and accuracy in the diagram.
+        4. Provide a brief explanation of the diagram created.
+
+        Format: Diagram + Explanation"""
+    )
+    return str(diagram_builder(f"Create diagram for: {description}, {diagram_filename}"))
+
+
 def similarity_rank(content: str, query: str) -> str:
     """
     Semantic similarity ranking and content filtering.
@@ -196,9 +225,9 @@ def reasoning_result(user_query: str, context: str) -> str:
         model=ollama_model,
 
         tools=[planner_agent, researcher_agent, analyst_agent,
-               similarity_ranker, writer_agent, handoff_to_user],
+               similarity_ranker, writer_agent, diagram_agent, handoff_to_user],
         conversation_manager=SlidingWindowConversationManager(window_size=40),
-        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:
+        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 6 steps of the workflow systematically:
 
         MANDATORY WORKFLOW - EXECUTE ALL STEPS:
         1. PLAN: Call planner_agent(goal=user_query, context="") - CREATE research brief
@@ -207,7 +236,7 @@ def reasoning_result(user_query: str, context: str) -> str:
         4. RANK: Call similarity_ranker(content=analysis_output, query=user_query) - FILTER content
         5. SYNTHESIZE: Call writer_agent(vetted_reasoning=ranked_output, goal=user_query, sources="") - FINAL report
 
-        DO NOT STOP until all 5 tools have been called. Show your thinking between each step.
+        DO NOT STOP until all 6 tools have been called. Show your thinking between each step.
 
         PARAMETER PASSING:
         - Always pass the original user query as 'goal' parameter
@@ -259,8 +288,8 @@ def knowledge_base_memory():
             with open(base_memory, "w", encoding="utf-8") as f:
                 initial_content = "Knowledge Base Initialized.\n"
                 f.write(initial_content)
-            logger.info(
-                f" Created knowledgebase.txt with %s characters", (len(initial_content),))
+            logger.info("Created knowledgebase.txt with %d characters",
+                        (len(initial_content),))
             return initial_content
         except Exception as e:
             logger.error("❌ Failed to create knowledgebase.txt: %s", e)
@@ -271,10 +300,10 @@ def knowledge_base_memory():
         with open(base_memory, "r", encoding="utf-8") as f:
             content = f.read()
             logger.info(
-                f" Loaded knowledge base with {len(content)} characters")
+                " Loaded knowledge base with %d characters", len(content))
             return content
     except Exception as e:
-        logger.error(f"❌ Failed to read knowledgebase.txt: {e}")
+        logger.error("❌ Failed to read knowledgebase.txt: %s", e)
         return "Error: Could not read knowledge base file."
 
 
@@ -297,11 +326,26 @@ def append_to_knowledge_base(content: str, category: str = "general"):
             f.write(entry)
 
         logger.info(
-            f"Added {len(content)} characters to knowledge base in category '{category}'")
+            "Added %d characters to knowledge base in category '%s'", len(content), category)
         return True
     except Exception as e:
-        logger.error(f"Failed to append to knowledge base: {str(e)}")
+        logger.error("Failed to append to knowledge base: %s", e)
         return False
+
+
+def retrieve_memory(query: str, context: str) -> str:
+    """
+    Retrieve relevant information from the knowledge base.
+
+    :param query: The query to search for in the knowledge base.
+    :return: The relevant information from the knowledge base.
+    """
+    logger.info(
+        "Retrieving information from knowledge base for query: %s", query)
+    # Retrieve relevant information from the knowledge base
+    # This is a placeholder and should be replaced with actual knowledge base retrieval
+    knowledge_base = knowledge_base_memory()
+    return knowledge_base
 
 
 def save_research_output(query: str, result):
@@ -328,10 +372,10 @@ def save_research_output(query: str, result):
             f.write("="*70 + "\n\n")
             f.write(result_str)
 
-        logger.info(f"Saved research output to {filename}")
+        logger.info("Saved research output to %s", filename)
         return filename
     except Exception as e:
-        logger.error(f"Failed to save research output: {str(e)}")
+        logger.error("Failed to save research output: %s", e)
         return None
 
 
@@ -344,9 +388,9 @@ if __name__ == "__main__":
     reasoning_agent = Agent(
         model=ollama_model,
         tools=[planner_agent, researcher_agent, analyst_agent,
-               similarity_ranker, writer_agent, handoff_to_user],
+               similarity_ranker, writer_agent, diagram_agent, handoff_to_user],
         conversation_manager=SlidingWindowConversationManager(window_size=40),
-        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 5 steps of the workflow systematically:"""
+        system_prompt="""You are the Master Reasoning Agent. You MUST execute ALL 6 steps of the workflow systematically:"""
     )
     while True:
         try:

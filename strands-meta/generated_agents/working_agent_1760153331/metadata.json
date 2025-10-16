@@ -1,8 +1,0 @@
-{
-  "name": "working_agent",
-  "description": "A working demonstration agent",
-  "model": "llama3.2",
-  "runtime": "ollama",
-  "created_at": "2025-10-10T23:28:51.230343",
-  "agent_file": "generated_agents\\working_agent_1760153331\\working_agent.py"
-}
