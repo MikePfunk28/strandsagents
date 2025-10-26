@@ -1,0 +1,133 @@
+digraph "Agent Builder Application - 3-Tier Architecture" {
+	graph [bgcolor=white fontcolor="#2D3436" fontname="Sans-Serif" fontsize=16 label="Agent Builder Application - 3-Tier Architecture" nodesep=0.60 pad=0.5 rankdir=TB ranksep=0.75 splines=ortho]
+	node [fixedsize=true fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13 height=1.4 imagescale=true labelloc=b shape=box style=rounded width=1.4]
+	edge [color="#7B8894"]
+	b98986fd4d914fe4b373d8621c6ad4f0 [label=Users height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/onprem/client\users.png" shape=none]
+	subgraph "cluster_Frontend (Vite + React)" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Frontend (Vite + React)" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"4ca28979cdf546d18a3c3d422b335c2c" [label="React App
+(Vite)" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/programming/framework\react.png" shape=none]
+	}
+	subgraph "cluster_Authentication (Convex Auth)" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Authentication (Convex Auth)" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"8f2fddc92b62485f8b9da140b1a0618f" [label="GitHub OAuth" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/onprem/vcs\github.png" shape=none]
+		"3e61fd750f664b9e93c677b6f07cc355" [label="Google OAuth" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/saas/identity\auth0.png" shape=none]
+		"1e8c5abf5a604f9ebda373c07215e6cc" [label="AWS Cognito" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/security\cognito.png" shape=none]
+	}
+	subgraph "cluster_Backend (Convex)" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Backend (Convex)" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		f58ec398d30848df850285eb13e582c2 [label="Convex API" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/network\api-gateway.png" shape=none]
+		subgraph "cluster_Core Services" {
+			graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize=12 label="Core Services" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			"97afe2c55f4f4e6588c7e08be1c81151" [label="Agents Service" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\lambda.png" shape=none]
+			"84e48da278a44c7f9c726b8da7823315" [label="Code Generator" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\lambda.png" shape=none]
+			b0320db045c241edaa9230c35e4cd160 [label="Deployment Router" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\lambda.png" shape=none]
+			"796733de480f40e09c34041f78d24b94" [label="MCP Client" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\lambda.png" shape=none]
+		}
+		subgraph "cluster_Data Layer" {
+			graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize=12 label="Data Layer" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			b3728ad43a8943a3a97eebf395006570 [label="Convex Database
+(Users, Agents,
+Deployments)" height=2.7 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/database\dynamodb.png" shape=none]
+		}
+	}
+	subgraph "cluster_Tier 1: Freemium Deployment" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Tier 1: Freemium Deployment" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		subgraph "cluster_AWS Bedrock AgentCore" {
+			graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize=12 label="AWS Bedrock AgentCore" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			ca32798729894308a2e8e97c3982ae46 [label="AgentCore
+Sandbox" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/ml\bedrock.png" shape=none]
+			"8e4d4fe697f54e07b409007e4ee94ce6" [label="AgentCore Logs" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+		}
+	}
+	subgraph "cluster_Tier 2: Personal Deployment
+(User's AWS Account)" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Tier 2: Personal Deployment
+(User's AWS Account)" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		subgraph "cluster_Cross-Account Access" {
+			graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize=12 label="Cross-Account Access" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			c4f51fe3fb784ae9890222dcb9a65ace [label="STS AssumeRole
+(External ID)" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/security\identity-and-access-management-iam.png" shape=none]
+		}
+		subgraph "cluster_User's VPC" {
+			graph [bgcolor="#EBF3E7" fontname="Sans-Serif" fontsize=12 label="User's VPC" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			"555d87b13b824e5d84244a84d8e95930" [label="User VPC" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/network\vpc.png" shape=none]
+			subgraph "cluster_ECS Fargate" {
+				graph [bgcolor="#ECE8F6" fontname="Sans-Serif" fontsize=12 label="ECS Fargate" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+				cb6315a4ba8e4efe962bc8fe05a918d8 [label="Agent Container" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\fargate.png" shape=none]
+				"259ae9d0271e49129f408fe1ddbb2d59" [label="ECR Repository" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/devtools\codebuild.png" shape=none]
+			}
+			"11d4a22033404c86ac5ce407172030f8" [label="Agent Storage" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/storage\simple-storage-service-s3.png" shape=none]
+			"88a6a9ed0a87458fbe59f52d08b3b0c0" [label="CloudWatch Logs" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+		}
+	}
+	subgraph "cluster_Tier 3: Enterprise
+(Coming Soon)" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Tier 3: Enterprise
+(Coming Soon)" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"6987f7ad3d3d4730a535e9620c845d3a" [label="AWS SSO" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/security\identity-and-access-management-iam.png" shape=none]
+		"6e83c145c5234e35ad2122a1fdf6f63a" [label="Enterprise
+Deployment" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\fargate.png" shape=none]
+	}
+	subgraph "cluster_MCP Servers" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="MCP Servers" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"6fffe64ce9064fd2a34452772f4d1ead" [label="Bedrock MCP" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/ml\bedrock.png" shape=none]
+		"32ae339b7cb741e99cbd9fefb3c486f3" [label="Custom MCP
+Servers" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\lambda.png" shape=none]
+	}
+	subgraph cluster_Observability {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label=Observability labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"93a46dfa7c5f4379a9c3199860d06a40" [label="CloudWatch
+Metrics" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch.png" shape=none]
+		c842226c00b64d80897660888b42fc09 [label="Error Logs" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+		c1590bf5b34f4e92bc4a299819a55137 [label="Audit Logs" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+	}
+	subgraph "cluster_Agent Testing" {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label="Agent Testing" labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		fda4cf0bdb8f43c3a8b56864b4d43838 [label="Test Queue" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/integration\simple-queue-service-sqs.png" shape=none]
+		"3f9251e26303495f934077ae406a2bcd" [label="Docker Test
+Environment" height=2.3 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/compute\elastic-container-service.png" shape=none]
+		"07988a8bd8794ce09d1a4d44f4c11dcc" [label="Test Logs" height=1.9 image="C:\Users\mikep\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\resources/aws/management\cloudwatch-logs.png" shape=none]
+	}
+	b98986fd4d914fe4b373d8621c6ad4f0 -> "4ca28979cdf546d18a3c3d422b335c2c" [label=HTTPS dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"4ca28979cdf546d18a3c3d422b335c2c" -> "8f2fddc92b62485f8b9da140b1a0618f" [label=OAuth dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"4ca28979cdf546d18a3c3d422b335c2c" -> "3e61fd750f664b9e93c677b6f07cc355" [label=OAuth dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"4ca28979cdf546d18a3c3d422b335c2c" -> "1e8c5abf5a604f9ebda373c07215e6cc" [label=OAuth dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"8f2fddc92b62485f8b9da140b1a0618f" -> f58ec398d30848df850285eb13e582c2 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"3e61fd750f664b9e93c677b6f07cc355" -> f58ec398d30848df850285eb13e582c2 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"1e8c5abf5a604f9ebda373c07215e6cc" -> f58ec398d30848df850285eb13e582c2 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"4ca28979cdf546d18a3c3d422b335c2c" -> f58ec398d30848df850285eb13e582c2 [label="API Calls" dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f58ec398d30848df850285eb13e582c2 -> "97afe2c55f4f4e6588c7e08be1c81151" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f58ec398d30848df850285eb13e582c2 -> "84e48da278a44c7f9c726b8da7823315" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f58ec398d30848df850285eb13e582c2 -> b0320db045c241edaa9230c35e4cd160 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f58ec398d30848df850285eb13e582c2 -> "796733de480f40e09c34041f78d24b94" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"97afe2c55f4f4e6588c7e08be1c81151" -> b3728ad43a8943a3a97eebf395006570 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"84e48da278a44c7f9c726b8da7823315" -> b3728ad43a8943a3a97eebf395006570 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> b3728ad43a8943a3a97eebf395006570 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> ca32798729894308a2e8e97c3982ae46 [label="Freemium
+Deploy" color=green dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	ca32798729894308a2e8e97c3982ae46 -> "8e4d4fe697f54e07b409007e4ee94ce6" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> c4f51fe3fb784ae9890222dcb9a65ace [label="Personal
+Deploy" color=blue dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	c4f51fe3fb784ae9890222dcb9a65ace -> "555d87b13b824e5d84244a84d8e95930" [label="Assume Role" dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"555d87b13b824e5d84244a84d8e95930" -> cb6315a4ba8e4efe962bc8fe05a918d8 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	cb6315a4ba8e4efe962bc8fe05a918d8 -> "259ae9d0271e49129f408fe1ddbb2d59" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	cb6315a4ba8e4efe962bc8fe05a918d8 -> "11d4a22033404c86ac5ce407172030f8" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	cb6315a4ba8e4efe962bc8fe05a918d8 -> "88a6a9ed0a87458fbe59f52d08b3b0c0" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> "6987f7ad3d3d4730a535e9620c845d3a" [label="Enterprise
+(Future)" color=orange dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13 style=dashed]
+	"6987f7ad3d3d4730a535e9620c845d3a" -> "6e83c145c5234e35ad2122a1fdf6f63a" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"796733de480f40e09c34041f78d24b94" -> "6fffe64ce9064fd2a34452772f4d1ead" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"796733de480f40e09c34041f78d24b94" -> "32ae339b7cb741e99cbd9fefb3c486f3" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"6fffe64ce9064fd2a34452772f4d1ead" -> ca32798729894308a2e8e97c3982ae46 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"97afe2c55f4f4e6588c7e08be1c81151" -> fda4cf0bdb8f43c3a8b56864b4d43838 [label="Submit Test" dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	fda4cf0bdb8f43c3a8b56864b4d43838 -> "3f9251e26303495f934077ae406a2bcd" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"3f9251e26303495f934077ae406a2bcd" -> "07988a8bd8794ce09d1a4d44f4c11dcc" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	ca32798729894308a2e8e97c3982ae46 -> "93a46dfa7c5f4379a9c3199860d06a40" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	cb6315a4ba8e4efe962bc8fe05a918d8 -> "93a46dfa7c5f4379a9c3199860d06a40" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"3f9251e26303495f934077ae406a2bcd" -> "93a46dfa7c5f4379a9c3199860d06a40" [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	"97afe2c55f4f4e6588c7e08be1c81151" -> c842226c00b64d80897660888b42fc09 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> c842226c00b64d80897660888b42fc09 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	f58ec398d30848df850285eb13e582c2 -> c1590bf5b34f4e92bc4a299819a55137 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+	b0320db045c241edaa9230c35e4cd160 -> c1590bf5b34f4e92bc4a299819a55137 [dir=forward fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13]
+}

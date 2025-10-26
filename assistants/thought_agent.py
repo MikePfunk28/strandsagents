@@ -5,6 +5,8 @@ This agent implements a comprehensive thinking-first approach where structured
 thinking pipelines analyze tasks and intelligently orchestrate agent workflows.
 """
 
+import re
+import hashlib
 from strands.agent.conversation_manager import SlidingWindowConversationManager
 from strands_tools import http_request, handoff_to_user, retrieve, think, use_llm, file_read, file_write, editor
 from strands.models.ollama import OllamaModel
@@ -66,6 +68,28 @@ thinking_agent = Agent(
     tools=[think],
     conversation_manager=SlidingWindowConversationManager(window_size=30)
 )
+
+# ADD: near the top
+
+
+def _dedupe_paragraphs(text: str, min_len: int = 40) -> str:
+    """Remove exact/near-duplicate paragraphs (whitespace/markdown-insensitive)."""
+    seen = set()
+    out = []
+    # split by blank lines as paragraphs
+    for para in re.split(r"\n\s*\n", text.strip()):
+        # normalize: lowercase, strip extra spaces, collapse internal whitespace
+        norm = re.sub(
+            r"\s+", " ", re.sub(r"[`*_#>-]", "", para.strip().lower()))
+        if len(norm) < min_len:
+            out.append(para)  # keep short lines (headings, bullets)
+            continue
+        key = hashlib.sha256(norm.encode("utf-8")).hexdigest()[:16]
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(para)
+    return "\n\n".join(out)
 
 
 @tool
@@ -342,6 +366,7 @@ def planner_agent(goal: str, context: str = "") -> str:
         3. TASK BOARD: Goals, subgoals, status tracking
         4. ASSUMPTIONS: Track what's assumed vs verified
 
+        Do NOT restate 'Project Context' or prior summaries if unchanged; reference them once.
         Keep outline visible and update as you learn. Format structured for other agents."""
     )
 
