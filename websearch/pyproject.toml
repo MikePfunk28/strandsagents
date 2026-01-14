@@ -3,7 +3,7 @@ name = "webscraper"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-  "scrapy==2.13.3",
+  "scrapy==2.14.1",
   "scrapy-playwright==0.0.31",
   "playwright==1.47.2",
   "lxml==5.2.2",
